@@ -179,10 +179,11 @@ private:
 public:
   TCurrentSong() : Lockable() {};
 
-  void Get(File& fil) const {
+  File Get() const {
     lock();
-    fil = currfile;
+    File tmpobj = currfile;
     unlock();
+    return tmpobj;
   }
   
   void Set(const File& fil, const bool del) {
@@ -214,31 +215,31 @@ void*
 player_thread(void*) {
   unsigned int i;
   File fobj;
-
+  
   stop_player = false;
   next_song = false;
-
+  
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-
+  
   // Init shoutcast stuff
 #ifdef HAVE_LIBSHOUT
   shout_conn_t conn;
   unsigned char buff[4096];
   long read;
   FILE *musicfile;
-
+  
   shout_init_connection(&conn);
   
   // Setup stream
   char stream_ip[16];
   char stream_mount[256];
   char stream_passwd[256];
-
+  
   strncpy(stream_ip, config.GetString("STREAM_IP").c_str(), sizeof(stream_ip));
   strncpy(stream_mount, config.GetString("STREAM_MOUNT").c_str(), sizeof(stream_mount));
   strncpy(stream_passwd, config.GetString("STREAM_PASSWD").c_str(), sizeof(stream_passwd));
-
+  
   conn.ip = stream_ip;
   conn.port = config.GetInteger("STREAM_PORT");
   conn.mount = stream_mount;
@@ -246,20 +247,22 @@ player_thread(void*) {
   conn.name = "NetDJ";
   conn.genre = "Mixed";
   conn.description = "NetDJ streaming channel";
-
+  
   if (config.GetBool("STREAM") && !shout_connect(&conn)) {
     cout << endl << "  Couldn't connect to server!" << endl;
+    screen_flush();
+    stop_player = true;
+  }
 #else
   // Sanitycheck, when libshout isn't in binary
   if (config.GetBool("STREAM")) {
     cout << endl
 	 << "  Shoutcast-support isn't included in this binary!" << endl
 	 << "  Set STREAM=false in configuration to use player instead" << endl;
-#endif
     screen_flush();
     stop_player = true;
   }
-  
+#endif
   
   // Open logfile
   ofstream logfile;
@@ -287,7 +290,7 @@ player_thread(void*) {
       screen_flush();
       sleep(30);
     } else {
-      if (fobj.Exists()) {
+      if (fobj.Exists() && fobj.GetName() != currentsong.Get().GetName()) {
 	currentsong.Set(fobj, i == 2 ? false : true);
 	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << lists[i]->GetShortname() << "]" << endl;
@@ -301,6 +304,7 @@ player_thread(void*) {
 	  }
 	  
 	  if (playercmd_pid == 0) {
+	    // childproc
 	    // Skip all output from player
 	    freopen("/dev/null", "w", stdout);
 	    freopen("/dev/null", "w", stderr);
@@ -311,27 +315,38 @@ player_thread(void*) {
 		   "--aggressive",
 		   fobj.GetName().c_str(),
 		   NULL);
-	  } else {
+	  } else { // parentproc
 	    wait(NULL);
-	  }
+	  } // playercmd_pid
 #ifdef HAVE_LIBSHOUT
 	} else {
+	  // Stream song
 	  musicfile = fopen(fobj.GetName().c_str(), "r");
-	  shout_update_metadata(&conn, fobj.GetFilename().c_str());
-	  while (!stop_player && !next_song) {
-	    read = fread(buff, 1, 4096, musicfile);
-	    if (read > 0) {
-	      if (!shout_send_data(&conn, buff, read)) {
-		cout << endl << "  Send error:" << conn.error << "..." << endl;
-		screen_flush();
+	  if (musicfile) {
+	    shout_update_metadata(&conn, fobj.GetFilename().c_str());
+	    while (!stop_player && !next_song) {
+	      read = fread(buff, 1, 4096, musicfile);
+	      if (read > 0) {
+		if (!shout_send_data(&conn, buff, read)) {
+		  cout << endl
+		       << "  Send error:" << conn.error << "..."
+		       << endl;
+		  screen_flush();
+		  break;
+		}
+	      } else {
 		break;
 	      }
-	    } else {
-	      break;
+	      shout_sleep(&conn);
 	    }
-	    shout_sleep(&conn);
-	  }
-	  fclose(musicfile);
+	    fclose(musicfile);
+	  } else {
+	    // Couldn't open file
+	    cout << endl
+		 << "  Couldn't open '" << fobj.GetName() << "'"
+		 << endl;
+	    screen_flush();
+	  } // musicfile
 #endif
 	}
 	if (logfile.is_open()) {
@@ -344,7 +359,7 @@ player_thread(void*) {
       }
     }
   }
-
+  
 #ifdef HAVE_LIBSHOUT
   // Disconnect from streaming server
   if (config.GetBool("STREAM")) {
@@ -470,7 +485,7 @@ com_info(char* arg) {
   time_t filetime;
   File fobj;
 
-  currentsong.Get(fobj);
+  fobj = currentsong.Get();
   filetime = fobj.GetMtime();
   cout << "  " << fobj.GetName() << endl;
   cout << "    " << setprecision(2)
@@ -522,7 +537,7 @@ com_move(char* arg) {
   string songname;
   string newpath;
   File songfile;
-  currentsong.Get(songfile);
+  songfile = currentsong.Get();
 
   if (songfile.Exists()) {
     newpath = share.GetDirname();
@@ -578,10 +593,10 @@ com_stop(char* arg) {
 int
 com_version(char* arg) {
   cout << "  " << PKGVER << endl
-       << "  CVS (main.cc):"
-       << " $Id$" << endl;
-
-  cout << "  Compiled with Shoutcast support: " <<
+       << "  main.cc - CVS id  :"
+       << " $Id$" << endl
+       << "  main.cc - compiled: " << __DATE__ << " " << __TIME__ << endl
+       << "  Compiled with Shoutcast support: " <<
 #ifdef HAVE_LIBSHOUT
     "Yes"
 #else
@@ -831,7 +846,7 @@ http_thread(void*) {
 	//	cout << endl << "  HTTPThread: Got connectionrequest" << endl;
 	//	screen_flush();
 	
-	currentsong.Get(songfile);
+	songfile = currentsong.Get();
 	// Get filename (without ending type)
 	cfilename = songfile.GetFilenameNoType();
 	
