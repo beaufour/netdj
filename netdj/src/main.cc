@@ -292,6 +292,7 @@ player_thread(void*) {
   }
 
   if (config.GetBool("STREAM")) {
+    shout_update_metadata(&conn, NULL);
     shout_disconnect(&conn);
   }
 
@@ -733,6 +734,7 @@ http_thread(void*) {
     string songname, o_hsongname, o_xsongname;
     string cfilename;
     string tmpstr;
+    string cmdbyuser;
     vector<File> songs;
     char *spos, *apos;
     COMMAND *com;
@@ -789,11 +791,14 @@ http_thread(void*) {
 	      cout << "  HTTPThread: Authorization: " << tmpstr << endl;
 	      screen_flush();
 #endif
-	      if (acc.IsAccessAllowed(tmpstr)) {
+	      if (acc.IsAccessAllowed(tmpstr, &cmdbyuser)) {
 		// Seperate command from rest of request
 		*strchr(spos + 13, ' ') = '\0';
 		com = find_command(spos + 13, false);
 		if (com) {
+		  cout << endl << "  HTTP-CMD: '" << cmdbyuser
+		       << "' requested '"
+		       << (spos + 13) << "'" << endl;
 		  ((*(com->func)) ((char*) NULL));
 		}
 		// Send redirect to '/'

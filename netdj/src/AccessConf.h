@@ -23,7 +23,7 @@ class AccessConf : public Lockable {
   AccessConf() : Lockable() {};
 
   void ReadFile(const string&);
-  bool IsAccessAllowed(const string&);
+  bool IsAccessAllowed(const string&, string* = NULL);
 };
 
 #endif

@@ -29,13 +29,16 @@ AccessConf::ReadFile(const string& fname) {
 }
 
 bool
-AccessConf::IsAccessAllowed(const string& str) {
+AccessConf::IsAccessAllowed(const string& str, string* userstr = NULL) {
   bool res = false;
   Regex reg("\\([^:]*\\):\\(.*\\)");
   vector<string> splitline;
 
   lock();
   if (reg.Match(str, splitline)) {
+    if (userstr) {
+      *userstr = splitline[0];
+    }
     res = users[splitline[0]] == splitline[1];
   }
   unlock();
