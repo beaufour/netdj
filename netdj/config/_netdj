@@ -7,6 +7,8 @@
 PLAYER = /home/beaufour/bin/mpg123
 # Start playing from start
 PLAYER_START = false
+# Deleted played cache-files
+DELETE_PLAYED = false
 
 ########################################
 # DIRECTORIES

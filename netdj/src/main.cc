@@ -48,7 +48,7 @@ extern "C" {
 #include <pthread.h>
 #include <signal.h>
 
-// Provides wait and fork
+// Provides wait, fork and unlink
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -139,22 +139,35 @@ loadstate() {
 ////////////////////////////////////////
 // PLAYER
 
-class TCurrentSong : public Lockable{
+class TCurrentSong : public Lockable {
 private:
-  string songname;
+  bool   currdelete;
+  string currsong;
+  bool   prevdelete;
+  string prevsong;
 
 public:
   TCurrentSong() : Lockable() {};
 
   void Get(string& str) {
     lock();
-    str = songname;
+    str = currsong;
     unlock();
   }
   
-  void Set(const string& str) {
+  void Set(const string& str, const bool del) {
     lock();
-    songname = str;
+    if (config.GetBool("DELETE_PLAYED") && prevdelete && prevsong.size()) {
+      if (unlink(prevsong.c_str())) {
+	cout << "Couldn't delete '" << prevsong << "'!" << endl;
+	screen_flush();
+      }
+    }
+    prevsong = currsong;
+    prevdelete = currdelete;
+    
+    currsong = str;
+    currdelete = del;
     unlock();
   }
 };
@@ -186,7 +199,7 @@ player_thread(void*) {
     } else {
       --i;
       if (fobj.Exists()) {
-	currentsong.Set(fobj.GetName());
+	currentsong.Set(fobj.GetName(), i == 1 ? true : false);
 	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << *(lists[i]->GetShortname()) << "]" << endl;
 	screen_flush();
@@ -216,7 +229,7 @@ player_thread(void*) {
   }
 
   // Clear currentsong and end thread
-  currentsong.Set(""); 
+  currentsong.Set("", false); 
   pthread_exit(NULL);
 }
 
@@ -398,7 +411,7 @@ com_move(char* arg) {
   if (rename(songname.c_str(), newpath.c_str()) == -1) {
     cout << "  Error: " << strerror(errno) << endl;
   } else {
-    currentsong.Set(newpath);
+    currentsong.Set(newpath, false);
   }
   return 0;
 }
