@@ -11,7 +11,8 @@ while (1) {
   # Count the cattle
   my $latest = check_gnut("$DIR/*");
 
-  print "[".localtime()."] Latest filechange was ".($latest/60)." minutes ago\n";
+  printf("[".localtime()."] Latest filechange was %.1f minutes ago\n",
+	 $latest/60);
 
   my $gnutproc = check_proc();
 
@@ -43,7 +44,8 @@ while (1) {
   }
 
   # Sleeping my day away
-  print "[".localtime()."] Waiting ".(($THRES - $latest)/60)." minutes ...\n";
+  printf("[".localtime()."] Waiting %.1f minutes ...\n",
+	 ($THRES - $latest)/60);
   sleep ($THRES - $latest);
 }
 
