@@ -65,13 +65,13 @@ $applet->register_callback("Start", "Start", \&cmd_generic, "start");
 $applet->register_callback("Stop", "Stop", \&cmd_generic, "stop");
 $applet->register_callback("GoogleSearch", "Search google...", sub
 			   {
-			     `gnome-moz-remote 'http://www.google.com/search?q=$current'`;
+			     `gnome-moz-remote "http://www.google.com/search?q=$current"`;
 			   });
 $applet->register_stock_callback("Preferences", "Preferences", , "Preferences...", \&menu_pref);
 $applet->register_stock_callback("About", "About", , "About...", \&menu_about);
 
 # Box
-my $box = new Gtk::HBox(0, 1);
+my $box = new Gtk::HBox(0, 4);
 $applet->add($box);
 
 # Status button
