@@ -44,6 +44,8 @@ class File {
   time_t GetCtime() const { return stat_buf.st_ctime; };
   off_t GetSize() const { return stat_buf.st_size; };
 
+  std::string GetOwner() const;
+
   // Name operations
   bool SetName(const std::string);
   std::string GetName() const { return name; };

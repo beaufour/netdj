@@ -14,6 +14,9 @@
 // Provides rename
 #include <cstdio>
 
+// Provides getpwnam
+#include <pwd.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -77,4 +80,16 @@ File::Rename(const string& newpath) {
 bool
 File::Symlink(const string &linkname) const {
   return !symlink(name.c_str(), linkname.c_str());
+}
+
+string
+File::GetOwner() const {
+  struct passwd *pw;
+
+  pw = getpwuid(stat_buf.st_uid);
+  if (pw) {
+    return string(pw->pw_name);
+  } else {
+    return string("");
+  }
 }
