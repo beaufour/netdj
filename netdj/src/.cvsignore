@@ -1,0 +1,8 @@
+.cvsignore
+stamp-h.in
+Makefile.in
+Makefile
+config.h
+stamp-h
+.deps
+dj

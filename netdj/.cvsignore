@@ -1,0 +1,8 @@
+.cvsignore
+Makefile.in
+configure
+Makefile
+config.cache
+config.h
+config.log
+config.status
