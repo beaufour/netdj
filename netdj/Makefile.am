@@ -6,5 +6,5 @@ EXTRA_DIST = \
 .PHONY:	ChangeLog
 
 ChangeLog:
-	./cvs2cl.pl --tags --branches --revisions --day-of-week --prune --fsf -U AUTHORS -W 3600
+	./cvs2cl.pl --tags --branches --revisions --day-of-week --prune --fsf -U AUTHORS -W 3600 --ignore ChangeLog
 
