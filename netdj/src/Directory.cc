@@ -8,6 +8,8 @@
 
 #include "Directory.h"
 
+#include <iostream>
+
 ////////////////////////////////////////
 // PRIVATE
 void
@@ -53,7 +55,10 @@ Directory::Update() {
 
     // Sort new entries in FIFO-chosen lists (eg. playlist)
     if (playlist) {
-      ::sort (it_from, list.end());
+      //      ::sort (it_from, list.end());
+      // Having troubles with the iterators, I think.
+      // Trying to sort the whole list instead ... not clever...
+      ::sort(list.begin(), list.end());
     }
     lastupdate = time(NULL);
   };
