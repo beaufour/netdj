@@ -1,0 +1,10 @@
+* Exceptions (StdException)
+* Qt
+  - qWarning, etc.
+* JavaDoc documentation style.
+
+Open issues:
+* All output to?
+  - cin/cout/cerr/clog ??
+  - warnings from qWarning should be caught!
+* Threads?
