@@ -166,7 +166,7 @@ main(int argc, char* argv[])
 
   // @todo Catch ctrl-c and call quit()
   
-  QApplication app( argc, argv );
+  QApplication app(argc, argv, false);
   mainApp = &app;
   
   /* Seed random number generator */
