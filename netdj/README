@@ -1,13 +1,13 @@
 Brief description:
 ------------------
 You will need to have some program that downloads mp3's for you. I use the
-gnut Gnutella-client (). It has a cache function that downloads random
-files, and with my small patch (gnut.patch) it will only cache .mp3-files.
+gnut Gnutella-client (http://www.gnutelliums.com/linux_unix/gnut/). It has a
+cache function that downloads random files, and with my small patch
+(gnut.patch) it will only cache .mp3-files.
 
 NetDJ will then scan that directory and play the files in the order that
 they are downloaded, if there's no files or it has played them all it will
 play random files from you private (share) collection.
-
 
 Need to have:
 -------------
@@ -17,16 +17,17 @@ Need to have:
 Nice to have:
 -------------
 * GNU readline (well, I give no guarantees without this, but it compiles)
+* libshout to stream through an icecast/shoutcast-server
 
 Compile:
 --------
-1. Edit config.h
-2. ./make
+1. ./configure
+2. make
 
 Configuration:
 --------------
-Edit _netdj and copy to ~/.netdj
-Edit _netdj_users and copy to  ~/.netdj_users
+1. make install
+2. edit /etc/netdj/*, or copy to ~/.netdj/ and edit there
 
 Bug reports to: allan@beaufour.dk with NetDJ in subject.
 
