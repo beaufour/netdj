@@ -567,7 +567,18 @@ com_stop(char* arg) {
 
 int
 com_version(char* arg) {
-  cout << "  " << PKGVER << endl;
+  cout << "  " << PKGVER << endl
+       << "  CVS (main.cc):"
+       << "$Id$" << endl;
+
+  cout << "Shoucast-support: " <<
+#ifdef HAVE_LIBSHOUT
+    "Yes"
+#else
+    "No"
+#endif
+       << endl;
+
   return 0;
 }
 
@@ -696,6 +707,9 @@ http_thread(void*) {
       "        font-size: 10pt;\n"
       "      }\n"
       "      table {\n"
+      "        font-size: 10pt;\n"
+      "      }\n"
+      "      form {\n"
       "        font-size: 10pt;\n"
       "      }\n"
       "    </STYLE>\n"
@@ -941,18 +955,18 @@ http_thread(void*) {
 		  }
 		  xbuf += "</netdj>\n";
 		  o_xsongname = songfile.GetName();
+		  // Replace illegal characters
+		  for (string::iterator it = xbuf.begin();
+		       it != xbuf.end();
+		       ++it) {
+		    ch = (unsigned char) *it;
+		    if ((ch == '&' || ch == '`' || ch > 127 || ch < 32)
+			&& ch != '\n' && ch != '\r') {
+		      *it = ' ';
+		    }
+		  }
 		  HTTPxml.SetBody(xbuf);
 		  HTTPxml.CreatePacket();
-		}
-		// Replace illegal characters
-		for (string::iterator it = xbuf.begin();
-		     it != xbuf.end();
-		     ++it) {
-		  ch = (unsigned char) *it;
-		  if (ch == '&' || ch == '`' ||
-		      (ch > 127 || ch < 32 && ch != '\n' && ch != '\r')) {
-		    *it = ' ';
-		  }
 		}
 		send(newsock, HTTPxml.Packet().c_str(), HTTPxml.Packet().size(), 0);
 	      } else {
