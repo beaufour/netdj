@@ -1,0 +1,3 @@
+const char CONF_DOTFILENAME[] = ".netdj";
+const char CONF_STATEFILENAME[] = ".netdj_state";
+const char CONF_USERFILENAME[] = ".netdj_users";

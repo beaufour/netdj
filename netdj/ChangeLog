@@ -1,3 +1,45 @@
+2002-02-04 Monday 12:57   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* ChangeLog (1.4), src/main.cc (1.17): Ooops a leftover created a
+	bug...  
+
+2002-02-03 Sunday 23:53   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* config/_netdj (1.3), src/Configuration.cc (1.3), src/Makefile.am
+	(1.4), src/main.cc (1.16): Added preliminary streaming support with
+	IceCast (libshout).  
+
+2002-02-03 Sunday 13:28   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* TODO (1.5), util/netdj_applet.pl (1.15): Applet will resize
+	properly when panelsize changes.  
+
+2002-02-03 Sunday 13:22   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* TODO (1.4): Updated with new ideas, etc.  
+
+2002-02-03 Sunday 11:57   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* util/netdj_applet.pl (1.14): Found a bug concerning XML::Simple.  
+
+2002-02-03 Sunday 11:57   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.15): Fixed a bug (would never play from shares).  
+
+2002-02-03 Sunday 11:27   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* README (1.3), aclocal.m4 (1.3), configure.in (1.4), src/File.cc
+	(1.3), src/File.h (1.3), src/ID3Tag.cc (1.2), src/ID3Tag.h (1.2),
+	src/Makefile.am (1.3), src/config.h.in (1.2), src/main.cc (1.14),
+	src/util.cc (1.4), src/util.h (1.4): Almost completed ID3Tag
+	implementation.  
+
+2002-02-02 Saturday 19:40   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/: File.cc (1.2), File.h (1.2), ID3Tag.cc (1.1), ID3Tag.h
+	(1.1), main.cc (1.13), util.cc (1.3), util.h (1.3): id3lib keeps
+	crashing, doing ID3-information myself.  
+
 2002-01-31 Thursday 15:17   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* src/main.cc (1.12): Added removal of everything not 7-bit ASCII
@@ -157,23 +199,6 @@
 
 2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
 
-	* AUTHORS (1.1), ChangeLog (1.1), COPYING (1.1), FILTER (1.1),
-	INSTALL (1.1), Makefile.am (1.1), NEWS (1.1), README (1.1), TODO
-	(1.1), acinclude.m4 (1.1), aclocal.m4 (1.1), config.guess (1.1),
-	config.sub (1.1), configure.in (1.1), gnut.patch (1.1), install-sh
-	(1.1), missing (1.1), mkinstalldirs (1.1), config/Makefile.am
-	(1.1), config/_netdj (1.1), config/_netdj_users (1.1),
-	src/AccessConf.cc (1.1), src/AccessConf.h (1.1),
-	src/Configuration.cc (1.1), src/Configuration.h (1.1),
-	src/Directory.cc (1.1), src/Directory.h (1.1), src/Lockable.cc
-	(1.1), src/Lockable.h (1.1), src/Makefile.am (1.1), src/Regex.cc
-	(1.1), src/Regex.h (1.1), src/config.h.in (1.1), src/main.cc (1.1),
-	src/util.cc (1.1), src/util.h (1.1), util/Makefile.am (1.1),
-	util/netdj_applet.desktop (1.1), util/netdj_applet.glade (1.1),
-	util/netdj_applet.pl (1.1): Initial revision 
-
-2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
-
 	* AUTHORS (1.1.1.1), ChangeLog (1.1.1.1), COPYING (1.1.1.1), FILTER
 	(1.1.1.1), INSTALL (1.1.1.1), Makefile.am (1.1.1.1), NEWS
 	(1.1.1.1), README (1.1.1.1), TODO (1.1.1.1), acinclude.m4
@@ -191,4 +216,21 @@
 	util/Makefile.am (1.1.1.1), util/netdj_applet.desktop (1.1.1.1),
 	util/netdj_applet.glade (1.1.1.1), util/netdj_applet.pl (1.1.1.1)
 	(utags: start): Imported sources.  
+
+2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* AUTHORS (1.1), ChangeLog (1.1), COPYING (1.1), FILTER (1.1),
+	INSTALL (1.1), Makefile.am (1.1), NEWS (1.1), README (1.1), TODO
+	(1.1), acinclude.m4 (1.1), aclocal.m4 (1.1), config.guess (1.1),
+	config.sub (1.1), configure.in (1.1), gnut.patch (1.1), install-sh
+	(1.1), missing (1.1), mkinstalldirs (1.1), config/Makefile.am
+	(1.1), config/_netdj (1.1), config/_netdj_users (1.1),
+	src/AccessConf.cc (1.1), src/AccessConf.h (1.1),
+	src/Configuration.cc (1.1), src/Configuration.h (1.1),
+	src/Directory.cc (1.1), src/Directory.h (1.1), src/Lockable.cc
+	(1.1), src/Lockable.h (1.1), src/Makefile.am (1.1), src/Regex.cc
+	(1.1), src/Regex.h (1.1), src/config.h.in (1.1), src/main.cc (1.1),
+	src/util.cc (1.1), src/util.h (1.1), util/Makefile.am (1.1),
+	util/netdj_applet.desktop (1.1), util/netdj_applet.glade (1.1),
+	util/netdj_applet.pl (1.1): Initial revision 
 
