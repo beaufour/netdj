@@ -62,7 +62,8 @@ extern "C" {
 
 void
 screen_flush() {
-#ifdef USE_READLINE
+  // Seems like there are problems with this and old readline libraries...
+#ifdef USE_READLINE_XX
   rl_forced_update_display();
 #else
   cout << endl << "NetDJ> " << flush;
