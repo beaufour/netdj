@@ -31,6 +31,7 @@ public:
 
   bool Parse(const string&, const bool = false);
   bool GetHeader(const string&, string&) const;
+  void SetHeader(const string&, const string&);
 };
 
 
@@ -58,6 +59,29 @@ public:
 
   string GetURIName() const {return name;};
   bool GetURIParam(const string&, string&) const;
+};
+
+
+class HTTPResponse : public HTTP {
+private:
+  string version;
+  int status;
+  string description;
+
+  static Regex comreg;
+
+  int ParseCommand(const string&, int);
+public:
+  HTTPResponse() : HTTP(), status(0) {};
+  HTTPResponse(int, const string& = "");
+
+  string GetVersion() const {return version;};
+  int GetStatus() const {return status;};
+  string GetDescription() const {return description;};
+
+  void SetVersion(const string& st) {version = st;};
+  void SetDescription(const string& st) {description = st;};
+  void SetStatus(int i) {version = i;};
 };
 
 #endif

@@ -339,6 +339,7 @@ int com_move(char*);
 int com_next(char*);
 int com_start(char*);
 int com_stop(char*);
+int com_version(char*);
 int com_weblock(char*);
 int com_webstart(char*);
 
@@ -371,6 +372,7 @@ COMMAND commands[] = {
   {"save",     com_yeah,     false, "(!) Save current song to share"},
   {"start",    com_start,    true,  "Start player"},
   {"stop",     com_stop,     true,  "Stop player"},
+  {"version",  com_version,  false, "Show program version"},
   {"weblock",  com_weblock,  false, "Lock webacces"},
   {"webstart", com_webstart, false, "Start web_thread"},
   { (char*) NULL, (rl_icpfunc_t*) NULL, false, (char*) NULL}
@@ -506,6 +508,13 @@ com_next(char* arg) {
 };
 
 int
+com_start(char* arg) {
+  stop_player = false;
+  pthread_create(&player_t, NULL, &player_thread, NULL);
+  return 0;
+};
+
+int
 com_stop(char* arg) {
   stop_player = true;
   kill_current();
@@ -513,11 +522,10 @@ com_stop(char* arg) {
 };
 
 int
-com_start(char* arg) {
-  stop_player = false;
-  pthread_create(&player_t, NULL, &player_thread, NULL);
+com_version(char* arg) {
+  cout << "  " << PKGVER << endl;
   return 0;
-};
+}
 
 int
 com_weblock(char* arg) {
@@ -660,6 +668,9 @@ http_thread(void*) {
       "      body {\n"
       "        font-size: 10pt;\n"
       "      }\n"
+      "      table {\n"
+      "        font-size: 10pt;\n"
+      "      }\n"
       "    </STYLE>\n"
       "    <TITLE>NetDJ</TITLE>\n"
       "  </HEAD>\n"
@@ -683,19 +694,22 @@ http_thread(void*) {
       "    </FORM>\n"
       "    <P>\n"
       "    [<A HREF=\"/\">Refresh</A>]\n"
-      "    - [<A HREF=\"/cgi-bin/next\">Skip song</A>]\n"
+      "    - [<A HREF=\"/cgi-bin/next?id=";
+
+    const char hbuf3[] =
+      "\">Skip song</A>]\n"
       "    - [<A HREF=\"/cgi-bin/stop\">Stop player</A>]\n"
       "    - [<A HREF=\"/cgi-bin/start\">Start player</A>]\n"
       "    <P>\n"
       "    <STRONG>Next songs in cache:</STRONG><BR>\n";
 
-    const char hbuf3[] =
+    const char hbuf4[] =
       "    <P>\n"
       "    <STRONG>Playlists:</STRONG><BR>\n"
       "    <TABLE BORDER=1>\n"
       "      <TR><TD><B>Size</B></TD><TD><B>Name</B></TD><TD><B>Description</B></TD></TR>\n";
 
-    const char hbuf4[] =
+    const char hbuf5[] =
       "    </TABLE>\n"
       "    <P>\n"
       "    Add to <A HREF=\"javascript:addNetscapePanel();\">Netscape sidebar</A>"
@@ -779,7 +793,7 @@ http_thread(void*) {
 	  int recno = recv(newsock, rbuf, sizeof(rbuf) - 1, 0);
 	  rbuf[recno] = '\0';
 	  
-	  //#define _DEBUG_HTTP
+	  // #define _DEBUG_HTTP
 	  
 #ifdef _DEBUG_HTTP
 	  cout << endl << "  HTTPThread: Received = " << endl << rbuf << endl;
@@ -912,6 +926,9 @@ http_thread(void*) {
 		///////////////////
 		if (o_hsongname != songfile.GetName()) {
 		  hbuf = hbuf1 + cfilename + hbuf2;
+		  sprintf(tmpint, "%d", songfile.GetId());
+		  hbuf += tmpint;
+		  hbuf += hbuf3;
 		  songs.clear();
 		  lists[1]->GetEntries(songs, 10);
 		  for (vector<File>::iterator it = songs.begin();
@@ -919,7 +936,7 @@ http_thread(void*) {
 		       ++it) {
 		    hbuf += "    " + it->GetFilenameNoType() + "<BR>\n";
 		  }
-		  hbuf += hbuf3;
+		  hbuf += hbuf4;
 		  for (unsigned int i = 0; i < listnum; ++i) {
 		    dir = lists[i];
 		    hbuf += "      <TR><TD>";
@@ -931,7 +948,7 @@ http_thread(void*) {
 		    hbuf += *(dir->GetDescription());
 		    hbuf += "</TD></TR>\n";
 		  }
-		  hbuf += hbuf4;
+		  hbuf += hbuf5;
 		  o_hsongname = songfile.GetName();
 		}
 		send(newsock, hbuf.c_str(), hbuf.size(), 0);

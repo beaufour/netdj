@@ -7,6 +7,10 @@
  */
 
 #include "HTTP.h"
+#include "config.h"
+
+// Provides atoi
+#include <cstdlib>
 
 //////////////////////////////////////////////////
 // HTTP                                         //
@@ -59,6 +63,11 @@ HTTP::GetHeader(const string& st, string &res) const {
   return false;
 }
 
+void
+HTTP::SetHeader(const string& hdr, const string& val) {
+  headers[hdr] = val;
+}
+
 //////////////////////////////////////////////////
 // HTTPRequest                                  //
 //////////////////////////////////////////////////
@@ -99,7 +108,6 @@ HTTPRequest::ParseCommand(const string& st, int pos) {
     name = URI;
   }
 
-
   return pos + newpos;
 }
 
@@ -111,4 +119,31 @@ HTTPRequest::GetURIParam(const string& st, string& res) const {
     return true;
   }
   return false;
+}
+
+//////////////////////////////////////////////////
+// HTTPResponse                                 //
+//////////////////////////////////////////////////
+Regex HTTPResponse::comreg("^HTTP/([^ ]+) +([[:digit:]]+) *(.*)\r\n");
+
+HTTPResponse::HTTPResponse(int _status, const string &cont_type = "")
+  : HTTP(), version("1.1"), status(_status) {
+  if (cont_type.size()) {
+    SetHeader("Content-Type", cont_type);
+  }
+  SetHeader("Server", PKGVER);
+}
+
+int
+HTTPResponse::ParseCommand(const string& st, int pos) {
+  vector<string> line;
+  int newpos;
+  // Parse Command
+  if ((newpos = comreg.Match(st.substr(pos), line))) {
+    version = line[0];
+    status = atoi(line[1].c_str());
+    description = line[2];
+  };
+
+  return pos + newpos;
 }
