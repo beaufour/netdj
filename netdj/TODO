@@ -1,17 +1,23 @@
-Coming up:
-* Proper blacklist-function in Gnut
-  - new 'cache <xxxxx>', just as 'search <xxxxx>'
-  
-* Multiple shares
-  -> Switchingpriority?
-  -> save/move should take listname as argument
-
-* Switch to select deletion of files after playing (after xx numbers played)
-  - should help Gnut cache new songs more quickly, or what?
-  
 Missing
 -------
-UI:
+ENGINE:
+* Multiple shares
+* Enable directories in lists (especially shares)
+* Enable HTTP GET of songs
+* Save history of played songs
+  - a playlist history
+  - check history before playing song (avoid too frequent repeats)
+* FIX: Request doesn't work
+
+
+APPLET:
+* Show the ID3-info
+* Show proper window instead of tooltip
+* FIX: Doesn't resize to new panelsize if moved
+* FIX: Crashes when there's only one song in the cache-list
+
+
+ADMIN UI:
 * Take generic player-command and args from config file
 * Do generic full_path-function (with either pwd or home as added path)     
 * Save (not move) file to share
@@ -27,12 +33,12 @@ UI:
   - choose by listname
 * Errorhandling should be made more flexible
 
-WEB:
+
+WEB UI:
 * Add 'search on freedb'
 * Add commands from UI
   - add song
-* Add support for:
-  - more commands
+* Add support for more commands
 * Add feedback to user for commands
 * Add info about webusage on admin display
 * Clean up songnames (in search line, or general?)
@@ -45,6 +51,7 @@ WEB:
 GNUT:
 * real blacklist-function for the cache
 * check for already existing files in all lists before caching
+* Weird idea: connect only to host in a geographical area?
 
 
 BIG ISSUES
