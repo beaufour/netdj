@@ -16,7 +16,7 @@ using namespace std;
 int Client::mIDCount = 0;
 
 Client::Client(QSocket* aSocket)
-  : mSocket(aSocket) 
+  : mSocket(aSocket), mLogLevel(0)
 {
 }
 
@@ -38,3 +38,16 @@ Client::GetID() const
 {
   return mID;
 }
+
+int
+Client::GetLogLevel() const
+{
+  return mLogLevel;
+}
+
+void
+Client::SetLogLevel(int aLevel)
+{
+  mLogLevel = aLevel;
+}
+

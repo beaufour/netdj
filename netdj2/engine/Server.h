@@ -84,8 +84,9 @@ private:
    *
    * @param aStream           Stream to write results to
    * @param aHeader           The request header
+   * @return                  Close connection?
    */
-  void HandleCommand(QTextStream& aStream,
+  bool HandleCommand(QTextStream& aStream,
                      const QHttpRequestHeader& aHeader);
 
   /**
@@ -105,6 +106,13 @@ private:
    * @param aStream           The stream to send output to
    */
   void CmdHelp(QTextStream& aStream);
+  
+  /**
+   * Command: Enable continous logging for caller
+   *
+   * @param aStream           The stream to send output to
+   */
+  void CmdLog(QTextStream& aStream);
   
   /**
    * Command: Skip current song.

@@ -130,6 +130,7 @@ Server::NewClient(QSocket* aSocket)
   // Connect slots
   connect(aSocket, SIGNAL(readyRead()), this, SLOT(ReadClient()));
   connect(aSocket, SIGNAL(connectionClosed()), this, SLOT(ClientClosed()));
+  connect(aSocket, SIGNAL(delayedCloseFinished()), this, SLOT(ClientClosed()));
 }
 
 /**
@@ -154,10 +155,8 @@ public:
 void
 Server::ReadClient()
 {
-  // This slot is called when the client sent data to the server. The
-  // server looks if it was a get request and sends a very simple HTML
-  // document back.
-  QSocket* socket = (QSocket*)sender();
+  QObject* sender = const_cast<QObject*>(QObject::sender());
+  QSocket* socket = static_cast<QSocket*>(sender);
 
   QString input;
   while (input.length() < MAX_REQUEST_SIZE && socket->canReadLine()) {
@@ -168,9 +167,10 @@ Server::ReadClient()
 
   QTextStream os(socket);
   os.setEncoding(QTextStream::UnicodeUTF8);
+  bool closeCon = true;
   if (header.method() == "GET") {
     try {
-      HandleCommand(os, header);
+      closeCon = HandleCommand(os, header);
     }
     catch (CMDUnauthorized& e) {
       os << HTTP_401
@@ -192,15 +192,14 @@ Server::ReadClient()
        << HTML_501;
   }
 
-  // Close connection
-  socket->close();
+  if (closeCon) {
+    socket->close();
+  }
 }
 
 void
 Server::ClientClosed()
 {
-  qDebug("client disconnected");
-
   QObject* sender = const_cast<QObject*>(QObject::sender());
   QSocket* socket = static_cast<QSocket*>(sender);
 
@@ -234,6 +233,7 @@ Server::GetSong(Song& aSong, const Collection** aCol)
 enum cmdtype_t {
   CMD_HELP,
   CMD_INDEX,
+  CMD_LOG,
   CMD_SKIP,
   CMD_SHUTDOWN,
   CMD_NULL
@@ -253,14 +253,17 @@ typedef struct
 const command_t gCommands[] = {
   {CMD_HELP,     "/help",       0, "This page"},
   {CMD_INDEX,    "/index.xml",  0, "XML: The current song playing and the requested songs pending"},
+  {CMD_LOG,      "/log",        0, "Get log messages (continuous)"},
   {CMD_SKIP,     "/skip",     200, "Skip the currently playing song"},
   {CMD_SHUTDOWN, "/shutdown", 500, "Shutdown NetDJ"},
   {CMD_NULL,     (char*) 0,     0, (char*) 0}
 };
 
-void
+bool
 Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 {
+  bool closeCon = true;
+
   // Analyze command
   const QUrl url(QUrl("http://127.0.0.1/"), aHeader.path());
 
@@ -298,6 +301,11 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
       CmdIndex(aStream);
       break;
 
+    case CMD_LOG:
+      CmdLog(aStream);
+      closeCon = false;
+      break;
+
     case CMD_SHUTDOWN:
       CmdShutdown(aStream);
       break;
@@ -310,6 +318,8 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
       throw new ServerError("Shoot the programmer, HandleCommand() gets an unknown command type!\n");
       break;
   }
+
+  return closeCon;
 }
 
 bool
@@ -373,6 +383,21 @@ Server::CmdIndex(QTextStream& aStream)
           << HTTP_XML
           << HTTP_DATASTART
           << doc.toString()
+          << endl;
+}
+
+void
+Server::CmdLog(QTextStream& aStream)
+{
+  QObject* sender = const_cast<QObject*>(QObject::sender());
+  QSocket* socket = static_cast<QSocket*>(sender);
+
+  mClients[socket]->SetLogLevel(1);
+
+  aStream << HTTP_200
+          << HTTP_XML
+          << HTTP_DATASTART
+          << "<log state=\"on\"/>\n"
           << endl;
 }
 

@@ -21,7 +21,8 @@ private:
   static int mIDCount;
   int mID;
   QSocket* mSocket;
-  
+  int mLogLevel;
+
 public:
   /**
    * Constructor, takes ownership of the socket.
@@ -39,6 +40,20 @@ public:
    * @return                  The network socket
    */
   QSocket* GetSocket();
+
+  /**
+   * Get log level
+   *
+   * @return                  Log level
+   */
+  int GetLogLevel() const;
+
+  /**
+   * Set log level
+   *
+   * @param aLevel            Log level
+   */
+  void SetLogLevel(int aLevel);
 
   /**
    * Get the unique client number.
