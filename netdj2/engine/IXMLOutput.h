@@ -11,6 +11,7 @@
 #define __IXMLOUTPUT_H__
 
 class QDomElement;
+class QDomDocument;
 
 namespace NetDJ
 {

@@ -8,18 +8,16 @@
  */
 
 #include <qdom.h>
-#include <qhttp.h>
 #include <qregexp.h>
 #include <qsocket.h>
 #include <qurl.h>
 
 #include "config.h"
 #include "AccessChecker.h"
-#include "Collection.h"
+#include "ICollection.h"
+#include "ISong.h"
 #include "Server.h"
 #include "ServerSocket.h"
-#include "Song.h"
-#include "StdException.h"
 #include "util.h"
 
 using namespace std;
@@ -85,7 +83,7 @@ const char* HTML_501 =
   "</HTML>\n";
 
 Server::Server(int aPort, int aBackLog, QObject* aParent)
-  : QObject(aParent, "Server")
+  : QObject(aParent, "Server"), mSongDocument("NetDJ")
 {
   // Automatically delete contained pointers on delete
   mClients.setAutoDelete(true);
@@ -216,21 +214,27 @@ Server::ClientClosed()
 }
 
 void
-Server::SongPlaying(const Song& aSong, const Collection* aCol)
+Server::SongPlaying(const ISong* aSong, const ICollection* aCol)
 {
-  QMutexLocker lock(&mSongMutex);
+  QMutexLocker lock(&mDocMutex);
 
-  mCurrentSong = aSong;
-  mCurrentCol = aCol;
+  mSongDocument.clear();
+  
+  QDomElement* songXML = aSong->AsXML(&mSongDocument);
+  songXML->setAttribute("collection", aCol->GetIdentifier());  
+  mSongDocument.appendChild(*songXML);
 }
 
-void
-Server::GetSong(Song& aSong, const Collection** aCol)
+QDomDocument*
+Server::GetSong()
 {
-  QMutexLocker lock(&mSongMutex);
+  QMutexLocker lock(&mDocMutex);
 
-  aSong = mCurrentSong;
-  *aCol = mCurrentCol;
+  QDomDocument* newdoc = new QDomDocument();
+  Q_CHECK_PTR(newdoc);
+  *newdoc = mSongDocument.cloneNode(true).toDocument();
+
+  return newdoc;
 }
 
 void
@@ -387,21 +391,15 @@ Server::CmdHelp(QTextStream& aStream)
 void
 Server::CmdIndex(QTextStream& aStream)
 {
-  Song cursong;
-  const Collection* curcol;
-  GetSong(cursong, &curcol);
-  
-  QDomDocument doc("NetDJ");
-  QDomElement root = doc.createElement("currentsong");
-  root.setAttribute("collection", mCurrentCol->GetIdentifier());
-  mCurrentSong.asXML(doc, root);
-  doc.appendChild(root);
-  
+  QDomDocument* songXML = GetSong();
+
   aStream << HTTP_200
           << HTTP_XML
           << HTTP_DATASTART
-          << doc.toString()
+          << songXML->toString()
           << endl;
+
+  delete songXML;
 }
 
 void

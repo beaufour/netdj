@@ -10,13 +10,13 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
+#include <qdom.h>
 #include <qhttp.h>
 #include <qmutex.h>
 #include <qobject.h>
 #include <qptrdict.h>
 
 #include "Client.h"
-#include "Song.h"
 #include "StdException.h"
 
 class QDomElement;
@@ -26,7 +26,8 @@ namespace NetDJ
 
   class ServerSocket;
   class IAccessChecker;
-  class Collection;
+  class ICollection;
+  class ISong;
 
   /**
    * Maximum bytes allowed in a request
@@ -73,19 +74,16 @@ namespace NetDJ
     /** The access checker used */
     IAccessChecker* mAccessChecker;
     
-    /** Mutex used to lock mCurrentSong and mCurrentCol */
-    mutable QMutex mSongMutex;
-    
-    /** The currently playing song */
-    Song mCurrentSong;
-    
-    /** The collection mCurrentSong comes from */
-    const Collection* mCurrentCol;
+    /** XML representation of currently playing song */
+    QDomDocument mSongDocument;
+
+    /** Mutex used to lock mSongDocument */
+    mutable QMutex mDocMutex;
     
     /**
-     * Get a copy of the currently playing song.
+     * Get a copy of the currently playing song document
      */
-    void GetSong(Song& aSong, const Collection** aCol);
+    QDomDocument* GetSong();
     
     /**
      * Handles commands from clients.
@@ -199,7 +197,7 @@ namespace NetDJ
      * @param aSong             The song
      * @param aCol              The collection it comes from
      */
-    void SongPlaying(const Song& aSong, const Collection* aCol);
+    void SongPlaying(const ISong* aSong, const ICollection* aCol);
 
     /** Called when a new log entry is made */
     void NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel);

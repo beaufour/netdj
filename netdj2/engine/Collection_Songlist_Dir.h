@@ -12,6 +12,8 @@
 
 #include "Collection_Songlist.h"
 
+#include <qdatetime.h>
+
 namespace NetDJ
 {
 
@@ -19,7 +21,8 @@ namespace NetDJ
    * Class for collections maintained by a list of songs, read from a
    * directory.
    */
-  class Collection_Songlist_Dir : public Collection_Songlist {
+  class Collection_Songlist_Dir : public Collection_Songlist
+  {
   protected:
     /** The directory with the songs */
     std::string mDirectory;

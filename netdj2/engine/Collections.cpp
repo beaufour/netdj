@@ -7,6 +7,9 @@
  */
 
 #include "Collections.h"
+#include "ICollection.h"
+
+#include <qglobal.h>
 
 using namespace std;
 using namespace NetDJ;
@@ -17,7 +20,7 @@ Collections::Collections()
 
 Collections::~Collections()
 {
-  Collection* col;
+  ICollection* col;
 
   while (mColList.size()) {
     col = mColList.back();
@@ -27,23 +30,24 @@ Collections::~Collections()
 }
 
 void
-Collections::AddCollection(Collection* aCol)
+Collections::AddCollection(ICollection* aCol)
 {
   mColList.push_back(aCol);
 }
 
 bool
-Collections::GetNextSong(Song& aSong, const Collection** aCol)
+Collections::GetNextSong(ISong** aSong, const ICollection** aCol)
 {
   Q_ASSERT(aCol);
+  Q_ASSERT(aSong);
   
-  vector<Collection*>::iterator curcol;
+  vector<ICollection*>::iterator curcol;
   for (curcol = mColList.begin();
        curcol != mColList.end();
        ++curcol) {
     try {
       (*curcol)->Update();
-      aSong = (*curcol)->GetNextSong();
+      *aSong = (*curcol)->GetNextSong();
       break;
     }
     catch (EmptyCollection &e) {

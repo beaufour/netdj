@@ -8,6 +8,10 @@
 
 #include "CollectionBase.h"
 
+#include <qdom.h>
+
+#include "ISong.h"
+
 using namespace std;
 using namespace NetDJ;
 
@@ -18,7 +22,7 @@ EmptyCollection::EmptyCollection(const std::string aStr)
 
 
 CollectionBase::CollectionBase(const string aId, const string aDescr)
-  : mIdentifier(aId), mDescription(aDescr)
+  : mNextUNID(0), mIdentifier(aId), mDescription(aDescr)
 {
 }
 
@@ -41,6 +45,12 @@ CollectionBase::GetDescription() const
   return mDescription;
 }
 
+u_int32_t
+CollectionBase::GetUNID()
+{  
+  return ++mNextUNID;
+}
+
 bool
 CollectionBase::GetDeleteAfterPlay() const
 {
@@ -48,34 +58,39 @@ CollectionBase::GetDeleteAfterPlay() const
 }
 
 
-void
-CollectionBase::asXML(QDomDocument& aDoc, QDomElement& aRoot) const
+QDomElement*
+CollectionBase::AsXML(QDomDocument* aDocument) const
 {
   /* Main node */
-  QDomElement col = aDoc.createElement("collection");
-  col.setAttribute("id", GetIdentifier());
-  aRoot.appendChild(col);
+  QDomElement* col = new QDomElement();
+  *col = aDocument->createElement("collection");
+  col->setAttribute("id", GetIdentifier());
 
   /* Description */
-  QDomElement col_descr = aDoc.createElement("description");
-  col.appendChild(col_descr);
-  QDomText col_descr_text = aDoc.createTextNode(GetDescription());
+  QDomElement col_descr = aDocument->createElement("description");
+  col->appendChild(col_descr);
+  QDomText col_descr_text = aDocument->createTextNode(GetDescription());
   col_descr.appendChild(col_descr_text);
 
   /* Size */
-  QDomElement col_size = aDoc.createElement("size");
-  col.appendChild(col_size);
+  QDomElement col_size = aDocument->createElement("size");
+  col->appendChild(col_size);
   QString col_size_str;
   col_size_str.setNum(Size());
-  QDomText col_size_text = aDoc.createTextNode(col_size_str);
+  QDomText col_size_text = aDocument->createTextNode(col_size_str);
   col_size.appendChild(col_size_text);
   
 
   /* Songs */
+  QDomElement* song;
   for (int i = 0; i < Size(); ++i) {
-    QDomElement elem = aDoc.createElement("entry");
+    QDomElement elem = aDocument->createElement("entry");
     elem.setAttribute("position", i);
-    col.appendChild(elem);
-    GetSong(i).asXML(aDoc, elem);
+    song = GetSong(i)->AsXML(aDocument);
+    elem.appendChild(*song);
+    col->appendChild(elem);
+    delete song;
   }
+
+  return col;
 }

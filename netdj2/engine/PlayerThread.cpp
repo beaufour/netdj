@@ -7,11 +7,13 @@
  */
 #include "PlayerThread.h"
 
+#include <qfile.h>
+
 #include "config.h"
-#include "Collection.h"
 #include "Collections.h"
+#include "ICollection.h"
+#include "ISong.h"
 #include "Shout.h"
-#include "Song.h"
 #include "StdException.h"
 
 using namespace std;
@@ -61,12 +63,12 @@ PlayerThread::run() {
     unsigned char buf[4096];
     int bytes;
 
-    Song currentSong;
-    const Collection* currentCollection;
+    ISong* currentSong;
+    const ICollection* currentCollection;
 
     while (true) {
       /* Check whether we have found a song */
-      if (!mCols->GetNextSong(currentSong, &currentCollection)) {
+      if (!mCols->GetNextSong(&currentSong, &currentCollection)) {
 	emit SigMessage("I have no files to play...", 10);
 	/** @todo Can we do something better than just waiting 10 secs? */
 	sleep(10);
@@ -74,10 +76,8 @@ PlayerThread::run() {
       }
       emit SigSongPlaying(currentSong, currentCollection);
 
-      if (currentSong.GetSongType() != SongType_MP3) {
-	emit SigMessage("Invalid songtype, skipping!", 10);
-	continue;
-      }
+      // @todo check song type
+      emit SigMessage("Check song type!", 10);
 
       /*
       try {
@@ -103,13 +103,14 @@ PlayerThread::run() {
       }
       */
 
-      QFile file(currentSong.GetFilename());
+      QFile file(currentSong->GetFilename());
       if (!file.open(IO_ReadOnly)) {
 	continue;
       }
       
       /* Send song */
-      shout.SetSongName(currentSong.GetFilename());
+      // @todo use song info!
+      shout.SetSongName(currentSong->GetFilename());
       while ((bytes = file.readBlock((char*) buf, sizeof(buf))) > 0
 	     && mStopPlayer == false && mSkipSong == false) {
 	shout.Send(buf, bytes);

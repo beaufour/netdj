@@ -11,12 +11,11 @@
 #define __COLLECTIONS_H__
 
 #include <vector>
-#include <string>
-#include "ICollection.h"
-#include "Song.h"
 
 namespace NetDJ
 {
+  class ICollection;
+  class ISong;
   
   /**
    * Handles a collection of Collection(s).
@@ -63,7 +62,7 @@ namespace NetDJ
      * @param aCol              The collection the song is retrieved from
      * @return                  Song succesfully retrieved?
      */
-    bool GetNextSong(Song& aSong, const ICollection** aCol);
+    bool GetNextSong(ISong** aSong, const ICollection** aCol);
   };
 }
 

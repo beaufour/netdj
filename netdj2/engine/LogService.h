@@ -14,12 +14,11 @@
 #include <qmutex.h>
 #include <qobject.h>
 
-#include "Song.h"
-
 namespace NetDJ 
 {
 
-  class Collection;
+  class ICollection;
+  class ISong;
 
   /**
    * A service that listens for signals from other objects, and creates log
@@ -75,7 +74,7 @@ namespace NetDJ
      * @param aSong             The song
      * @param aCol              The collection it comes from
      */
-    void LogSongPlaying(const Song& aSong, const Collection* aCol);
+    void LogSongPlaying(const ISong* aSong, const ICollection* aCol);
     
     /** Receiving a 'quit' command */
     void LogQuit(const QString& aUsername);

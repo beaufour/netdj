@@ -10,7 +10,7 @@
 #ifndef __ISONGINFO_H__
 #define __ISONGINFO_H__
 
-#include <string>
+#include <qstring.h>
 
 #include "StdException.h"
 #include "IXMLOutput.h"
@@ -56,35 +56,35 @@ namespace NetDJ
      *
      * @return        mDescription
      */
-    virtual std::string GetDescription() const = 0;
+    virtual QString GetDescription() const = 0;
     
     /**
      * Get song artist
      *
      * @return        mArtist
      */
-    virtual std::string GetArtist() const = 0;
+    virtual QString GetArtist() const = 0;
     
     /**
      * Get song album
      *
      * @return        mAlbum
      */
-    virtual std::string GetAlbum() const = 0;
+    virtual QString GetAlbum() const = 0;
     
     /**
      * Get song title
      *
      * @return        mTitle
      */
-    virtual std::string GetTitle() const = 0;
+    virtual QString GetTitle() const = 0;
     
     /**
      * Get song genre
      *
      * @return       mGenre 
      */
-    virtual std::string GetGenre() const = 0;
+    virtual QString GetGenre() const = 0;
     
     /**
      * Get song track number
@@ -112,7 +112,7 @@ namespace NetDJ
      *
      * @return       mOwner
      */
-    virtual std::string GetOwner() const = 0;
+    virtual QString GetOwner() const = 0;
     
     /**
      * Get song length, in seconds

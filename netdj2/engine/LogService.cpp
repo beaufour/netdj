@@ -11,10 +11,9 @@
 
 #include <qdom.h>
 
-#include "Song.h"
-#include "Collection.h"
+#include "ISong.h"
+#include "ICollection.h"
 
-using namespace NetDJ;
 using namespace NetDJ;
 
 LogService::LogService(QObject* aParent)
@@ -53,15 +52,15 @@ LogService::SimpleEntry(const int aLevel, const QString aName)
 
 
 void
-LogService::LogSongPlaying(const Song& aSong, const Collection* aCol)
+LogService::LogSongPlaying(const ISong* aSong, const ICollection* aCol)
 {
   QDomElement e;
   CreateEntry(e, 10, "SongPlaying");
 
-  QDomElement song = mDocument.createElement("currentsong");
-  song.setAttribute("collection", aCol->GetIdentifier());
-  aSong.asXML(mDocument, song);
-  e.appendChild(song);
+  QDomElement* song = aSong->AsXML(&mDocument);
+  song->setAttribute("collection", aCol->GetIdentifier());
+  e.appendChild(*song);
+  delete song;
   
   Emit(e, 10);
 }

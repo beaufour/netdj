@@ -16,17 +16,20 @@
 
 using namespace NetDJ;
 
+/**
+ * @todo How do I get mediatype from Taglib?
+ */
 SongInfoFile::SongInfoFile(const QString& aFilename)
 {
   // Get file information
   QFileInfo qinfo(aFilename);
 
-  mOwner = qinfo.owner().ascii();
+  mOwner = qinfo.owner();
   mSize = qinfo.size();
 
 
   // Get tag information with TagLib
-  TagLib::FileRef tfile(aFilename.ascii());
+  TagLib::FileRef tfile(aFilename);
 
   // TODO: Use unicode in to8Bit() call?
   mAlbum = tfile.tag()->album().to8Bit();
@@ -41,28 +44,13 @@ SongInfoFile::SongInfoFile(const QString& aFilename)
     mDescription = mArtist + " - " + mTitle;
   } else {
     /* Set description to file basename */
-    mDescription = qinfo.ascii();
+    mDescription = qinfo.fileName();
   }
 
-
-
-}
-
-MediaType_t
-SongInfo_File::GetMediaType() const {
-  // Filename must include ".mp3".
+  // Get mediatype
   // Tried using QFileInfo, but
   // f.x. "..mp3" returned ".mp3" instead of "mp3".
-  if (mFilename.size() > 4) {
-    char ending[5];
-    strcpy(ending, mFilename.substr(mFilename.size() - 4).c_str());
-    ending[1] = tolower(ending[1]);
-    ending[2] = tolower(ending[2]);
-    if (strstr(ending, ".mp3") != 0) {
-      return MediaType_MP3;
-    }
+  if (aFilename.right(3).lower() == "mp3") {
+    mMediaType = MediaType_MP3;
   }
-
-  return MediaType_Unknown;
 }
-

@@ -7,15 +7,13 @@
  */
 
 #include "SongFile.h"
-#include "SongInfo_File_mp3.h"
+#include "SongInfoFile.h"
 
 #include <qdom.h>
 
-using namespace std;
 using namespace NetDJ;
 
-
-SongFile::SongFile(const string aName, const u_int32_t aUNID)
+SongFile::SongFile(const QString& aName, const u_int32_t aUNID)
   : mFilename(aName), mSongInfo(0), mUNID(aUNID)
 {
 }
@@ -28,8 +26,8 @@ SongFile::~SongFile()
   }
 }
 
-SongFile::SongFile(const Song& aSong2)
-  : mFilename(aSong2.mFilename), mSongInfo(0), mUNID(aSong2.mUNID)
+SongFile::SongFile(const SongFile& aSong2)
+  : ISong(), mFilename(aSong2.mFilename), mSongInfo(0), mUNID(aSong2.mUNID)
 {
 }
 
@@ -48,24 +46,22 @@ SongFile::GetUNID() const
   return mUNID;
 }
 
-const SongInfo*
+const ISongInfo*
 SongFile::GetSongInfo() const
 {
   if (!mSongInfo) {
-    switch (GetSongType()) {
-    case SongType_MP3:
-      mSongInfo = new SongInfo_File_mp3(mFilename);
-      Q_CHECK_PTR(mSongInfo);
-      break;
-      
-    default:
-      break;
-    }
+    mSongInfo = new SongInfoFile(mFilename);
+    Q_CHECK_PTR(mSongInfo);
   }
-
+  
   return mSongInfo;
 }
 
+QString
+SongFile::GetFileName() const
+{
+  return mFilename;
+}
 
 QDomElement*
 SongFile::AsXML(QDomDocument* aDocument) const

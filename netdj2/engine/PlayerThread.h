@@ -14,12 +14,12 @@
 #include <qobject.h>
 
 #include "Client.h"
-#include "Song.h"
 
 namespace NetDJ
 {
   class Collections;
-  class Collection;
+  class ICollection;
+  class ISong;
   
   /**
    * The thread handling the actual playing of files through the icecast
@@ -66,7 +66,7 @@ namespace NetDJ
      * @param aSong             The song
      * @param aCol              The collection it comes from
      */
-    void SigSongPlaying(const Song& aSong, const Collection* aCol);
+    void SigSongPlaying(const ISong* aSong, const ICollection* aCol);
     
     /** Emitted when the player starts */
     void SigStart();

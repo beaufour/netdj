@@ -7,6 +7,8 @@
  */
 
 #include "Collection_Songlist_File.h"
+#include "SongFile.h"
+
 #include "StdException.h"
 
 #include <qapplication.h>
@@ -32,7 +34,7 @@ Collection_Songlist_File::~Collection_Songlist_File() {
 void
 Collection_Songlist_File::Update() {
   /* Temporary storage for new list */
-  deque<Song> newlist;
+  deque<ISong*> newlist;
 
   /* Open file */
   ifstream flist(mFilename.c_str());
@@ -49,7 +51,7 @@ Collection_Songlist_File::Update() {
       continue;
     }
     try {
-      newlist.push_back(Song(line));
+      newlist.push_back(new SongFile(line, GetUNID()));
     }
     catch (...) {
       qWarning("Could not add '%s' to collection '%s'!", line, GetIdentifier().c_str());

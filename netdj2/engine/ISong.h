@@ -10,11 +10,13 @@
 #ifndef __ISONG_H__
 #define __ISONG_H__
 
-#include "SongInfo.h"
 #include "IXMLOutput.h"
+
+#include <qstring.h>
 
 namespace NetDJ
 {
+  class ISongInfo;
   
   /**
    * Interface for songs.
@@ -36,20 +38,20 @@ namespace NetDJ
     virtual u_int32_t GetUNID() const = 0;
     
     /**
-     * Get the type of the media (MP3, OGG, WAV, etc.)
-     * 
-     * @return        The media type.
-     */
-    virtual MediaType_t GetMediaType() const = 0;
-    
-    /**
      * Get detailed information about the song.
      *
      * @note Ownership is held by ISong.
      *
      * @return        SongInfo structure
      */
-    virtual const SongInfo* GetSongInfo() const = 0;
+    virtual const ISongInfo* GetSongInfo() const = 0;
+
+    /**
+     * Get the filename of the song
+     *
+     * @return        The filename
+     */
+    virtual QString GetFilename() const = 0;
   };
 }
 

@@ -10,7 +10,9 @@
 #ifndef __SONGINFOFILE_H__
 #define __SONGINFOFILE_H__
 
-#include "ISongInfo.h"
+#include "SongInfoBase.h"
+
+#include <qstring.h>
 
 namespace NetDJ
 {
@@ -21,7 +23,7 @@ namespace NetDJ
    * Uses Taglib to get the information,
    * @see http://developer.kde.org/~wheeler/taglib.html
    */
-  class SongInfoFile : public ISongInfo {
+  class SongInfoFile : public SongInfoBase {
   public:
     /**
      * Constructor.

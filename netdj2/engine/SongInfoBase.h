@@ -24,10 +24,10 @@ namespace NetDJ
   class SongInfoBase : public ISongInfo {
   private:
     /** Tells whether the XML information is valid */
-    bool mXMLValid;
+    mutable bool mXMLValid;
 
     /** Document used to store song information in */
-    mutable QDomDocument mDoc;
+    mutable QDomDocument mDocument;
 
     /** The main information node */
     mutable QDomElement  mInfoNode;
@@ -37,19 +37,19 @@ namespace NetDJ
     
   protected:
     /** Textual description of song (ie. "Aha - Take On Me") */
-    std::string mDescription;
+    QString mDescription;
     
     /** Song artist */
-    std::string mArtist;
+    QString mArtist;
     
     /** From album */
-    std::string mAlbum;
+    QString mAlbum;
     
     /** Song title */
-    std::string mTitle;
+    QString mTitle;
     
     /** Song genre */
-    std::string mGenre;
+    QString mGenre;
     
     /** Song track */
     u_int32_t mTrack;
@@ -61,7 +61,7 @@ namespace NetDJ
     u_int32_t mSize;
     
     /** Song owner */
-    std::string mOwner;
+    QString mOwner;
     
     /** Song length, in seconds */
     u_int32_t mLength;
@@ -77,15 +77,15 @@ namespace NetDJ
     virtual ~SongInfoBase();
 
     // ISong
-    std::string GetDescription() const;
-    std::string GetArtist() const;
-    std::string GetAlbum() const;
-    std::string GetTitle() const;
-    std::string GetGenre() const;
+    QString GetDescription() const;
+    QString GetArtist() const;
+    QString GetAlbum() const;
+    QString GetTitle() const;
+    QString GetGenre() const;
     u_int32_t GetTrack() const;
     u_int32_t GetYear() const;
     u_int32_t GetSize() const;
-    std::string GetOwner() const;
+    QString GetOwner() const;
     u_int32_t GetLength() const;
     MediaType_t GetMediaType() const;
 

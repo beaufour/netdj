@@ -11,12 +11,13 @@
 #define __ICOLLECTION_H__
 
 #include <string>
-#include "Song.h"
 #include "StdException.h"
-#include "XMLOutput.h"
+#include "IXMLOutput.h"
 
 namespace NetDJ
 {
+
+  class ISong;
 
   /**
    * Exception thrown by GetNextSong if ICollection is empty.
@@ -38,7 +39,7 @@ namespace NetDJ
    * - Retrieve song at specific position
    * - Retrieve list of all songs?
    */
-  class ICollection : public XMLOutput {
+  class ICollection : public IXMLOutput {
   public:
     /**
      * Get the identifier for the collection.
@@ -82,18 +83,18 @@ namespace NetDJ
      *
      * @return        The next song
      */
-    virtual Song GetNextSong() = 0;
+    virtual ISong* GetNextSong() = 0;
     
     
     /**
      * Get a song from the list.
      *
-     * \note Hmmm, would like to use operator[], but how do you call
+     * @note Hmmm, would like to use operator[], but how do you call
      * that function from a class funtion (in asXML?).
      *
-     * @param pos     The song number to get
+     * @param aPos     The song number to get
      */
-    virtual const Song& GetSong(const int aPos) const = 0;
+    virtual const ISong* GetSong(const int aPos) const = 0;
     
     
     /**
@@ -101,7 +102,7 @@ namespace NetDJ
      *
      * @param sng     The song to add
      */
-    virtual bool AddSong(const Song& aSong) = 0;
+    virtual bool AddSong(ISong* aSong) = 0;
   };
 }
 

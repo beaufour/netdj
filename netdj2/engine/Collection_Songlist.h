@@ -11,7 +11,7 @@
 #define __COLLECTION_SONGLIST_H__
 
 #include "CollectionBase.h"
-#include "Song.h"
+
 #include <deque>
 #include <qmutex.h>
 
@@ -24,7 +24,7 @@ namespace NetDJ
   class Collection_Songlist : public CollectionBase {
   protected:
     /** List of songs managed by collection */
-    std::deque<Song> mSonglist;
+    std::deque<ISong*> mSonglist;
     
     /**
      * Determines whether collecgion is treated like a queue: Any new
@@ -49,12 +49,13 @@ namespace NetDJ
     
     /** Destructor */
     ~Collection_Songlist();
-    
+
+    // ICollection
     virtual void Update();
     int Size() const;
-    Song GetNextSong();
-    const Song& GetSong(const int aPos) const;
-    bool AddSong(const Song& aSong);
+    ISong* GetNextSong();
+    const ISong* GetSong(const int aPos) const;
+    bool AddSong(ISong* aSong);
   };
 }
 

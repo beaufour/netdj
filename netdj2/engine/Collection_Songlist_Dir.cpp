@@ -7,6 +7,9 @@
  */
 
 #include "Collection_Songlist_Dir.h"
+
+#include "SongFile.h"
+
 #include <qdir.h>
 #include <qptrlist.h>
 
@@ -39,7 +42,7 @@ void
 Collection_Songlist_Dir::Update()
 {
   /* Temporary storage for new list */
-  deque<Song> newlist;
+  deque<ISong*> newlist;
 
   // Open directory
   QDir dir(mDirectory, QString::null, QDir::Time | QDir::Reversed,
@@ -60,11 +63,11 @@ Collection_Songlist_Dir::Update()
       if (mIsQueue) {
 	if (fi->lastModified() >= mLastTimeStamp) {
 	  QMutexLocker locker(&mMutex);
-	  mSonglist.push_back(Song(fi->filePath().ascii()));
+	  mSonglist.push_back(new SongFile(fi->filePath(), GetUNID()));
 	  mLastTimeStamp = fi->lastModified();
 	}
       } else { /* Not a queue */
-	newlist.push_back(Song(fi->filePath().ascii()));
+	newlist.push_back(new SongFile(fi->filePath(), GetUNID()));
       }
       ++it;
     }

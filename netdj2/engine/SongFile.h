@@ -10,13 +10,15 @@
 #ifndef __SONGFILE_H__
 #define __SONGFILE_H__
 
-#include <string>
+#include <qstring.h>
 #include <qfileinfo.h>
 
 #include "ISong.h"
 
 namespace NetDJ
 {
+
+  class ISongInfo;
   
   /**
    * Implementation of ISong for songs stored in files
@@ -25,10 +27,10 @@ namespace NetDJ
   {
   private:
     /** The filename */
-    std::string mFilename;
+    QString mFilename;
     
     /** Pointer to SongInfo structure, may be 0 */
-    mutable SongInfo* mSongInfo;
+    mutable ISongInfo* mSongInfo;
     
     /** Unique ID (application-wise) */
     u_int32_t mUNID;
@@ -39,10 +41,10 @@ namespace NetDJ
      *
      * @param fname   The filename of the song
      */
-    SongFile(const std::string fname,  const u_int32_t aUNID);
+    SongFile(const QString& fname,  const u_int32_t aUNID);
     
     /** Destructor */
-    ~SongFile();
+    virtual ~SongFile();
     
     /**
      * Copy constructor.
@@ -61,11 +63,11 @@ namespace NetDJ
 
     // ISong
     u_int32_t GetUNID() const;
-    MediaType_t GetMediaType() const;
-    const SongInfo* GetSongInfo() const;    
+    const ISongInfo* GetSongInfo() const;    
+    QString GetFileName() const;
 
     // IXMLOutput
-    const QDomElement& AsXML() const;
+    QDomElement* AsXML(QDomDocument* aDocument) const;
   };
 }
 

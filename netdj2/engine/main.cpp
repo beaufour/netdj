@@ -104,7 +104,7 @@ main(int argc, char* argv[])
 
   gLogger.LogMessage("Initializing song collections", 10);
   Collections cols;
-  Collection* newcol = new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true);
+  ICollection* newcol = new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true);
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
   newcol = new Collection_Songlist_File("share", "Shares", "mp3.list");
@@ -120,8 +120,8 @@ main(int argc, char* argv[])
                    &gLogger,      SLOT(LogMessage(const QString&, const unsigned int)));
   QObject::connect(playerthread,  SIGNAL(SigException(const QString&, const QString&)),
                    &gLogger,      SLOT(LogException(const QString&, const QString&)));
-  QObject::connect(playerthread,  SIGNAL(SigSongPlaying(const Song&, const Collection*)),
-                   &gLogger,      SLOT(LogSongPlaying(const Song&, const Collection*)));
+  QObject::connect(playerthread,  SIGNAL(SigSongPlaying(const ISong*, const Collection*)),
+                   &gLogger,      SLOT(LogSongPlaying(const ISong*, const Collection*)));
   QObject::connect(playerthread,  SIGNAL(SigStart()),
                    &gLogger,      SLOT(LogPlayerStart()));
   QObject::connect(playerthread,  SIGNAL(SigStop()),
@@ -152,8 +152,8 @@ main(int argc, char* argv[])
   // Connect playerthread and server
   QObject::connect(server,       SIGNAL(SigSkip(const QString&)),
                    playerthread, SLOT(Skip()));
-  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)),
-                   server,       SLOT(SongPlaying(const Song&, const Collection*)));
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const ISong*, const Collection*)),
+                   server,       SLOT(SongPlaying(const ISong*, const Collection*)));
   
 
   // Starting playerthread

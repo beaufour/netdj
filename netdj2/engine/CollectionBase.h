@@ -13,33 +13,40 @@
 #include <string>
 
 #include "ICollection.h"
-#include "Song.h"
-#include "StdException.h"
-#include "XMLOutput.h"
 
 namespace NetDJ
 {
 
   /**
-   * Base implementation of Collection.
+   * Base implementation of ICollection.
    */
-  class CollectionBase : public Collection
+  class CollectionBase : public ICollection
   {
+  private:
+    /** The next UNID */
+    u_int32_t mNextUNID;
+    
   protected:
     /** Identifier for the collection, short id */
     std::string mIdentifier;
     
     /** The description, long textual*/
     std::string mDescription;
-    
+
+    /** Get a UNID */
+    u_int32_t GetUNID();
+
   public:
     CollectionBase(const std::string aId, const std::string aDescr);
     virtual ~CollectionBase();
     
+    // ICollection
     std::string GetIdentifier() const;
     std::string GetDescription() const;
     bool GetDeleteAfterPlay() const;
-    void asXML(QDomDocument& aDoc, QDomElement& aRoot) const;
+
+    // IXMLOutput
+    QDomElement* AsXML(QDomDocument* aDocument) const;
   };
 }
 

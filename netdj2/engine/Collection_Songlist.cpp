@@ -29,7 +29,7 @@ Collection_Songlist::Size() const {
   return mSonglist.size();
 }
 
-Song
+ISong*
 Collection_Songlist::GetNextSong() {
   QMutexLocker locker(&mMutex);
 
@@ -38,7 +38,7 @@ Collection_Songlist::GetNextSong() {
   }
 
   if (mIsQueue) {
-    Song sng = mSonglist[0];
+    ISong* sng = mSonglist[0];
     mSonglist.pop_front();
     return sng;
   } else {
@@ -46,7 +46,7 @@ Collection_Songlist::GetNextSong() {
   }
 }
 
-const Song&
+const ISong*
 Collection_Songlist::GetSong(const int aPos) const {
   QMutexLocker locker(&mMutex);
   
@@ -54,7 +54,7 @@ Collection_Songlist::GetSong(const int aPos) const {
 }
 
 bool
-Collection_Songlist::AddSong(const Song& aSng) {
+Collection_Songlist::AddSong(ISong* aSng) {
   mSonglist.push_back(aSng);
   return true;
 }
