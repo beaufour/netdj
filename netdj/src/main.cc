@@ -53,11 +53,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/wait.h>
 
-// ID3-handling
-#ifdef HAVE_ID3LIB
-#  include <id3/tag.h>
-#  include <id3/misc_support.h>
-#endif
+#undef HAVE_ID3LIB
 
 void
 screen_flush() {
@@ -347,9 +343,7 @@ com_help(char* arg) {
 
 int
 com_info(char* arg) {
-#ifdef HAVE_ID3LIB  
-  ID3_Tag tag;
-#endif
+  id3tag_t id3tag;
   time_t filetime;
   string songname;
   File fobj;
@@ -361,16 +355,12 @@ com_info(char* arg) {
     cout << "    " << setprecision(2)
          << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
          << ctime(&filetime) << endl;
-#ifdef HAVE_ID3LIB  
-    tag.Link(songname.c_str());
-    if (tag.Size()) {
-      cout << "    Artist:  " << ID3_GetArtist(&tag) << endl;
-      cout << "    Album:   " << ID3_GetAlbum(&tag) << endl;
-      cout << "    Title:   " << ID3_GetTitle(&tag) << endl;
-      cout << "    Comment: " << ID3_GetComment(&tag) << endl;
+    if (fobj.GetID3Info(id3tag)) {
+      cout << "    Artist:  " << id3tag.artist << endl;
+      cout << "    Album:   " << id3tag.album << endl;
+      cout << "    Title:   " << id3tag.songname << endl;
+      cout << "    Comment: " << id3tag.note << endl;
     }
-    tag.Clear();
-#endif
   }
   return 0;
 };
@@ -684,10 +674,7 @@ http_thread(void*) {
     pf.events = POLLIN;
     int z;
     unsigned char ch;
-#ifdef HAVE_ID3LIB  
-    ID3_Tag tag;
-    ID3_Frame* id3frame;
-#endif
+    id3tag_t id3tag;
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
@@ -817,33 +804,26 @@ http_thread(void*) {
 		  xbuf += tmplint;
 		  xbuf += "</size>\n";
 		  xbuf += "    <description>" + it->GetFilename() + "</description>\n";
-#ifdef HAVE_ID3LIB  
-		  tag.Link(it->GetName().c_str());
-		  xbuf += "     <artist>";
-		  if ((id3frame = tag.Find(ID3FID_LEADARTIST)) ||
-		      (id3frame = tag.Find(ID3FID_BAND))       ||
-		      (id3frame = tag.Find(ID3FID_CONDUCTOR))  ||
-		      (id3frame = tag.Find(ID3FID_COMPOSER))) {
-		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		  if (it->GetID3Info(id3tag)) {
+		    xbuf += "     <artist>";
+		    xbuf += id3tag.artist;
+		    xbuf += "</artist>\n";
+		    xbuf += "     <album>";
+		    xbuf += id3tag.album;
+		    xbuf += "</album>\n";
+		    xbuf += "     <title>";
+		    xbuf += id3tag.songname;
+		    xbuf += "</title>\n";
+		    xbuf += "     <comment>";
+		    xbuf += id3tag.note;
+		    xbuf += "</comment>\n";
+		    xbuf += "     <year>";
+		    xbuf += id3tag.year;
+		    xbuf += "</year>\n";
+		    xbuf += "     <genre>";
+		    xbuf += find_style(id3tag.style);
+		    xbuf += "</genre>\n";
 		  }
-		  xbuf += "</artist>\n";
-		  xbuf += "     <album>";
-		  if ((id3frame = tag.Find(ID3FID_ALBUM))) {
-		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		  };
-		  xbuf += "</album>\n";
-		  xbuf += "     <title>";
-		  if ((id3frame = tag.Find(ID3FID_TITLE))) {
-		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		  };
-		  xbuf += "</title>\n";
-		  xbuf += "     <comment>";
-		  if ((id3frame = tag.Find(ID3FID_COMMENT))) {
-		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		  };	
-		  xbuf += "</comment>\n";
-		  tag.Clear();
-#endif
 		  xbuf += "  </song>\n";
 		}
 		for (unsigned int i = 0; i < listnum; ++i) {

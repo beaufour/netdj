@@ -19,4 +19,8 @@ int get_rand(const int);
 void error(const char*, const bool = true);
 string base64_decode(const char*);
 
+
+// ID3 style handling
+string find_style(int);
+
 #endif

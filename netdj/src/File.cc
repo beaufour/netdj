@@ -33,3 +33,12 @@ string
 File::GetFilename() const {
   return name.substr(name.find_last_of('/') + 1);
 };
+
+bool
+File::GetID3Info(id3tag_t &_id3) {
+  if (!validid3) {
+
+  }
+  _id3 = id3;
+  return validid3;
+}
