@@ -71,6 +71,10 @@ BIG ISSUES
 * Handle wishes? Send requests through underlying file fetcher
   (ie. search for xxx on gnut, don't download, just search -- would
    maybe trigger caching...)
+* Make NetDJ a IRC-bot
+  - would enable a community where one could chat about the songs, etc.
+  - it could print the log to the channel
+  - it could take commands when one 'talked' to it.
 * Wild idea: Enable "news-hour", ie. every full our stream the news
   from you local netradio...
 * "Work" the MP3-files before broadcasting them
