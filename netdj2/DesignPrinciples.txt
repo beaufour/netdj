@@ -22,6 +22,8 @@ Open issues:
   -- Event: SkipSong, PlaySong, StartPlayer, StopPlayer, RequestListAdd,
      RequestListRemove, ListenerAdd, ListenerRemove
   -- All inherting from a base type that has a AsString() function?
+  -- OR: Signal/slot based?
+
 * Database support throgh Qt? UnixODBC?
 * Easy way to extend
   -- Via pure virtual interfaces
