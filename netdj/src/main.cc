@@ -85,6 +85,15 @@ bool http_locked;
 void* http_thread(void*);
 pthread_t http_t;
 
+// Definition of userlevels
+enum UserLevel {
+  Level_Null  = 0,
+  Level_User  = 50,
+  Level_PowerUser = 100,
+  Level_PrivUser = 200,
+  Level_Admin = 1000
+};
+
 
 ////////////////////////////////////////
 // SCREEN_FLUSH
@@ -171,7 +180,7 @@ private:
 
   void InternalSet(const File& fil, const bool del) {
     lock();
-    if (config.GetBool("DELETE_PLAYED") && prevdelete) {
+    if (prevdelete) {
       if (!prevfile.Delete()) {
 	cout << "Couldn't delete '" << prevfile.GetName() << "'!" << endl;
 	screen_flush();
@@ -301,7 +310,10 @@ player_thread(void*) {
       sleep(30);
     } else {
       if (fobj.Exists() && fobj.GetName() != currentsong.Get().GetName()) {
-	currentsong.Set(fobj, i == 2 ? false : true);
+	// This sucks, and should be part of the great
+	// directory-reorganization scheme...
+	currentsong.Set(fobj,
+			i == 0 ? true : (i == 1 ? config.GetBool("DELETE_PLAYED") : false));
 	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << lists[i]->GetShortname() << "]" << endl;
 	screen_flush();
