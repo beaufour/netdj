@@ -9,6 +9,7 @@
 #include "Collections.h"
 
 using namespace std;
+using namespace NetDJ;
 
 Collections::Collections()
 {

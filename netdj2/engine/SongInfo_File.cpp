@@ -10,6 +10,7 @@
 #include <qfileinfo.h>
 
 using namespace std;
+using namespace NetDJ;
 
 SongInfo_File::SongInfo_File(const string aName)
   : mFilename(aName)

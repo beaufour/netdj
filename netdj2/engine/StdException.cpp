@@ -9,6 +9,7 @@
 #include "StdException.h"
 
 using namespace std;
+using namespace NetDJ;
 
 StdException::StdException(string aDescr, string aType)
   : mDescription(aDescr), mType(aType)

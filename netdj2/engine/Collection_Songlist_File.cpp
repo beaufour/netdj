@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace NetDJ;
 
 Collection_Songlist_File::Collection_Songlist_File(const string aId,
 						   const string aDescr,

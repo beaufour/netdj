@@ -12,55 +12,59 @@
 
 class QSocket;
 
-/**
- * This class will contain all the information about each currently connected client.
- */
-class Client 
+namespace NetDJ
 {
-private:
-  static int mIDCount;
-  int mID;
-  QSocket* mSocket;
-  int mLogLevel;
-
-public:
-  /**
-   * Constructor, takes ownership of the socket.
-   *
-   * @param aSocket           The network socket for the client
-   */
-  Client(QSocket* aSocket);
-
-  /** Destructor */
-  ~Client();
 
   /**
-   * Get the network socket for the client
-   *
-   * @return                  The network socket
+   * This class will contain all the information about each currently connected client.
    */
-  QSocket* GetSocket();
-
-  /**
-   * Get log level
-   *
-   * @return                  Log level
-   */
-  int GetLogLevel() const;
-
-  /**
-   * Set log level
-   *
-   * @param aLevel            Log level
-   */
-  void SetLogLevel(int aLevel);
-
-  /**
-   * Get the unique client number.
-   *
-   * @return                  The client id
-   */
-  int GetID() const;
-};
+  class Client 
+  {
+  private:
+    static int mIDCount;
+    int mID;
+    QSocket* mSocket;
+    int mLogLevel;
+    
+  public:
+    /**
+     * Constructor, takes ownership of the socket.
+     *
+     * @param aSocket           The network socket for the client
+     */
+    Client(QSocket* aSocket);
+    
+    /** Destructor */
+    ~Client();
+    
+    /**
+     * Get the network socket for the client
+     *
+     * @return                  The network socket
+     */
+    QSocket* GetSocket();
+    
+    /**
+     * Get log level
+     *
+     * @return                  Log level
+     */
+    int GetLogLevel() const;
+    
+    /**
+     * Set log level
+     *
+     * @param aLevel            Log level
+     */
+    void SetLogLevel(int aLevel);
+    
+    /**
+     * Get the unique client number.
+     *
+     * @return                  The client id
+     */
+    int GetID() const;
+  };
+}
 
 #endif

@@ -11,6 +11,7 @@
 #include <qptrlist.h>
 
 using namespace std;
+using namespace NetDJ;
 
 Collection_Songlist_Dir::Collection_Songlist_Dir(const string aId,
 						 const string aDescr,

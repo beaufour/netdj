@@ -13,6 +13,7 @@
 #include <cstring>
 
 using namespace std;
+using namespace NetDJ;
 
 u_int32_t Song::sNextUNID = 0;
 

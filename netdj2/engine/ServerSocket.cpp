@@ -9,6 +9,8 @@
 #include <qsocket.h>
 #include "ServerSocket.h"
 
+using namespace NetDJ;
+
 ServerSocket::ServerSocket(int aPort, int aBackLog, QObject* aParent, const char* aName)
   : QServerSocket(aPort, aBackLog, aParent, aName)
 {

@@ -8,12 +8,15 @@
  */
 
 #include "FileLogger.h"
+#include "LogService.h"
 
 #include <qdom.h>
 
 using namespace std;
+using namespace NetDJ;
 
-FileLogger::FileLogger(const QString aFilename,
+FileLogger::FileLogger(LogService* aLogService,
+                       const QString aFilename,
                        const unsigned int aLevel,
                        QObject* aParent)
   : QObject(aParent, "FileLogger"),
@@ -26,12 +29,16 @@ FileLogger::FileLogger(const QString aFilename,
   } else {
     mFile.open(IO_WriteOnly);
   }
-  
+  if (aLogService) {
+    connect(aLogService, SIGNAL(NewLogEntry(const QDomElement*, const unsigned int)),
+            this,       SLOT(NewLogEntry(const QDomElement*, const unsigned int)));
+  }
 }
 
 FileLogger::~FileLogger()
 {
   mStream << flush;
+  mFile.close();
 }
 
 void

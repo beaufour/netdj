@@ -10,20 +10,23 @@
 #ifndef __XMLOUTPUT_H__
 #define __XMLOUTPUT_H__
 
-/**
- * Interface providing asXML()-function to get the object's
- * representation in XML.
- */
-class XMLOutput {
-public:
+namespace NetDJ
+{
+  
   /**
-   * Create XML structure for object.
-   *
-   * @param doc     The DomDocument to use
-   * @param root    The DomElement to use as root
+   * Interface providing asXML()-function to get the object's
+   * representation in XML.
    */
-  virtual void asXML(QDomDocument& aDoc, QDomElement& aRoot) const = 0;
-
-};
+  class XMLOutput {
+  public:
+    /**
+     * Create XML structure for object.
+     *
+     * @param doc     The DomDocument to use
+     * @param root    The DomElement to use as root
+   */
+    virtual void asXML(QDomDocument& aDoc, QDomElement& aRoot) const = 0;
+  };
+}
 
 #endif

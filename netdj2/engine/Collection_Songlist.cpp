@@ -10,6 +10,7 @@
 #include "util.h"
 
 using namespace std;
+using namespace NetDJ;
 
 Collection_Songlist::Collection_Songlist(const string aId, const string aDescr,
 					 const bool aIsQ)

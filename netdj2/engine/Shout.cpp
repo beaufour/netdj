@@ -9,6 +9,7 @@
 #include "Shout.h"
 
 using namespace std;
+using namespace NetDJ;
 
 ShoutException::ShoutException(const string aMsg)
   : StdException(aMsg, "ShoutException")

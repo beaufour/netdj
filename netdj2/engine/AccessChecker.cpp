@@ -15,6 +15,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace NetDJ;
 
 SimpleAccessChecker::SimpleAccessChecker(const QString& aFilename)
   : mFilename(aFilename)

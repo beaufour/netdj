@@ -2,10 +2,12 @@ Remember:
 - Fix comments
 - Make sure that SongInfo is not always cached!
 - get STL and std::string out of the code...
-- Make a global config and logger in 'NetDJ' namespace
 
-Show-stoppers:
-* Logger service
+Showstoppers:
+- Parse command line parameters
+- Fork into background
+- Default log file placement
+- Network logging
 
 Major enhancements:
 * Support ogg

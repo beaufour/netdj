@@ -23,6 +23,7 @@
 #include "util.h"
 
 using namespace std;
+using namespace NetDJ;
 
 ServerError::ServerError(string aErr)
   : StdException(aErr, "ServerError") {
@@ -90,9 +91,9 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
   mClients.setAutoDelete(true);
 
   // Initialize Access Controll
-  QString Filename = NETDJ_CONF.GetString("CONFIG_DIR");
+  QString Filename = gConfig.GetString("CONFIG_DIR");
   Filename += Filename.isEmpty() ? "" : "/";
-  Filename += NETDJ_CONF.GetString("USER_LIST_FILE");
+  Filename += gConfig.GetString("USER_LIST_FILE");
   mAccessChecker = new SimpleAccessChecker(Filename);
   if (!mAccessChecker->Init()) {
     throw ServerError("Could not initialize Access Checker");
@@ -266,8 +267,6 @@ const command_t gCommands[] = {
 bool
 Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 {
-  bool closeCon = true;
-
   // Analyze command
   const QUrl url(QUrl("http://127.0.0.1/"), aHeader.path());
 
@@ -285,16 +284,24 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
   }
   command_t cmd = gCommands[i];
   if (cmd.mType == CMD_NULL) {
+    emit SigMessage("Invalid command: " + cmdstr, 70);
     throw CMDInvalid();
   }
 
   // Check Auth
-  if (!CheckAuthorization(cmd.mAuthLevel, aHeader.value("Authorization"))) {
+  QString uName;
+  if (!CheckAuthorization(cmd.mAuthLevel, aHeader.value("Authorization"), uName)) {
+    if (!uName.isEmpty()) {
+      emit SigMessage("Unauthorized command: '" + cmdstr + "', user='" + uName + "'", 50);
+    }
+    
     throw CMDUnauthorized();
   }
 
   // If/when commands with structures are needed header needs to be unpacked.
 
+  emit SigMessage("Command: '" + cmdstr + (uName.isEmpty() ? "" : "', user='" + uName + "'"), 150);
+  bool closeCon = true;
   // Call command
   switch (cmd.mType) {
     case CMD_HELP:
@@ -311,15 +318,15 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
       break;
 
     case CMD_SHUTDOWN:
-      CmdShutdown(aStream);
+      CmdShutdown(aStream, uName);
       break;
 
     case CMD_SKIP:
-      CmdSkip(aStream);
+      CmdSkip(aStream, uName);
       break;
 
     default:
-      throw new ServerError("Shoot the programmer, HandleCommand() gets an unknown command type!\n");
+      throw new ServerError("Shoot the programmer, HandleCommand() got an unknown command type!\n");
       break;
   }
 
@@ -327,7 +334,7 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 }
 
 bool
-Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
+Server::CheckAuthorization(unsigned int aLevel, QString aAuthString, QString& aUserName)
 {
   if (aLevel == 0) {
     return true;
@@ -337,10 +344,10 @@ Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
     }
     QString auth = base64_decode(aAuthString.mid(6).ascii());
 
-    QString user = auth.section(':', 0, 0);
+    aUserName = auth.section(':', 0, 0);
     QString pass = auth.section(':', 1, 1);
     
-    return mAccessChecker->HasAccess(user, pass, aLevel);
+    return mAccessChecker->HasAccess(aUserName, pass, aLevel);
   }
 }
 
@@ -406,7 +413,7 @@ Server::CmdLog(QTextStream& aStream)
 }
 
 void
-Server::CmdSkip(QTextStream& aStream)
+Server::CmdSkip(QTextStream& aStream, const QString& aUsername)
 {
   aStream << HTTP_200
           << HTTP_HTML
@@ -415,11 +422,11 @@ Server::CmdSkip(QTextStream& aStream)
           << "<p>Skipping song</p>\n"
           << HTML_200_END;
   
-  emit SigSkip();
+  emit SigSkip(aUsername);
 }
 
 void
-Server::CmdShutdown(QTextStream& aStream)
+Server::CmdShutdown(QTextStream& aStream, const QString& aUsername)
 {
   aStream << HTTP_200
           << HTTP_HTML
@@ -428,6 +435,6 @@ Server::CmdShutdown(QTextStream& aStream)
           << "<p>Shutting down NetDJ!</p>\n"
           << HTML_200_END;
   
-  emit SigQuit();
+  emit SigQuit(aUsername);
 }
 

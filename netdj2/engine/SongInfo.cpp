@@ -9,6 +9,7 @@
 #include "SongInfo.h"
 
 using namespace std;
+using namespace NetDJ;
 
 NoSongInfo::NoSongInfo(string aStr)
   : StdException(aStr, "NoSongInfo")

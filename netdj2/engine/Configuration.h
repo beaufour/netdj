@@ -14,24 +14,28 @@
 #include <qmap.h>
 #include <qstring.h>
 
-/**
- * Configuration file manager.
- */
-class Configuration {
-private:
-  /** Map that holds the configuration, name/value pairs */
-  QMap<QString, QString> mConfig;
-
-public:
-  bool Init();  
-
-  QString GetString(const QString&) const;
-  int GetInteger(const QString&) const;
-  bool GetBool(const QString&) const;
-
-  void SetString(const QString&, const QString&);
-  void SetBool(const QString&, bool);
-  void SetInteger(const QString&, int);
-};
+namespace NetDJ
+{
+  
+  /**
+   * Configuration file manager.
+   */
+  class Configuration {
+  private:
+    /** Map that holds the configuration, name/value pairs */
+    QMap<QString, QString> mConfig;
+    
+  public:
+    bool Init();  
+    
+    QString GetString(const QString&) const;
+    int GetInteger(const QString&) const;
+    bool GetBool(const QString&) const;
+    
+    void SetString(const QString&, const QString&);
+    void SetBool(const QString&, bool);
+    void SetInteger(const QString&, int);
+  };
+}
 
 #endif

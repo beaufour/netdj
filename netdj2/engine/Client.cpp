@@ -12,6 +12,7 @@
 #include "Client.h"
 
 using namespace std;
+using namespace NetDJ;
 
 int Client::mIDCount = 0;
 

@@ -13,26 +13,30 @@
 #include "SongInfo.h"
 #include <string>
 
-/**
- * Handles song informations for a file, that is fills out Owner and
- * Size.
- */
-class SongInfo_File : public SongInfo {
-protected:
-  /** The filename of the file */
-  std::string mFilename;
+namespace NetDJ
+{
 
-public:
   /**
-   * Constructor.
-   *
-   * @param fname   The filename of the file
+   * Handles song informations for a file, that is fills out Owner and
+   * Size.
    */
-  SongInfo_File(const std::string aName);
+  class SongInfo_File : public SongInfo {
+  protected:
+    /** The filename of the file */
+    std::string mFilename;
+    
+  public:
+    /**
+     * Constructor.
+     *
+     * @param fname   The filename of the file
+     */
+    SongInfo_File(const std::string aName);
 
-
-  /** Destructor */
-  virtual ~SongInfo_File();
-};
+    
+    /** Destructor */
+    virtual ~SongInfo_File();
+  };
+}
 
 #endif

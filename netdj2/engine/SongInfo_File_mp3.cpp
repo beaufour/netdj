@@ -16,6 +16,7 @@
 #include "SongInfo_File_mp3.h"
 
 using namespace std;
+using namespace NetDJ;
 
 SongInfo_File_mp3::SongInfo_File_mp3(const string aName)
   : SongInfo_File(aName)

@@ -17,23 +17,32 @@
 
 class QDomElement;
 
-class FileLogger : public QObject
+namespace NetDJ
 {
-  Q_OBJECT
 
-private:
-  unsigned int mLevel;
-
-  QFile mFile;
-
-  QTextStream mStream;
+  class LogService;
   
-public:
-  FileLogger(const QString aFilename, const unsigned int aLevel, QObject* aParent = 0);
-  ~FileLogger();
-  
-public slots:
-  void NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel);
-};
+  class FileLogger : public QObject
+  {
+    Q_OBJECT
+
+  private:
+    unsigned int mLevel;
+    
+    QFile mFile;
+    
+    QTextStream mStream;
+    
+  public:
+    FileLogger(LogService* aLogService,
+               const QString aFilename,
+               const unsigned int aLevel,
+               QObject* aParent = 0);
+    ~FileLogger();
+    
+  public slots:
+    void NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel);
+  };
+}
 
 #endif

@@ -16,6 +16,7 @@
 #include <qtextstream.h>
 
 using namespace std;
+using namespace NetDJ;
 
 typedef struct 
 {

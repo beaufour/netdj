@@ -9,6 +9,7 @@
 #include "CollectionBase.h"
 
 using namespace std;
+using namespace NetDJ;
 
 EmptyCollection::EmptyCollection(const std::string aStr)
   : StdException(aStr, "EmptyCollection")

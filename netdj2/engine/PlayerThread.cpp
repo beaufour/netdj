@@ -7,9 +7,6 @@
  */
 #include "PlayerThread.h"
 
-#include <iostream>
-#include <vector>
-
 #include "config.h"
 #include "Collection.h"
 #include "Collections.h"
@@ -18,6 +15,7 @@
 #include "StdException.h"
 
 using namespace std;
+using namespace NetDJ;
 
 PlayerThread::PlayerThread(Collections* aCols, unsigned int aStackSize,
 			   QObject* aParent)
@@ -46,15 +44,15 @@ PlayerThread::run() {
   try {
     emit SigStart();
     
-    Shout shout(NETDJ_CONF.GetString("STREAM_NAME"),
-		NETDJ_CONF.GetString("STREAM_GENRE"),
-		NETDJ_CONF.GetString("STREAM_DESCR"));
-    shout.SetPublic(NETDJ_CONF.GetBool("STREAM_PUBLIC"));
-    shout.SetUser(NETDJ_CONF.GetString("STREAM_USER"));
-    shout.SetHost(NETDJ_CONF.GetString("STREAM_HOST"));
-    shout.SetPort(NETDJ_CONF.GetInteger("STREAM_PORT"));
-    shout.SetPassword(NETDJ_CONF.GetString("STREAM_PASSWD"));
-    shout.SetMount(NETDJ_CONF.GetString("STREAM_MOUNT"));
+    Shout shout(gConfig.GetString("STREAM_NAME"),
+		gConfig.GetString("STREAM_GENRE"),
+		gConfig.GetString("STREAM_DESCR"));
+    shout.SetPublic(gConfig.GetBool("STREAM_PUBLIC"));
+    shout.SetUser(gConfig.GetString("STREAM_USER"));
+    shout.SetHost(gConfig.GetString("STREAM_HOST"));
+    shout.SetPort(gConfig.GetInteger("STREAM_PORT"));
+    shout.SetPassword(gConfig.GetString("STREAM_PASSWD"));
+    shout.SetMount(gConfig.GetString("STREAM_MOUNT"));
     shout.SetFormat(SHOUT_FORMAT_MP3);
     shout.SetProtocol(SHOUT_PROTOCOL_HTTP);
     
@@ -67,8 +65,6 @@ PlayerThread::run() {
     const Collection* currentCollection;
 
     while (true) {
-      cout << "-----=====> Get next song" << endl;
-
       /* Check whether we have found a song */
       if (!mCols->GetNextSong(currentSong, &currentCollection)) {
 	emit SigMessage("I have no files to play...", 10);
@@ -79,7 +75,7 @@ PlayerThread::run() {
       emit SigSongPlaying(currentSong, currentCollection);
 
       if (currentSong.GetSongType() != SongType_MP3) {
-	cout << "INVALID SONGTYPE, skipping!" << endl;
+	emit SigMessage("Invalid songtype, skipping!", 10);
 	continue;
       }
 
@@ -127,7 +123,7 @@ PlayerThread::run() {
       /* Delete file, if collection is request-queue */
       if (currentCollection->GetDeleteAfterPlay()) {
 	/** @todo Delete file! */
-	cout << "TODO: delete file" << endl;
+	emit SigMessage("TODO: delete file", 0);
       }
 
       if (mStopPlayer) {
@@ -139,15 +135,14 @@ PlayerThread::run() {
     } // Main loop
   }
   catch (StdException &e) {
-    cout << "[" << e.GetType() << "] " << e.what() << endl;
+    emit SigException(e.GetType(), e.what());
   }
   catch (exception& e) {
-    cout << "[std::exception] " << e.what() << endl;
+    emit SigException("[std::exception] ", e.what());
   }
   catch (...) {
-    cout << "Unknown exception!!" << endl;
-    }
+    emit SigException("(unknown)", "(unknown)");
+  }
 
-  cout << "Player thread stopped!" << endl;
   emit SigStop();
 }

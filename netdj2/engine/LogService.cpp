@@ -14,7 +14,8 @@
 #include "Song.h"
 #include "Collection.h"
 
-using namespace std;
+using namespace NetDJ;
+using namespace NetDJ;
 
 LogService::LogService(QObject* aParent)
   : QObject(aParent, "LogService"),
@@ -24,41 +25,69 @@ LogService::LogService(QObject* aParent)
 }
 
 void
-LogService::CreateEntry(QDomElement& aEntry, const int aLevel, const QString aType)
+LogService::Emit(QDomElement& aEntry, const int aLevel)
+{
+  QMutexLocker lock(&mEmitMutex);
+
+  aEntry.setAttribute("id", ++mLogCount);
+  emit NewLogEntry(&aEntry, aLevel);
+}
+
+void
+LogService::CreateEntry(QDomElement& aEntry, const int aLevel, const QString aName)
 {
   aEntry = mDocument.createElement("entry");
 
   aEntry.setAttribute("sender", sender() ? sender()->name() : "(none)");
-  aEntry.setAttribute("type", aType);
+  aEntry.setAttribute("name", aName);
   aEntry.setAttribute("level", aLevel);
-  aEntry.setAttribute("id", ++mLogCount);
 }
 
 void
-LogService::SimpleEntry(const int aLevel, const QString aType)
+LogService::SimpleEntry(const int aLevel, const QString aName)
 {
   QDomElement e;
-  CreateEntry(e, aLevel, aType);
-  emit NewLogEntry(&e, aLevel);
+  CreateEntry(e, aLevel, aName);
+  Emit(e, aLevel);
 }
 
 
 void
 LogService::LogSongPlaying(const Song& aSong, const Collection* aCol)
 {
-  SimpleEntry(10, "SongPlaying");
+  QDomElement e;
+  CreateEntry(e, 10, "SongPlaying");
+
+  QDomElement song = mDocument.createElement("currentsong");
+  song.setAttribute("collection", aCol->GetIdentifier());
+  aSong.asXML(mDocument, song);
+  e.appendChild(song);
+  
+  Emit(e, 10);
 }
 
 void
-LogService::LogQuit()
+LogService::LogQuit(const QString& aUsername)
 {
-  SimpleEntry(0, "Quit");
+  QDomElement e;
+  CreateEntry(e, 0, "Shutdown");
+  QDomElement uNode = mDocument.createElement("user");
+  e.appendChild(uNode);
+  QDomText uName = mDocument.createTextNode(aUsername);
+  uNode.appendChild(uName);
+  Emit(e, 0);
 }
   
 void
-LogService::LogSkip()
+LogService::LogSkip(const QString& aUsername)
 {
-  SimpleEntry(20, "Skip");
+  QDomElement e;
+  CreateEntry(e, 20, "Skip");
+  QDomElement uNode = mDocument.createElement("user");
+  e.appendChild(uNode);
+  QDomText uName = mDocument.createTextNode(aUsername);
+  uNode.appendChild(uName);
+  Emit(e, 20);
 }
 
 void
@@ -92,6 +121,17 @@ LogService::LogMessage(const QString& aMsg, const unsigned int aLevel)
   CreateEntry(e, aLevel, "Message");
   QDomText msg = mDocument.createTextNode(aMsg);
   e.appendChild(msg);
-  emit NewLogEntry(&e, aLevel);
+  Emit(e, aLevel);
+}
+
+void
+LogService::LogException(const QString& aName, const QString& aMsg)
+{
+  QDomElement e;
+  CreateEntry(e, 0, "Exception");
+  e.setAttribute("class", aName);
+  QDomText msg = mDocument.createTextNode(aMsg);
+  e.appendChild(msg);
+  Emit(e, 0);
 }
 
