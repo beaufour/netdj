@@ -7,8 +7,10 @@ use XML::Simple;
 use Gtk;
 use Gnome;
 use Gnome::Applet;
-use Gtk::GladeXML;
 use Data::Dumper;
+
+# I can't get Gtk::GladeXML to work with Gnome::Applet...
+# use Gtk::GladeXML;
 
 ########################################
 # CONFIG
@@ -27,6 +29,7 @@ close(CONFFILE);
 ########################################
 # GLOBALS
 my $NOINFO_TEXT = '- No Info - ';
+my $NOTPLAYING_TEXT = '- Not Playing -';
 my $last_status = "";
 my $current = "";
 
@@ -42,8 +45,9 @@ my $ua = LWP::UserAgent->new(timeout => 1,
 $ua->credentials($CONFIG{HOST}, 'NetDJ', $CONFIG{USER}, $CONFIG{PASS});
 
 # Glade
-my $glade = new Gtk::GladeXML('netdj_applet.glade');
-$glade->signal_autoconnect_from_package('main');
+# Well, doesn't work right now...
+# my $glade = new Gtk::GladeXML('netdj_applet.glade');
+# $glade->signal_autoconnect_from_package('main');
 
 
 ########################################
@@ -126,8 +130,12 @@ sub cmd_update {
 	    
 	    # Current song
 	    $current = $status->{currentsong}->{description};
+	    if (ref $current) {
+		$current = $NOTPLAYING_TEXT;
+	    }
 	    $label->set_text($current);
     
+
 	    # Songlist
 	    my $tool = "";
 	    my $songs = $status->{song};
@@ -167,26 +175,27 @@ sub menu_about {
     return 1;
 }
 
-sub menu_pref {
-    my $pref_dialog = $glade->get_widget('pref_dialog');
-    $pref_dialog->show;
-    return 1;
-}
+#  sub menu_pref {
+#      my $pref_dialog = $glade->get_widget('pref_dialog');
+#      $pref_dialog->show;
+#      return 1;
+#  }
 
-sub pref_but_ok {
-    print "Button clicked: OK\n";
+#  sub pref_but_ok {
+#      print "Button clicked: OK\n";
 
-    return 1;
-}
+#      return 1;
+#  }
 
-sub pref_but_apply {
-    print "Button clicked: Apply\n";
+#  sub pref_but_apply {
+#      print "Button clicked: Apply\n";
 
-    return 1;
-}
+#      return 1;
+#  }
 
-sub pref_but_cancel {
-    print "Button clicked: Cancel\n";
+#  sub pref_but_cancel {
+#      print "Button clicked: Cancel\n";
 
-    return 1;
-}
+#      return 1;
+#  }
+
