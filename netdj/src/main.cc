@@ -324,7 +324,8 @@ player_thread(void*) {
 	}
 	if (logfile.is_open()) {
 	  logfile << "\"" << fobj.GetFilenameNoType() << "\","
-		  << ((stop_player || next_song) ? 1 : 0)
+		  << ((stop_player || next_song) ? 1 : 0) << ",\""
+		  << lists[i]->GetShortname() << "\""
 		  << endl;
 	}
       }
@@ -863,22 +864,20 @@ http_thread(void*) {
 		    "                  xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n";
 
 		  xbuf += "  <currentsong>\n";
-		  xbuf += "    <unid>";
-		  sprintf(tmpint, "%d", songfile.GetId());
-		  xbuf += tmpint;
-		  xbuf += "</unid>\n";
+		  xbuf += "    <unid>0</unid>\n";
+		  xbuf += "    <listid>current</listid>\n";
 		  xbuf += "    <size>";
 		  sprintf(tmplint, "%ld", songfile.GetSize());
 		  xbuf += tmplint;
 		  xbuf += "</size>\n";
 		  xbuf += "    <description>" + songfile.GetFilenameNoType() + "</description>\n";
 		  songfile.GetID3Info(id3tag);
-		  xbuf += "     <artist>" +  id3tag->GetArtist() + "</artist>\n";
-		  xbuf += "     <album>" + id3tag->GetAlbum() + "</album>\n";
-		  xbuf += "     <title>" + id3tag->GetTitle() + "</title>\n";
-		  xbuf += "     <comment>" + id3tag->GetNote() + "</comment>\n";
-		  xbuf += "     <year>" + id3tag->GetYear() + "</year>\n";
-		  xbuf += "     <style>" + id3tag->GetStyle() + "</style>\n";
+		  xbuf += "    <artist>" +  id3tag->GetArtist() + "</artist>\n";
+		  xbuf += "    <album>" + id3tag->GetAlbum() + "</album>\n";
+		  xbuf += "    <title>" + id3tag->GetTitle() + "</title>\n";
+		  xbuf += "    <comment>" + id3tag->GetNote() + "</comment>\n";
+		  xbuf += "    <year>" + id3tag->GetYear() + "</year>\n";
+		  xbuf += "    <style>" + id3tag->GetStyle() + "</style>\n";
 		  xbuf += "  </currentsong>\n";
 		  songsgot = songno = 0;
 		  for (unsigned int listno = 0; listno < listnum; ++listno) {
@@ -1067,7 +1066,6 @@ main(int argc, char* argv[]) {
   pthread_cancel(player_t);
   cout << "Stopping HTTP" << endl;
   pthread_cancel(http_t);
-
 
   return 0;
 }
