@@ -1,0 +1,79 @@
+set GDJ_extra_paths 
+set http_client_headers User-Agent: Gnut 0.4.28_abl\nReferrer: Gnutella file sharing network\nConnection: Keep-Alive\n
+set update_clear 0
+set autokill_thres 10
+set score_did_receive 40
+set qreply_cache 500
+set multi_enable 1
+set host_list_size 10000
+set max_searches 10
+set verbose 3
+set max_incoming 4
+set search_min_rating 0
+set cache_path /home/beaufour/gnut-cache/
+set auto_download_retry 60
+set packet_stats 0
+set transfer_log 
+set cache_size 500000
+set speed 1000
+set search_log 
+set stats_format 0
+set global_bandwidth_cap 0
+set munge 1
+set score_available 50
+set auto_clear 1
+set search_extensions *
+set wait_after_find 1
+set debug_opts 0
+set default_download_cap 0
+set local_port 5634
+set password_required 0
+set search_min_size 0
+set search_max_size 0
+set cache_refresh 10
+set sort_order s-p-
+set min_connections 4
+set hide_pathname 0
+set GDJ_log_playlist 
+set paginate 1
+set redirect 0
+set ttl 7
+set retry_push 1
+set response_format {f#}){N/ I:P}size: {S}speed:{s} rating: {R}
+set default_upload_cap 0
+set beep_on_first 0
+set download_path /home/beaufour/mp3/
+set follow_symlinks 1
+set hidden 0
+set strict_search 1
+set beep_on_all 0
+set html_template 
+set max_downloads 10
+set virtual_network_name GNUTELLA
+set password 
+set config_file ~/.gnutrc
+set html_enable 0
+set auto_response 1
+set max_responses 1000
+set score_did_upload 30
+set share_paths /home/beaufour/mp3/
+set password_only 0
+set max_uploads 10
+set leave_turds 512
+set auto_forget 0
+set cache_parallel 20
+set prompt gnut> 
+set cache_namecomp .mp3
+set cache_filter_file /home/beaufour/netdj/FILTER
+set eval_echo 1
+set no_rfc_1597 0
+set search_log_all 0
+set min_cache_size 2500
+set max_results 64
+set checkpoint_hosts 600
+set log_level 0
+set download_timeout 60
+set auto_remove_segv_info 1
+set play_prog xmms
+set checkpoint_net 60
+scan
