@@ -41,16 +41,16 @@ typedef enum {
 class Song : public XMLOutput {
 private:
   /** Next unique ID to assign */
-  static u_int32_t NextUNID;
+  static u_int32_t mNextUNID;
 
   /** The filename */
-  std::string Filename;
+  std::string mFilename;
 
   /** Pointer to SongInfo structure, may be 0 */
-  mutable SongInfo* sInfo;
+  mutable SongInfo* mSongInfo;
 
   /** Unique ID (application-wise) */
-  u_int32_t UNID;
+  u_int32_t mUNID;
 
   /**
    * Assign an UNID to Song.
@@ -76,7 +76,7 @@ public:
    *
    * @param s2      New song content.
    */
-  Song(const Song& s2);
+  Song(const Song& aSong2);
 
   /**
    * Assignment. 
@@ -84,7 +84,7 @@ public:
    * @param s2      New song content.
    * @return        Reference to self.
    */
-  Song& operator=(const Song& s2);
+  Song& operator=(const Song& aSong2);
 
   /**
    * Get unique identificator.
@@ -116,7 +116,7 @@ public:
    */
   const SongInfo* GetSongInfo() const;
 
-  void asXML(QDomDocument& doc, QDomElement& root) const;
+  void asXML(QDomDocument& aDoc, QDomElement& aRoot) const;
 };
 
 #endif

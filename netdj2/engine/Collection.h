@@ -20,7 +20,7 @@
  */
 class EmptyCollection : public StdException {
 public:
-  EmptyCollection(const std::string str);
+  EmptyCollection(const std::string aStr);
 };
 
 /**
@@ -37,11 +37,11 @@ public:
 class Collection : public XMLOutput {
 protected:
   /** Identifier for the collection, short id */
-  std::string Identifier;
+  std::string mIdentifier;
 
 
   /** The description, long textual*/
-  std::string Description;
+  std::string mDescription;
 
 
 public:
@@ -51,7 +51,7 @@ public:
    * @param id      The identifier
    * @param descr   The description
    */
-  Collection(const std::string id, const std::string descr);
+  Collection(const std::string aId, const std::string aDescr);
 
   /**
    * Destructor.
@@ -103,7 +103,7 @@ public:
    *
    * @param pos     The song number to get
    */
-  virtual const Song& GetSong(const int pos) const = 0;
+  virtual const Song& GetSong(const int aPos) const = 0;
 
 
   /**
@@ -111,9 +111,9 @@ public:
    *
    * @param sng     The song to add
    */
-  virtual bool AddSong(const Song& sng) = 0;
+  virtual bool AddSong(const Song& aSong) = 0;
 
-  void asXML(QDomDocument& doc, QDomElement& root) const;
+  void asXML(QDomDocument& aDoc, QDomElement& aRoot) const;
 };
 
 #endif

@@ -11,13 +11,13 @@
 
 using namespace std;
 
-SongInfo_File::SongInfo_File(const string fname)
-  : Filename(fname)
+SongInfo_File::SongInfo_File(const string aName)
+  : mFilename(aName)
 {
-  QFileInfo qinfo(Filename);
+  QFileInfo qinfo(mFilename);
 
-  Owner = qinfo.owner().ascii();
-  Size = qinfo.size();
+  mOwner = qinfo.owner().ascii();
+  mSize = qinfo.size();
 }
 
 

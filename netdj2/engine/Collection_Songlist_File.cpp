@@ -15,10 +15,10 @@
 
 using namespace std;
 
-Collection_Songlist_File::Collection_Songlist_File(const string id,
-						   const string descr,
-						   const string fname)
-  : Collection_Songlist(id, descr, false), Filename(fname) {
+Collection_Songlist_File::Collection_Songlist_File(const string aId,
+						   const string aDescr,
+						   const string aName)
+  : Collection_Songlist(aId, aDescr, false), mFilename(aName) {
 
   Update();
 }
@@ -34,9 +34,9 @@ Collection_Songlist_File::Update() {
   deque<Song> newlist;
 
   /* Open file */
-  ifstream flist(Filename.c_str());
+  ifstream flist(mFilename.c_str());
   if (!flist) {
-    throw StdException("Could not open file '" + Filename + "'!");
+    throw StdException("Could not open file '" + mFilename + "'!");
   }
 
   /* Read file */
@@ -56,6 +56,6 @@ Collection_Songlist_File::Update() {
   }
 
   /* Swap content */
-  QMutexLocker locker(&mutex);
-  Songlist.swap(newlist);
+  QMutexLocker locker(&mMutex);
+  mSonglist.swap(newlist);
 }

@@ -15,7 +15,7 @@
 using namespace std;
 
 int
-get_rand(const int max) {
-  return (int) ((float) max * rand() / (RAND_MAX + 1.0));
+get_rand(const int aMax) {
+  return (int) ((float) aMax * rand() / (RAND_MAX + 1.0));
 }
 

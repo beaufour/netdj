@@ -25,7 +25,7 @@ public:
    *
    * @param msg     The errormessage
    */
-  ShoutException(const std::string msg);
+  ShoutException(const std::string aMsg);
 };
 
 class Shout;
@@ -36,7 +36,7 @@ class Shout;
 class Shout_Metadata {
 private:
   /** The metadata handle */
-  shout_metadata_t* metadata;
+  shout_metadata_t* mMetaData;
 
 public:
   /** Constructor */
@@ -53,7 +53,7 @@ public:
    * @param name    The name
    * @param value   The value
    */
-  void Add(const std::string name, const std::string value);
+  void Add(const std::string aName, const std::string aValue);
 
   friend class Shout;
 };
@@ -67,7 +67,7 @@ public:
 class Shout {
 protected:
   /** The connection handle */
-  shout_t* shout;
+  shout_t* mShout;
 
   /**
    * Error wrapper function. Checks the number and throws a
@@ -77,7 +77,7 @@ protected:
    * @param func    The function returning the error
    * @param err     The error number
    */
-  inline void ErrorWrapper(const std::string func, const int err);
+  inline void ErrorWrapper(const std::string aFunc, const int aErr);
 
   /** Initialize libshout */
   void Init();
@@ -95,8 +95,8 @@ public:
    * @param genre   The genre of music played
    * @param descr   Description of the stream
    */
-  Shout(const std::string name, const std::string genre,
-	const std::string descr);
+  Shout(const std::string aName, const std::string aGenre,
+	const std::string aDescr);
 
 
   /** Destructor */
@@ -114,7 +114,7 @@ public:
    * @param data    The data to send
    * @param len     The length of the data
    */
-  void Send(const unsigned char *data, size_t len);
+  void Send(const unsigned char *aData, size_t aLen);
 
   /** Sleep until it is time to send more data */
   void Sleep() throw();
@@ -132,42 +132,42 @@ public:
    *
    * @param host    The hostname
    */
-  void SetHost(const std::string host);
+  void SetHost(const std::string aHost);
 
   /**
    * Set the port number for the icecast server
    *
    * @param port    The port number
    */
-  void SetPort(const unsigned short port);
+  void SetPort(const unsigned short aPort);
 
   /**
    * Set the mountpoint for the stream (ie. the URL)
    *
    * @param mount   The mountpoint
    */
-  void SetMount(const std::string mount);
+  void SetMount(const std::string aMount);
 
   /**
    * Set the username to authenticate with.
    *
-   * @param uname   The username
+   * @param aUserName The username
    */
-  void SetUser(const std::string uname);
+  void SetUser(const std::string aUserName);
 
   /**
    * Set the password to authenticate with. 
    *
    * @param pass    The password
    */
-  void SetPassword(const std::string pass);
+  void SetPassword(const std::string aPass);
 
   /**
    * Set the stream format (ie. Vorbis or MP3)
    *
    * @param format  The format (Vorbis = 0, MP3 = 1)
    */
-  void SetFormat(const unsigned int format);
+  void SetFormat(const unsigned int aFormat);
 
   /**
    * Set the protocol to use to communicate with icecast server (HTTP,
@@ -175,42 +175,42 @@ public:
    *
    * @param prot    The protocol type.
    */
-  void SetProtocol(const unsigned int prot);
+  void SetProtocol(const unsigned int aProt);
 
   /**
    * Set whether the stream is public or not.
    *
    * @param pub     Is stream public?
    */
-  void SetPublic(const bool pub);
+  void SetPublic(const bool aPublic);
 
   /**
    * Set the name of the stream (not mountpoint!)
    *
    * @param name    The name
    */
-  void SetName(const std::string name);
+  void SetName(const std::string aName);
 
   /**
    * Set the genre of music played
    *
    * @param genre   The genre
    */
-  void SetGenre(const std::string genre);
+  void SetGenre(const std::string aGenre);
 
   /**
    * Set the textual description of the stream
    *
    * @param descr   The description
    */
-  void SetDescription(const std::string descr);
+  void SetDescription(const std::string aDescr);
 
   /**
    * Set the songname of the current song.
    *
    * @param name    The name of the song.
    */
-  void SetSongName(const std::string name);
+  void SetSongName(const std::string aName);
 
 };
 

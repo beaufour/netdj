@@ -11,6 +11,6 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-int get_rand(const int max);
+int get_rand(const int aMax);
 
 #endif

@@ -10,14 +10,14 @@
 
 using namespace std;
 
-NoSongInfo::NoSongInfo(string str)
-  : StdException(str)
+NoSongInfo::NoSongInfo(string aStr)
+  : StdException(aStr)
 {
 }
 
 
 SongInfo::SongInfo()
-  : Track(0), Year(0), Size(0)
+  : mTrack(0), mYear(0), mSize(0), mLength(0)
 {
 }
 
@@ -26,47 +26,52 @@ SongInfo::~SongInfo() {
 
 string
 SongInfo::GetDescription() const {
-  return Description;
+  return mDescription;
 }
 
 string
 SongInfo::GetArtist() const {
-  return Artist;
+  return mArtist;
 }
 
 string
 SongInfo::GetAlbum() const {
-  return Album;
+  return mAlbum;
 }
 
 string
 SongInfo::GetTitle() const {
-  return Title;
+  return mTitle;
 }
 
 string
 SongInfo::GetGenre() const {
-  return Genre;
+  return mGenre;
 }
 
 u_int32_t
 SongInfo::GetTrack() const {
-  return Track;
+  return mTrack;
 }
 
 u_int32_t
 SongInfo::GetYear() const {
-  return Year;
+  return mYear;
 }
 
 u_int32_t
 SongInfo::GetSize() const {
-  return Size;
+  return mSize;
 }
 
 string
 SongInfo::GetOwner() const {
-  return Owner;
+  return mOwner;
+}
+
+u_int32_t
+SongInfo::GetLength() const {
+  return mLength;
 }
 
 /**
@@ -79,31 +84,31 @@ SongInfo::GetOwner() const {
     empty values.
 */
 void
-SongInfo::asXML(QDomDocument& doc, QDomElement& root) const {
+SongInfo::asXML(QDomDocument& aDoc, QDomElement& aRoot) const {
   const int s_num = 6;
-  const string* s_list[s_num] = {&Description, &Artist, &Album, &Title, &Genre, &Owner};
+  const string* s_list[s_num] = {&mDescription, &mArtist, &mAlbum, &mTitle, &mGenre, &mOwner};
   const string s_list_names[s_num] = {"description", "artist", "album", "title", "genre", "owner"};
-  const int i_num = 3;
-  const u_int32_t* i_list[i_num] = {&Track, &Year, &Size};
-  const string i_list_names[i_num] = {"track", "year", "size"};
+  const int i_num = 4;
+  const u_int32_t* i_list[i_num] = {&mTrack, &mYear, &mSize, &mLength};
+  const string i_list_names[i_num] = {"track", "year", "size", "length"};
 
   for (int i = 0; i < s_num; ++i) {
     if (*s_list[i] != "") {
-      QDomElement elem = doc.createElement(s_list_names[i]);
-      QDomText text = doc.createTextNode(*s_list[i]);
+      QDomElement elem = aDoc.createElement(s_list_names[i]);
+      QDomText text = aDoc.createTextNode(*s_list[i]);
       elem.appendChild(text);
-      root.appendChild(elem);
+      aRoot.appendChild(elem);
     }
   }
 
   QString tmpstr;
   for (int i = 0; i < i_num; ++i) {
     if (*i_list[i] != 0) {
-      QDomElement elem = doc.createElement(i_list_names[i]);
+      QDomElement elem = aDoc.createElement(i_list_names[i]);
       tmpstr.setNum(*i_list[i]);
-      QDomText text = doc.createTextNode(tmpstr);
+      QDomText text = aDoc.createTextNode(tmpstr);
       elem.appendChild(text);
-      root.appendChild(elem);
+      aRoot.appendChild(elem);
     }
   }
 }

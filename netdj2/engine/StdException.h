@@ -18,9 +18,9 @@
  */
 class StdException : public std::exception {
 protected:
-  std::string Description;
+  std::string mDescription;
 public:
-  StdException(std::string descr);
+  StdException(std::string aDescr);
   ~StdException() throw();
 
   virtual const char* what() const throw();

@@ -17,23 +17,23 @@ Collections::Collections() {
 Collections::~Collections() {
   Collection* col;
 
-  while (ColList.size()) {
-    col = ColList.back();
-    ColList.pop_back();
+  while (mColList.size()) {
+    col = mColList.back();
+    mColList.pop_back();
     delete col;
   }
 }
 
 void
-Collections::AddCollection(Collection* col) {
-  ColList.push_back(col);
+Collections::AddCollection(Collection* aCol) {
+  mColList.push_back(aCol);
 }
 
 bool
-Collections::GetNextSong(Song& song, std::string& colid) {
+Collections::GetNextSong(Song& song, std::string& aColId) {
   vector<Collection*>::iterator curcol;
-  for (curcol = ColList.begin();
-       curcol != ColList.end();
+  for (curcol = mColList.begin();
+       curcol != mColList.end();
        ++curcol) {
     try {
       (*curcol)->Update();
@@ -44,10 +44,10 @@ Collections::GetNextSong(Song& song, std::string& colid) {
     }
   }
 
-  if (curcol == ColList.end()) {
+  if (curcol == mColList.end()) {
     return false;
   } else {
-    colid = (*curcol)->GetIdentifier();
+    aColId = (*curcol)->GetIdentifier();
     return true;
   }
 }

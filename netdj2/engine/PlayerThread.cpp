@@ -18,34 +18,34 @@
 
 using namespace std;
 
-PlayerThread::PlayerThread(Collections* cols, unsigned int stackSize)
-  : QThread(stackSize), StopPlayer(false), SkipSong(false), Cols(cols) {
+PlayerThread::PlayerThread(Collections* aCols, unsigned int aStackSize)
+  : QThread(aStackSize), mStopPlayer(false), mSkipSong(false), mCols(aCols) {
 
 }
 
 bool
 PlayerThread::GetNextSong() {
-  QMutexLocker lock(&SongMutex);
+  QMutexLocker lock(&mSongMutex);
 
-  return Cols->GetNextSong(CurrentSong, CurrentCollection);
+  return mCols->GetNextSong(mCurrentSong, mCurrentCollection);
 }
 
 void
-PlayerThread::GetCurrentSong(Song& song, string& colid) const {
-  QMutexLocker lock(&SongMutex);
+PlayerThread::GetCurrentSong(Song& aSong, string& aColId) const {
+  QMutexLocker lock(&mSongMutex);
 
-  song = CurrentSong;
-  colid = CurrentCollection;
+  aSong = mCurrentSong;
+  aColId = mCurrentCollection;
 }
 
 void
 PlayerThread::Stop() {
-  StopPlayer = true;
+  mStopPlayer = true;
 }
 
 void
 PlayerThread::Skip() {
-  SkipSong = true;
+  mSkipSong = true;
 }
 
 void
@@ -57,9 +57,9 @@ PlayerThread::run() {
     shout.SetFormat(SHOUT_FORMAT_MP3);
     shout.SetUser("source");
     shout.SetProtocol(SHOUT_PROTOCOL_HTTP);
-    shout.SetHost("localhost");
+    shout.SetHost("beaufourpc");
     shout.SetPort(8000);
-    shout.SetPassword("hackme");
+    shout.SetPassword("florence");
     shout.SetMount("netdj");
     
     cout << "-----=====> Connect to icecast" << endl;
@@ -83,18 +83,18 @@ PlayerThread::run() {
       }
 
       cout << "** Song info " << endl;
-      cout << "UNID :      " << CurrentSong.GetUNID() << endl;
-      cout << "Type :      " << CurrentSong.GetSongType() << endl;
-      cout << "Filename :  " << CurrentSong.GetFilename() << endl;
-      cout << "Collection: " << CurrentCollection << endl;
+      cout << "UNID :      " << mCurrentSong.GetUNID() << endl;
+      cout << "Type :      " << mCurrentSong.GetSongType() << endl;
+      cout << "Filename :  " << mCurrentSong.GetFilename() << endl;
+      cout << "Collection: " << mCurrentCollection << endl;
       
-      if (CurrentSong.GetSongType() != SongType_MP3) {
+      if (mCurrentSong.GetSongType() != SongType_MP3) {
 	cout << "INVALID SONGTYPE!" << endl;
 	continue;
       }
       
       try {
-	const SongInfo* info = CurrentSong.GetSongInfo();
+	const SongInfo* info = mCurrentSong.GetSongInfo();
 	if (info) {
 	  cout << "** Song content info" << endl;
 	  cout << "Description:  " << info->GetDescription() << endl;
@@ -104,6 +104,8 @@ PlayerThread::run() {
 	  cout << "Genre:        " << info->GetGenre() << endl;
 	  cout << "Year:         " << info->GetYear() << endl;
 	  cout << "Track:        " << info->GetTrack() << endl;
+	  cout << "Length:       " << (info->GetLength()/60)
+	       << ":" << (info->GetLength() - (info->GetLength()/60) * 60)<< endl;
 	  cout << "Size:         " << info->GetSize() << endl;
 	  cout << "Owner:        " << info->GetOwner() << endl;
 	}
@@ -114,15 +116,15 @@ PlayerThread::run() {
       }
 
       cout << "-----=====> Send song to icecast" << endl;
-      QFile file(CurrentSong.GetFilename());
+      QFile file(mCurrentSong.GetFilename());
       if (!file.open(IO_ReadOnly)) {
 	continue;
       }
       
       /* Send song */
-      shout.SetSongName(CurrentSong.GetFilename());
+      shout.SetSongName(mCurrentSong.GetFilename());
       while ((bytes = file.readBlock((char*) buf, sizeof(buf))) > 0
-	     && StopPlayer == false && SkipSong == false) {
+	     && mStopPlayer == false && mSkipSong == false) {
 	shout.Send(buf, bytes);
 	shout.Sleep();
       }
@@ -132,16 +134,16 @@ PlayerThread::run() {
 
 
       /* Delete file, if collection is request-queue */
-      if (CurrentCollection == "request") {
+      if (mCurrentCollection == "request") {
 	/** \todo Delete file! */
 	cout << "TODO: delete file" << endl;
       }
 
-      if (StopPlayer) {
+      if (mStopPlayer) {
 	break;
       }
-      if (SkipSong) {
-	SkipSong = false;
+      if (mSkipSong) {
+	mSkipSong = false;
 	cout << "Skipping current song!" << endl;
       }
     } // Main loop

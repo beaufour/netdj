@@ -21,16 +21,16 @@
 using namespace std;
 
 void
-myMessageOutput(QtMsgType type, const char *msg ) {
+myMessageOutput(QtMsgType type, const char *aMsg ) {
   switch (type) {
   case QtDebugMsg:
-    fprintf(stderr, "Debug: %s\n", msg);
+    fprintf(stderr, "Debug: %s\n", aMsg);
     break;
   case QtWarningMsg:
-    fprintf(stderr, "Warning: %s\n", msg);
+    fprintf(stderr, "Warning: %s\n", aMsg);
     break;
   case QtFatalMsg:
-    fprintf(stderr, "Fatal: %s\n", msg);
+    fprintf(stderr, "Fatal: %s\n", aMsg);
     abort();                    // deliberately core dump
   }
 }

@@ -19,14 +19,14 @@
 class Collection_Songlist_Dir : public Collection_Songlist {
 protected:
   /** The directory with the songs */
-  std::string Directory;
+  std::string mDirectory;
 
   /**
    * Date/time of last file added to songlist
    *
    * Used when isQueue == true, to only add newer files.
    */
-  QDateTime LastTimeStamp;
+  QDateTime mLastTimeStamp;
 
 public:
   /**
@@ -37,8 +37,8 @@ public:
    * @param dir     The directory containing songs
    * @param isq     Is the songlist a queue?
    */
-  Collection_Songlist_Dir(const std::string id, const std::string descr,
-			  const std::string dir, const bool isq);
+  Collection_Songlist_Dir(const std::string aId, const std::string aDescr,
+			  const std::string aDir, const bool aIsQ);
 
   /** Destructor */
   ~Collection_Songlist_Dir();

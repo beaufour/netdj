@@ -22,7 +22,7 @@ public:
    * @param doc     The DomDocument to use
    * @param root    The DomElement to use as root
    */
-  virtual void asXML(QDomDocument& doc, QDomElement& root) const = 0;
+  virtual void asXML(QDomDocument& aDoc, QDomElement& aRoot) const = 0;
 
 };
 

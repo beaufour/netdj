@@ -25,7 +25,7 @@ public:
    *
    * @param err     The errormessage
    */
-  HttpError(const std::string err);
+  HttpError(const std::string aErr);
 };
 
 /**
@@ -35,7 +35,7 @@ class HttpServer : public QServerSocket {
   Q_OBJECT
 private:
   /** Pointer to the PlayerThread */
-  PlayerThread* Player;
+  PlayerThread* mPlayer;
 
 public:
   /**
@@ -46,15 +46,15 @@ public:
    * @param pl      The PlayerThread to communicate with
    * @param parent  The parent QObject
    */
-  HttpServer(Q_UINT16 port, int backlog,
-	     PlayerThread* pl, QObject* parent = 0);
+  HttpServer(Q_UINT16 aPort, int aBackLog,
+	     PlayerThread* aPl, QObject* aParent = 0);
 
   /**
    * Called when a new connection is received.
    *
    * @param socket  The new connection socket.
    */
-  void newConnection(int socket);
+  void newConnection(int aSocket);
 
 signals:
   void cmdQuit();

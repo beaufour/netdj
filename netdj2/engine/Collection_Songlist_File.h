@@ -19,7 +19,7 @@
 class Collection_Songlist_File : public Collection_Songlist {
 protected:
   /** Filename with the file list */
-  std::string Filename;
+  std::string mFilename;
 
 public:
   /**
@@ -29,8 +29,8 @@ public:
    * @param descr   The description
    * @param fname   The filename containing the list of songs
    */
-  Collection_Songlist_File(const std::string id, const std::string descr,
-			   const std::string fname);
+  Collection_Songlist_File(const std::string aId, const std::string aDescr,
+			   const std::string aName);
 
   /** Destructor */
   ~Collection_Songlist_File();

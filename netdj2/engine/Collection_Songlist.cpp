@@ -11,9 +11,9 @@
 
 using namespace std;
 
-Collection_Songlist::Collection_Songlist(const string id, const string descr,
-					 const bool isq)
-  : Collection(id, descr), isQueue(isq)
+Collection_Songlist::Collection_Songlist(const string aId, const string aDescr,
+					 const bool aIsQ)
+  : Collection(aId, aDescr), mIsQueue(aIsQ)
 {
 }
 
@@ -23,38 +23,38 @@ Collection_Songlist::~Collection_Songlist() {
 
 int
 Collection_Songlist::Size() const {
-  QMutexLocker locker(&mutex);
+  QMutexLocker locker(&mMutex);
 
-  return Songlist.size();
+  return mSonglist.size();
 }
 
 Song
 Collection_Songlist::GetNextSong() {
-  QMutexLocker locker(&mutex);
+  QMutexLocker locker(&mMutex);
 
-  if (!Songlist.size()) {
+  if (!mSonglist.size()) {
     throw EmptyCollection("Cannot get a song, collection is empty");
   }
 
-  if (isQueue) {
-    Song sng = Songlist[0];
-    Songlist.pop_front();
+  if (mIsQueue) {
+    Song sng = mSonglist[0];
+    mSonglist.pop_front();
     return sng;
   } else {
-    return Songlist[get_rand(Songlist.size())];
+    return mSonglist[get_rand(mSonglist.size())];
   }
 }
 
 const Song&
-Collection_Songlist::GetSong(const int pos) const {
-  QMutexLocker locker(&mutex);
+Collection_Songlist::GetSong(const int aPos) const {
+  QMutexLocker locker(&mMutex);
   
-  return Songlist[pos];
+  return mSonglist[aPos];
 }
 
 bool
-Collection_Songlist::AddSong(const Song& sng) {
-  Songlist.push_back(sng);
+Collection_Songlist::AddSong(const Song& aSng) {
+  mSonglist.push_back(aSng);
   return true;
 }
 

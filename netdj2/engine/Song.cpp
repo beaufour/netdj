@@ -14,51 +14,51 @@
 
 using namespace std;
 
-u_int32_t Song::NextUNID = 0;
+u_int32_t Song::mNextUNID = 0;
 
 Song::Song()
-  : sInfo(0) {
+  : mSongInfo(0) {
   
 }
 
-Song::Song(const string fname)
-  : Filename(fname), sInfo(0)
+Song::Song(const string aName)
+  : mFilename(aName), mSongInfo(0)
 {
   AssignUNID();
 }
 
 
 Song::~Song() {
-  if (sInfo) {
-    delete sInfo;
+  if (mSongInfo) {
+    delete mSongInfo;
   }
 }
 
-Song::Song(const Song& s2)
-  : XMLOutput(), Filename(s2.Filename), sInfo(0), UNID(s2.UNID) {
+Song::Song(const Song& aSong2)
+  : XMLOutput(), mFilename(aSong2.mFilename), mSongInfo(0), mUNID(aSong2.mUNID) {
 }
 
 Song&
-Song::operator=(const Song& s2) {
-  Filename = s2.Filename;
-  UNID = s2.UNID;
-  sInfo = 0;
+Song::operator=(const Song& aSong2) {
+  mFilename = aSong2.mFilename;
+  mUNID = aSong2.mUNID;
+  mSongInfo = 0;
   return *this;
 }
 
 void
 Song::AssignUNID() {
-  UNID = NextUNID++;
+  mUNID = mNextUNID++;
 }
 
 u_int32_t
 Song::GetUNID() const {
-  return UNID;
+  return mUNID;
 }
 
 string
 Song::GetFilename() const {
-  return Filename;
+  return mFilename;
 }
 
 SongType
@@ -66,9 +66,9 @@ Song::GetSongType() const {
   // Filename must include ".mp3".
   // Tried using QFileInfo, but
   // f.x. "..mp3" returned ".mp3" instead of "mp3".
-  if (Filename.size() > 4) {
+  if (mFilename.size() > 4) {
     char ending[5];
-    strcpy(ending, Filename.substr(Filename.size() - 4).c_str());
+    strcpy(ending, mFilename.substr(mFilename.size() - 4).c_str());
     ending[1] = tolower(ending[1]);
     ending[2] = tolower(ending[2]);
     if (strstr(ending, ".mp3") != 0) {
@@ -81,10 +81,10 @@ Song::GetSongType() const {
 
 const SongInfo*
 Song::GetSongInfo() const {
-  if (!sInfo) {
+  if (!mSongInfo) {
     switch (GetSongType()) {
     case SongType_MP3:
-      sInfo = new SongInfo_File_mp3(Filename);
+      mSongInfo = new SongInfo_File_mp3(mFilename);
       break;
       
     default:
@@ -92,23 +92,23 @@ Song::GetSongInfo() const {
     }
   }
 
-  return sInfo;
+  return mSongInfo;
 }
 
 
 void
-Song::asXML(QDomDocument& doc, QDomElement& root) const {
-  QDomElement song = doc.createElement("song");
-  root.appendChild(song);
+Song::asXML(QDomDocument& aDoc, QDomElement& aRoot) const {
+  QDomElement song = aDoc.createElement("song");
+  aRoot.appendChild(song);
   song.setAttribute("unid", GetUNID());
 
-  QDomElement fname = doc.createElement("filename");
+  QDomElement fname = aDoc.createElement("filename");
   song.appendChild(fname);
-  QDomText fname_text = doc.createTextNode(GetFilename());
+  QDomText fname_text = aDoc.createTextNode(GetFilename());
   fname.appendChild(fname_text);
 
   
   if (GetSongInfo()) {
-    sInfo->asXML(doc, song);
+    mSongInfo->asXML(aDoc, song);
   }
 }

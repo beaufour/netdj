@@ -3,9 +3,9 @@
 # $Id$
 #
 TEMPLATE = app
-CONFIG += debug warn_on qt exceptions
-INCLUDEPATH += .
-LIBS += -lid3 -lshout -lefence
+CONFIG += debug warn_on qt exceptions thread
+INCLUDEPATH += . /usr/include/taglib /usr/local/include
+LIBS += -ltag -lshout -lefence
 
 # Input
 HEADERS	+= 	Song.h SongInfo.h SongInfo_File.h SongInfo_File_mp3.h \

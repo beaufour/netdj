@@ -10,8 +10,8 @@
 
 using namespace std;
 
-StdException::StdException(string descr)
-  : Description(descr) 
+StdException::StdException(string aDescr)
+  : mDescription(aDescr)
 {
 }
 
@@ -21,6 +21,6 @@ StdException::~StdException() throw()
 
 const char*
 StdException::what() const throw() {
-  return Description.c_str();
+  return mDescription.c_str();
 }
 

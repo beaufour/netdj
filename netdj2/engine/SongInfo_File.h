@@ -20,7 +20,7 @@
 class SongInfo_File : public SongInfo {
 protected:
   /** The filename of the file */
-  std::string Filename;
+  std::string mFilename;
 
 public:
   /**
@@ -28,7 +28,7 @@ public:
    *
    * @param fname   The filename of the file
    */
-  SongInfo_File(const std::string fname);
+  SongInfo_File(const std::string aName);
 
 
   /** Destructor */

@@ -16,20 +16,20 @@
 
 using namespace std;
 
-HttpError::HttpError(string err)
-  : StdException(err) {
+HttpError::HttpError(string aErr)
+  : StdException(aErr) {
 }
 
-HttpServer::HttpServer(Q_UINT16 port, int backlog,
-		       PlayerThread* pl, QObject* parent)
-  : QServerSocket(port, backlog, parent), Player(pl) {
+HttpServer::HttpServer(Q_UINT16 aPort, int aBackLog,
+		       PlayerThread* aPl, QObject* aParent)
+  : QServerSocket(aPort, aBackLog, aParent), mPlayer(aPl) {
   if (!ok()) {
     throw HttpError("Could not listen to port!");
   }
 }
 
 void
-HttpServer::newConnection(int socket) {
+HttpServer::newConnection(int aSocket) {
   // When a new client connects, the server constructs a QSocket and all
   // communication with the client is done over this QSocket. QSocket
   // works asynchronouslyl, this means that all the communication is done
@@ -37,7 +37,7 @@ HttpServer::newConnection(int socket) {
   QSocket* s = new QSocket( this );
   connect( s, SIGNAL(readyRead()), this, SLOT(readClient()) );
   connect( s, SIGNAL(delayedCloseFinished()), this, SLOT(discardClient()) );
-  s->setSocket( socket );
+  s->setSocket( aSocket );
 }
 
 void
@@ -65,7 +65,7 @@ HttpServer::readClient() {
 	"Content-Type: text/html; charset=\"utf-8\"\r\n"
 	"\r\n"
 	"<h1>Skipping</h1>\n";
-      Player->Skip();
+      mPlayer->Skip();
     } else if (tokens[0] == "GET") {
       QTextStream os(socket);
       os.setEncoding(QTextStream::UnicodeUTF8);
@@ -77,7 +77,7 @@ HttpServer::readClient() {
       QDomElement root = doc.createElement("currentsong");
       Song cursong;
       string curcol;
-      Player->GetCurrentSong(cursong, curcol);
+      mPlayer->GetCurrentSong(cursong, curcol);
       root.setAttribute("collection", curcol);
       cursong.asXML(doc, root);
       doc.appendChild(root);

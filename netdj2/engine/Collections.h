@@ -32,7 +32,7 @@
 class Collections {
 private:
   /** The list of Collections */
-  std::vector<Collection*> ColList;
+  std::vector<Collection*> mColList;
 
 public:
   /** Constructor. */
@@ -51,7 +51,7 @@ public:
    * @param col     The new Collection to add.
    *
    */
-  void AddCollection(Collection* col);
+  void AddCollection(Collection* aCol);
 
   /**
    * Get the next song to play.
@@ -60,7 +60,7 @@ public:
    * @param colid   Id of the collection the song is retrieved from
    * @return        Song succesfully retrieved?
    */
-  bool GetNextSong(Song& song, std::string& colid);
+  bool GetNextSong(Song& song, std::string& aColId);
 };
 
 #endif

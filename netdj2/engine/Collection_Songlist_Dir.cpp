@@ -12,11 +12,11 @@
 
 using namespace std;
 
-Collection_Songlist_Dir::Collection_Songlist_Dir(const string id,
-						 const string descr,
-						 const string dir,
-						 const bool isq)
-  : Collection_Songlist(id, descr, isq), Directory(dir)
+Collection_Songlist_Dir::Collection_Songlist_Dir(const string aId,
+						 const string aDescr,
+						 const string aDir,
+						 const bool aIsQ)
+  : Collection_Songlist(aId, aDescr, aIsQ), mDirectory(aDir)
 {
   Update();
 }
@@ -31,10 +31,10 @@ Collection_Songlist_Dir::Update() {
   deque<Song> newlist;
 
   // Open directory
-  QDir dir(Directory, QString::null, QDir::Time | QDir::Reversed,
+  QDir dir(mDirectory, QString::null, QDir::Time | QDir::Reversed,
 	   QDir::Files | QDir::Readable);
   if (!dir.exists()) {
-    throw StdException("Could not open directory '" + Directory + "'!");
+    throw StdException("Could not open directory '" + mDirectory + "'!");
   }
 
   // Iterate over files in directory
@@ -46,11 +46,11 @@ Collection_Songlist_Dir::Update() {
 
   while ((fi = it.current()) != 0 ) {
     try {
-      if (isQueue) {
-	if (fi->lastModified() >= LastTimeStamp) {
-	  QMutexLocker locker(&mutex);
-	  Songlist.push_back(Song(fi->filePath().ascii()));
-	  LastTimeStamp = fi->lastModified();
+      if (mIsQueue) {
+	if (fi->lastModified() >= mLastTimeStamp) {
+	  QMutexLocker locker(&mMutex);
+	  mSonglist.push_back(Song(fi->filePath().ascii()));
+	  mLastTimeStamp = fi->lastModified();
 	}
       } else { /* Not a queue */
 	newlist.push_back(Song(fi->filePath().ascii()));
@@ -69,11 +69,11 @@ Collection_Songlist_Dir::Update() {
    * \note Can I do something smarter than add one second to the
    * timestamp?
    */
-  LastTimeStamp.addSecs(1);
+  mLastTimeStamp.addSecs(1);
   
   /* Swap content */
-  if (!isQueue) {
-    QMutexLocker locker(&mutex);
-    Songlist.swap(newlist);
+  if (!mIsQueue) {
+    QMutexLocker locker(&mMutex);
+    mSonglist.swap(newlist);
   }
 }

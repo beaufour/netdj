@@ -22,22 +22,22 @@
 class PlayerThread : public QThread {
 private:
   /** If this is set to true the thread will exit */
-  bool StopPlayer;
+  bool mStopPlayer;
 
   /** If this is set to true the current song will be skipped */
-  bool SkipSong;
+  bool mSkipSong;
 
   /** Pointer to song Collections */
-  Collections* Cols;
+  Collections* mCols;
 
   /** Mutex protecting CurrentSong */
-  mutable QMutex SongMutex;
+  mutable QMutex mSongMutex;
 
   /** The song currently playing */
-  Song CurrentSong;
+  Song mCurrentSong;
 
   /** The collection the currently playing song is from */
-  std::string CurrentCollection;
+  std::string mCurrentCollection;
 
   /** Get next song to play */
   bool GetNextSong();
@@ -49,7 +49,7 @@ public:
    * @param cols         Point to Collections
    * @param stackSize    The stacksize for the thread
    */
-  PlayerThread(Collections* cols, unsigned int stackSize = 0);
+  PlayerThread(Collections* aCols, unsigned int aStackSize = 0);
 
   /** Main function of the thread. */
   void run();
@@ -66,7 +66,7 @@ public:
    * @param song    Current song
    * @param colid   Current collection.
    */
-  void GetCurrentSong(Song& song, std::string& colid) const;
+  void GetCurrentSong(Song& song, std::string& aColId) const;
 };
 
 #endif

@@ -28,7 +28,7 @@ public:
    *
    * @param str     Eventual error message
    */
-  NoSongInfo(std::string str);
+  NoSongInfo(std::string aStr);
 };
 
 
@@ -44,31 +44,34 @@ public:
 class SongInfo : public XMLOutput {
 protected:
   /** Textual description of song (ie. "Aha - Take On Me") */
-  std::string Description;
+  std::string mDescription;
 
   /** Song artist */
-  std::string Artist;
+  std::string mArtist;
 
   /** From album */
-  std::string Album;
+  std::string mAlbum;
 
   /** Song title */
-  std::string Title;
+  std::string mTitle;
 
   /** Song genre */
-  std::string Genre;
+  std::string mGenre;
 
   /** Song track */
-  u_int32_t Track;
+  u_int32_t mTrack;
 
   /** Song release year */
-  u_int32_t Year;
+  u_int32_t mYear;
 
   /** Song size (in bytes) */
-  u_int32_t Size;
+  u_int32_t mSize;
 
   /** Song owner */
-  std::string Owner;
+  std::string mOwner;
+
+  /** Song length, in seconds */
+  u_int32_t mLength;
 
 public:
   /**
@@ -84,67 +87,74 @@ public:
   /**
    * Get song description.
    *
-   * @return        Description
+   * @return        mDescription
    */
   std::string GetDescription() const;
 
   /**
    * Get song artist
    *
-   * @return        Artist
+   * @return        mArtist
    */
   std::string GetArtist() const;
 
   /**
    * Get song album
    *
-   * @return        Album
+   * @return        mAlbum
    */
   std::string GetAlbum() const;
 
   /**
    * Get song title
    *
-   * @return        Title
+   * @return        mTitle
    */
   std::string GetTitle() const;
 
   /**
    * Get song genre
    *
-   * @return       Genre 
+   * @return       mGenre 
    */
   std::string GetGenre() const;
 
   /**
    * Get song track number
    *
-   * @return       Track
+   * @return       mTrack
    */
   u_int32_t GetTrack() const;
 
   /**
    * Get song release year
    *
-   * @return       Year
+   * @return       mYear
    */
   u_int32_t GetYear() const;
 
   /**
    * Get song size (in bytes)
    *
-   * @return       Size
+   * @return       mSize
    */
   u_int32_t GetSize() const;
 
   /**
    * Get song owner
    *
-   * @return       Owner
+   * @return       mOwner
    */
   std::string GetOwner() const;
 
-  void asXML(QDomDocument& doc, QDomElement& root) const;
+  /**
+   * Get song length, in seconds
+   *
+   * @return       mSeconds
+   */
+  u_int32_t GetLength() const;
+
+  void asXML(QDomDocument& aDoc, QDomElement& aRoot) const;
 };
 
 #endif
