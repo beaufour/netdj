@@ -708,7 +708,7 @@ http_thread(void*) {
 	      //////////////////
 	      if (o_xsongname != songname) {
 		xbuf = xbuf1;
-		xbuf += "  <song>\n    <description>" + cfilename + "</description>\n  </song>\n";
+		xbuf += "  <currentsong>\n    <description>" + cfilename + "</description>\n  </currentsong>\n";
 		songs.clear();
 		lists[1]->GetEntries(songs, 10);
 		for (vector<string>::iterator it = songs.begin();
