@@ -19,7 +19,12 @@ Showstoppers:
 - command line config file placement
 - Logging from player in reverse order? songplaying before/after check type?
 - *ahem* Missing files???
-
+- log_all.xml, unfiltered log, log.xml should be filtered:
+  - level < 100
+  - class?
+  - specific events? clientnew/close?
+- stream_conf.xml, Icecast stream info: port, url, mediatype, bitrate (last
+  two may be accesible through icecast....) 
 Major enhancements:
 * Database support
 * Support ogg
