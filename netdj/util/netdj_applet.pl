@@ -125,9 +125,9 @@ sub cmd_update {
 	    # Songlist
 	    my $tool = "";
 	    my $songs = $status->{song};
-
-	    foreach my $s (values %$songs) {
-		$tool .= $s->{description}."\n";
+	    
+	    foreach my $s (sort keys %$songs) {
+		$tool .= $songs->{$s}->{description}."\n";
 	    }
 	    $applet->set_tooltip($tool);
 
