@@ -179,7 +179,6 @@ ID3Tag::find_style(int styleid) {
   return "Unknown Style";
 }
 
-#include <iostream>
 
 bool
 ID3Tag::InitFromFile(const string fname) {
