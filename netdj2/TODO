@@ -10,8 +10,10 @@ Remember:
 
 Showstoppers:
 - client lib.
-  - solves FileLogger
-- Default log file placement
+  - solves FileLoggerefault log file placement
+- keeping client connection open
+  - log + command mixing
+  - Connection: close?
 - Make sure that SongInfo is not always cached!
 - Use QSettings for configuration?
 - command line config file placement
