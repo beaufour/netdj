@@ -37,7 +37,4 @@ Open issues:
      - song information (part of list query?)
      - stream information, listeners, url, etc.?
 
-* CollectionAggregator/Merger?
-  -- Implements normal READONOLY CollectionInterface, maintains a list of
-     Collections and just acts as a proxy to these.
-  -- GetSong() needs to return struct that includes list information...
+* Use PAM as access checker?

@@ -1,8 +1,14 @@
+Remember:
+- Fix comments
+- Make sure that SongInfo is not always cached!
+- get STL and std::string out of the code...
+
 Show-stoppers:
-* Config file
 * Logger service
-* Proper command interface
-* Access Control
+
+Major enhancements:
+* Support ogg
+* Reencode files to CBR
 
 Nice to have:
 * Use SOAP for commands
