@@ -44,6 +44,7 @@ SHARE_DIR = /home/beaufour/mp3
 HTTP_START = true
 # Which port to server HTTP-requests on
 HTTP_PORT = 7676
+# Redirect /-requests to this URL
+HTTP_REDIRECT = http://localhost.localdomain/netdj/
 # Lock HTTP command interface
 WEB_LOCKED = false
-

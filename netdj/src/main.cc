@@ -788,7 +788,7 @@ http_thread(void*) {
     // Redirection packet
     HTTPResponse HTTPredirect(302, "");
     HTTPredirect.SetHeader("Connection", "Close");
-    HTTPredirect.SetHeader("Location", "/");
+    HTTPredirect.SetHeader("Location", config.GetString("HTTP_REDIRECT") == "" ? "/" : config.GetString("HTTP_REDIRECT"));
     HTTPredirect.CreatePacket();
 
     // Authorization packet
@@ -986,37 +986,42 @@ http_thread(void*) {
 		}
 		send(newsock, HTTPxml.Packet().c_str(), HTTPxml.Packet().size(), 0);
 	      } else {
-		///////////////////
-		// Send HTML answer
-		///////////////////
-		if (o_hsongname != songfile.GetName()) {
-		  hbuf = hbuf1 + cfilename + hbuf2;
-		  sprintf(tmpint, "%d", songfile.GetId());
-		  hbuf += tmpint;
-		  hbuf += hbuf3;
-		  songs.clear();
-		  lists[1]->GetEntries(songs, 10);
-		  for (vector<File>::iterator it = songs.begin();
-		       it != songs.end();
-		       ++it) {
-		    hbuf += "    " + it->GetFilenameNoType() + "<BR>\n";
-		  }
-		  hbuf += hbuf4;
-		  for (unsigned int i = 0; i < listnum; ++i) {
-		    dir = lists[i];
-		    hbuf += "      <TR><TD>";
-		    sprintf(tmpint, "%d", dir->GetSize());
+		if (config.GetString("HTTP_REDIRECT") != "") {
+		  // Send redirect to '/'
+		  send(newsock, HTTPredirect.Packet().c_str(), HTTPredirect.Packet().size(), 0);
+		} else {
+		  ///////////////////
+		  // Send HTML answer
+		  ///////////////////
+		  if (o_hsongname != songfile.GetName()) {
+		    hbuf = hbuf1 + cfilename + hbuf2;
+		    sprintf(tmpint, "%d", songfile.GetId());
 		    hbuf += tmpint;
-		    hbuf += "</TD><TD>";
-		    hbuf += dir->GetShortname();
-		    hbuf += "</TD><TD>";
-		    hbuf += dir->GetDescription();
-		    hbuf += "</TD></TR>\n";
+		    hbuf += hbuf3;
+		    songs.clear();
+		    lists[1]->GetEntries(songs, 10);
+		    for (vector<File>::iterator it = songs.begin();
+			 it != songs.end();
+			 ++it) {
+		      hbuf += "    " + it->GetFilenameNoType() + "<BR>\n";
+		    }
+		    hbuf += hbuf4;
+		    for (unsigned int i = 0; i < listnum; ++i) {
+		      dir = lists[i];
+		      hbuf += "      <TR><TD>";
+		      sprintf(tmpint, "%d", dir->GetSize());
+		      hbuf += tmpint;
+		      hbuf += "</TD><TD>";
+		      hbuf += dir->GetShortname();
+		      hbuf += "</TD><TD>";
+		      hbuf += dir->GetDescription();
+		      hbuf += "</TD></TR>\n";
+		    }
+		    hbuf += hbuf5;
+		    o_hsongname = songfile.GetName();
 		  }
-		  hbuf += hbuf5;
-		  o_hsongname = songfile.GetName();
+		  send(newsock, hbuf.c_str(), hbuf.size(), 0);
 		}
-		send(newsock, hbuf.c_str(), hbuf.size(), 0);
 	      }
 	    } // req.Parse()
 	  } // !http_locked
