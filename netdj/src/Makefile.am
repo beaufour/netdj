@@ -1,9 +1,6 @@
-READLINE_LIB =
-HISTORY_LIB =
-
 bin_PROGRAMS = netdj
 
-netdj_LDADD = $(READLINE_LIB) $(HISTORY_LIB) -lshout
+netdj_LDADD =  -lshout
 
 netdj_SOURCES = main.cc \
 		util.cc util.h \
@@ -13,4 +10,5 @@ netdj_SOURCES = main.cc \
 		AccessConf.cc AccessConf.h \
 		Lockable.cc Lockable.h \
 		File.cc File.h \
-		ID3Tag.cc ID3Tag.h
+		ID3Tag.cc ID3Tag.h \
+		HTTP.cc HTTP.h
