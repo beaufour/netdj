@@ -8,10 +8,11 @@
  *  (c) 2004, Allan Beaufour Larsen <allan@beaufour.dk>
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <cstdlib>
+
+// Fork
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <qapplication.h>
 
@@ -74,6 +75,28 @@ main(int argc, char* argv[])
   }
 
   // @todo parse command line options, should overrule configuration file.
+
+  /* Fork code
+  int pid = fork();
+  if (pid == -1) {
+    std::cout << "Hmmm, couldn't fork into the background?!" << std::endl;
+    std::cout << "  " << strerror(errno) << std::endl;
+    exit (-1);
+  }
+
+  if (pid) {
+    std::cout << "Spawned daemon (pid " << pid << ")" << std::endl;
+    exit(0);
+  }
+
+  // Daemon
+  setpgid(0, 0);
+  freopen("/dev/null", "r", stdin);
+  freopen("/var/log/netdj", "w", stdout);
+  freopen("/dev/null", "w", stderr);
+  std::cout << "NetDJ v" << VERSION << " starting up." << std::endl;  
+
+  */
 
 
   /* Create logger service */

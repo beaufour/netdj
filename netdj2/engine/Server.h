@@ -19,6 +19,8 @@
 #include "Song.h"
 #include "StdException.h"
 
+class QDomElement;
+
 namespace NetDJ
 {
 
@@ -54,6 +56,8 @@ namespace NetDJ
    * @todo Implement StartNetwork and StopNetwork, including signals.
    *
    * @todo Implement Digest authentication (http://rfc.sunsite.dk/rfc/rfc2617.html)
+   
+   * @todo Implement SigCommand signal instead of using Message()
    */
   class Server : public QObject
   {
@@ -196,6 +200,9 @@ namespace NetDJ
      * @param aCol              The collection it comes from
      */
     void SongPlaying(const Song& aSong, const Collection* aCol);
+
+    /** Called when a new log entry is made */
+    void NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel);
   };
 }
 

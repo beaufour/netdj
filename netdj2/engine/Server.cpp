@@ -233,6 +233,13 @@ Server::GetSong(Song& aSong, const Collection** aCol)
   *aCol = mCurrentCol;
 }
 
+void
+Server::NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel)
+{
+  // @todo Implement log handling in Server
+}
+
+
 /********** COMMAND HANDLER ************/
 /** Command types */
 enum cmdtype_t {
