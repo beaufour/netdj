@@ -13,6 +13,7 @@
 #include "Configuration.h"
 #include "AccessConf.h"
 #include "Directory.h"
+#include "File.h"
 
 // Provides cout and manipulation of same
 #include <iostream>
@@ -163,27 +164,27 @@ pthread_t player_t;
 void*
 player_thread(void*) {
   unsigned int i;
-  string filename;
+  File fobj;
+  bool gotsong;
 
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
   while (!stop_player) {
-    filename = "";
     i = 0;
-    while (filename.empty() && i < listnum) {
-      lists[i]->GetSong(filename);
+    do {
+      gotsong = lists[i]->GetSong(fobj);
       ++i;
-    }
-    --i;
-    if (filename.empty()) {
+    } while (!gotsong && i < listnum);
+    if (i == listnum) {
       cout << endl << "  Hmmm, no files to play..." << endl;
       screen_flush();
       sleep(30);
     } else {
-      if (file_exists(filename.c_str(), NULL)) {
-	currentsong.Set(filename);
-	cout << endl << "  Playing '" << get_filename(filename)
+      --i;
+      if (fobj.Exists()) {
+	currentsong.Set(fobj.GetName());
+	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << *(lists[i]->GetShortname()) << "]" << endl;
 	screen_flush();
 	
@@ -202,7 +203,7 @@ player_thread(void*) {
 		 "mpg123",
 		 "-q",
 		 "--aggressive",
-		 filename.c_str(),
+		 fobj.GetName().c_str(),
 		 NULL);
 	} else {
 	  wait(NULL);
@@ -325,13 +326,14 @@ com_info(char* arg) {
 #endif
   time_t filetime;
   string songname;
+  File fobj;
 
   currentsong.Get(songname);
-  if (!songname.empty()) {
-    filetime = file_mtime(songname);
+  if (fobj.SetName(songname)) {
+    filetime = fobj.GetMtime();
     cout << "  " << songname << endl;
     cout << "    " << setprecision(2)
-         << ((float) file_size(songname) / (1024 * 1024)) << " MB - "
+         << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
          << ctime(&filetime) << endl;
 #ifdef HAVE_ID3LIB  
     tag.Link(songname.c_str());
@@ -350,15 +352,15 @@ com_info(char* arg) {
 int
 com_list(char* arg) {
   unsigned int l = atoi(arg);
-  vector<string> songs;
+  vector<File> songs;
 
   if (l >= 0 && l < listnum) {
     cout << "  [" << *(lists[l]->GetShortname()) << "]:" << endl;
     lists[l]->GetEntries(songs, 10);
-    for (vector<string>::iterator it = songs.begin();
+    for (vector<File>::iterator it = songs.begin();
 	 it != songs.end();
 	 ++it) {
-      cout << "    " << (*it) << endl;
+      cout << "    " << it->GetFilename() << endl;
     }
   }
   return 0;
@@ -383,7 +385,7 @@ com_move(char* arg) {
   string newpath;
   currentsong.Get(songname);
   newpath = *(share.GetDirname());
-  newpath += get_filename(songname);
+  newpath += File(songname).Exists();
 
   cout << "  Moving '" << songname << "' to '"
        << newpath << "'" << endl;
@@ -621,11 +623,12 @@ http_thread(void*) {
     string songname, o_hsongname, o_xsongname;
     string cfilename;
     string tmpstr;
-    vector<string> songs;
+    vector<File> songs;
     char *spos, *apos;
     COMMAND *com;
     Directory* dir;
-    char tmpsize[10];
+    char tmpint[10];
+    char tmplint[20];
     struct pollfd pf;
     pf.events = POLLIN;
 
@@ -643,7 +646,7 @@ http_thread(void*) {
 
 	currentsong.Get(songname);
 	// Get filename (without .-ending)
-	cfilename = get_filename(songname.substr(0, songname.find_last_of('.')));
+	cfilename = File(songname.substr(0, songname.find_last_of('.'))).GetFilename();
 
 	// Receive something from the client ...
 	pf.fd = newsock;
@@ -711,19 +714,27 @@ http_thread(void*) {
 		xbuf += "  <currentsong>\n    <description>" + cfilename + "</description>\n  </currentsong>\n";
 		songs.clear();
 		lists[1]->GetEntries(songs, 10);
-		for (vector<string>::iterator it = songs.begin();
+		for (vector<File>::iterator it = songs.begin();
 		     it != songs.end();
 		     ++it) {
 		  xbuf += "  <song>\n";
-		  xbuf += "    <description>" + get_filename(*it) + "</description>\n";
+		  xbuf += "    <id>";
+		  sprintf(tmpint, "%d", it->GetId());
+		  xbuf += tmpint;
+		  xbuf += "</id>\n";
+		  xbuf += "    <size>";
+		  sprintf(tmplint, "%ld", it->GetSize());
+		  xbuf += tmplint;
+		  xbuf += "</size>\n";
+		  xbuf += "    <description>" + it->GetFilename() + "</description>\n";
 		  xbuf += "  </song>\n";
 		}
 		for (unsigned int i = 0; i < listnum; ++i) {
 		  dir = lists[i];
 		  xbuf += "  <list>\n";
-		  sprintf(tmpsize, "%d", dir->GetSize());
+		  sprintf(tmpint, "%d", dir->GetSize());
 		  xbuf += "     <size>";
-		  xbuf += tmpsize;
+		  xbuf += tmpint;
 		  xbuf += "</size>\n";
 		  xbuf += "     <shortname>" + *(dir->GetShortname()) + "</shortname>\n";
 		  xbuf += "     <description>" + *(dir->GetDescription()) + "</description>\n";
@@ -742,17 +753,17 @@ http_thread(void*) {
 		hbuf = hbuf1 + cfilename + hbuf2;
 		songs.clear();
 		lists[1]->GetEntries(songs, 10);
-		for (vector<string>::iterator it = songs.begin();
+		for (vector<File>::iterator it = songs.begin();
 		     it != songs.end();
 		     ++it) {
-		  hbuf += "    " + get_filename(*it) + "<BR>\n";
+		  hbuf += "    " + it->GetFilename() + "<BR>\n";
 		}
 		hbuf += hbuf3;
 		for (unsigned int i = 0; i < listnum; ++i) {
 		  dir = lists[i];
 		  hbuf += "      <TR><TD>";
-		  sprintf(tmpsize, "%d", dir->GetSize());
-		  hbuf += tmpsize;
+		  sprintf(tmpint, "%d", dir->GetSize());
+		  hbuf += tmpint;
 		  hbuf += "</TD><TD>";
 		  hbuf += *(dir->GetShortname());
 		  hbuf += "</TD><TD>";

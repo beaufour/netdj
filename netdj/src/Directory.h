@@ -10,6 +10,8 @@
 #define __DIRECTORY_H__
 
 #include "Lockable.h"
+#include "File.h"
+#include "util.h"
 
 // STL containers and such
 #include <deque>
@@ -21,30 +23,13 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-// Provides file-handling
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include "util.h"
-
 class Directory : public Lockable {
 private:
-  class File {
-  public:
-    string name;
-    time_t timestamp;
-    File (string _name, time_t _timestamp)
-      : name(_name), timestamp(_timestamp) {}
-
-    bool operator< (const File& f2) const {
-      return timestamp < f2.timestamp;
-    }
-  };
-
   typedef deque<File> list_t;
 
   string shname, descr;
   string dirname;
+  int nextfileid;
   time_t lastupdate, lastplay;
   list_t list;
   bool playlist;
@@ -56,7 +41,7 @@ private:
 public:
   Directory(char* _shname, char* _descr, bool _playlist = true)
     : Lockable(),
-      shname(_shname), descr(_descr),
+      shname(_shname), descr(_descr), nextfileid(0),
       lastupdate(time_t(0)), lastplay(time_t(0)), playlist(_playlist) {};
   
   void SetDirname(const string&);
@@ -66,10 +51,10 @@ public:
   time_t GetNextTimestamp();
 
   bool Empty();
-  void GetSong(string&);
+  bool GetSong(File&);
   void AddSong(const string&);
   int GetSize();
-  int GetEntries(vector<string>&, unsigned int);
+  int GetEntries(vector<File>&, unsigned int);
 
   const string* GetShortname();
   const string* GetDescription();

@@ -8,9 +8,9 @@ AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_PROG_CXX
-# if we're using GCC, enable all warnings and optimize
+# if we're using GCC, enable all warnings
 if test "$GXX" = yes; then
-   CXXFLAGS="$CXXFLAGS -Wall -O4";
+   CXXFLAGS="$CXXFLAGS -Wall";
 fi
 AC_PROG_INSTALL
 AC_PROG_LN_S

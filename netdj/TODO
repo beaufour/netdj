@@ -14,7 +14,7 @@ Missing
 UI:
 * Take generic player-command and args from config file
 * Do generic full_path-function (with either pwd or home as added path)     
-* Save file to share
+* Save (not move) file to share
 * Delete should accept parameter current/previous/number
 * Show current downloads (*.gnut)
 * Show playlist for sharedir
@@ -25,11 +25,7 @@ UI:
 * Better playlist-listings
   - userchosen numbers
   - choose by listname
-* util.h/c stinks
-  - make generic File-class
-  - error should be made more flexible or skipped
-* FIX: There seems to some kind of error with Opera and /cgi-bin/-commands,
-  they only work every second time - weird...
+* Errorhandling should be made more flexible
 
 WEB:
 * Add 'search on freedb'
@@ -46,6 +42,8 @@ WEB:
   - Remove additional endings, .mp3.mp3, etc.
   - Get ID3-tag, and use that
 * FIX: Shutdown thread correctly, ie. close socket
+* FIX: There seems to some kind of error with Opera and /cgi-bin/-commands,
+  they only work every second time - weird... timeout error of some sort
 
 
 GNUT:
@@ -65,6 +63,7 @@ BIG ISSUES
 * Handle wishes? Send requests through underlying file fetcher
   (ie. search for xxx on gnut, don't download, just search -- would
    maybe trigger caching...)
-
+* Wild idea: Enable "news-hour", ie. every full our stream the news
+  from you local netradio...
 
 CVS: $Id$

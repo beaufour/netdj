@@ -13,56 +13,12 @@ get_rand(const int max) {
   return (int) ((float) max * rand() / (RAND_MAX + 1.0));
 }
 
-
-bool
-file_exists(const string &filename, struct stat *stat_buf_ptr = NULL) {
-  struct stat stat_buf;
-  if (!stat_buf_ptr) { // Supply stat_buf if user doesn't
-    stat_buf_ptr = &stat_buf;
-  }
-  return (stat(filename.c_str(), stat_buf_ptr) == 0
-	  && S_ISREG(stat_buf_ptr->st_mode));
-}
-
-
-time_t
-file_mtime(const string &filename) {
-  struct stat stat_buf;
-  if (stat(filename.c_str(), &stat_buf) == 0) {
-    return stat_buf.st_mtime;
-  } else {
-    return time_t(0);
-  };
-}
-
-
-off_t
-file_size(const string &filename) {
-  struct stat stat_buf;
-  if (stat(filename.c_str(), &stat_buf) == 0) {
-    return stat_buf.st_size;
-  } else {
-    return off_t(-1);
-  };
-}
-
-
 void
 error(const char* errmsg, const bool isfatal = true) {
   cout << "  ARGH: " << errmsg << endl;
   if (isfatal) {
     exit(100);
   }
-}
-
-string
-get_filename(const string& str) {
-  return str.substr(str.find_last_of('/') + 1);
-}
-
-string
-get_dirname(const string& str) {
-  return str.substr(0, str.find_last_of('/'));
 }
 
 // I'm not accountable, I stole this :)

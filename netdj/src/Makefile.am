@@ -12,3 +12,4 @@ dj_SOURCES = 	main.cc \
 		Directory.cc Directory.h \
 		AccessConf.cc AccessConf.h \
 		Lockable.cc Lockable.h \
+		File.cc File.h
