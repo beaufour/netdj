@@ -16,6 +16,7 @@ Open issues:
   -- warnings from qWarning should be caught!
   -- events could be the answer?
 * Threads?
+* NetDJ namespace?
 * Event-based?
   -- Logger could listen to DebugEvents, or whatever, anyone could subscribe to
      these types of events and use it for whatever.
