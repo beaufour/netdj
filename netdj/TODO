@@ -87,5 +87,12 @@ BIG ISSUES
   - re-encode to a constant predefined bitrate
   - equalize to get an even sound level for all songs played
   - clean up filename / ID3
+* Store information in a database
+  - at least ID3-information to allow better searching
+  - 'last played', 'times played' information
+  - user stats : '# requests'
+  - Example queries:
+    + "30 songs not played the last month"
+    + "Top-10 this overall / month / year"
 
 CVS: $Id$
