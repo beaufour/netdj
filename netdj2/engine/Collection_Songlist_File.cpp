@@ -59,7 +59,7 @@ Collection_Songlist_File::Update() {
 	newlist.push_back(new SongFile(line, GetNewUNID()));
       }
       catch (...) {
-	qWarning("Could not add '%s' to collection '%s'!", line.latin1(), GetIdentifier().c_str());
+	qWarning("Could not add '%s' to collection '%s'!", line.latin1(), GetIdentifier().latin1());
       }
     }
   }

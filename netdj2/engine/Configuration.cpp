@@ -26,10 +26,10 @@ typedef struct
 
 const defvalue_t gDefValues[] = {
   {"HTTP_PORT",         "7676"},
-  {"CACHE_DIR",         "/usr/share/mp3/cache"},
   {"SHARE_DIR",         "/usr/share/mp3/share"},
   {"REQUEST_DIR",       "/usr/share/mp3/request"},
   {"USER_LIST_FILE",    "netdj-users"},
+  {"UPDATE_BEFORE_TRANSMIT",    "false"},
   {"STREAM_HOST",       "127.0.0.1"},
   {"STREAM_PORT",       "8000"},
   {"STREAM_MOUNT",      "netdj"},

@@ -85,7 +85,7 @@ Collection_Songlist_Dir::Update()
       ++it;
     }
     catch (...) {
-      qWarning("Could not add '%s' to collection '%s'!", fi->filePath().ascii(), GetIdentifier().c_str());
+      qWarning("Could not add '%s' to collection '%s'!", fi->filePath().ascii(), GetIdentifier().latin1());
     }
   }
 

@@ -30,7 +30,7 @@ namespace NetDJ
     mutable QDomDocument mDocument;
 
     /** The main information node */
-    mutable QDomElement  mInfoNode;
+    mutable QDomElement mInfoNode;
 
     /** Creates the XML representation of the class */
     void CreateXML() const;

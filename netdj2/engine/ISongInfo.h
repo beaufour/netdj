@@ -37,7 +37,7 @@ namespace NetDJ
     /**
      * Constructor.
      *
-     * @param str     Eventual error message
+     * @param aStr     Eventual error message
      */
     NoSongInfo(std::string aStr);
   };

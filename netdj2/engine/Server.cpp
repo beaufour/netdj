@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "AccessChecker.h"
+#include "Collections.h"
 #include "ICollection.h"
 #include "ISong.h"
 #include "Server.h"
@@ -31,6 +32,7 @@ const char* HTTP_200       = "HTTP/1.0 200 Ok\r\n";
 const char* HTTP_401       = "HTTP/1.0 401 Unauthorized\r\n"
                              "WWW-Authenticate: Basic realm=\"NetDJ\"\r\n";
 const char* HTTP_404       = "HTTP/1.0 404 Not Found\r\n";
+const char* HTTP_500       = "HTTP/1.0 500 Internal Server Error\r\n";
 const char* HTTP_501       = "HTTP/1.0 501 Not Implemented\r\n";
 const char* HTTP_HTML      = "Content-Type: text/html; charset=\"utf-8\"\r\n";
 const char* HTTP_XML       = "Content-Type: text/xml; charset=\"utf-8\"\r\n";
@@ -71,6 +73,17 @@ const char* HTML_404 =
   "</BODY>\n"
   "</HTML>\n";
 
+const char* HTML_500 = 
+  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
+  "<HTML>\n"
+  "<HEAD>\n"
+  "<TITLE>500 Internal Server Error</TITLE>\n"
+  "</HEAD>\n"
+  "<BODY BGCOLOR=\"#FFFFFF\">\n"
+  "Sorry, something not quite good has happened in the server.\n"
+  "</BODY>\n"
+  "</HTML>\n";
+
 const char* HTML_501 = 
   "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
   "<HTML>\n"
@@ -82,8 +95,10 @@ const char* HTML_501 =
   "</BODY>\n"
   "</HTML>\n";
 
-Server::Server(int aPort, int aBackLog, QObject* aParent)
-  : QObject(aParent, "Server"), mSongDocument("NetDJ")
+Server::Server(Collections* aCols, int aPort, int aBackLog, QObject* aParent)
+  : QObject(aParent, "Server"),
+    mDocument("NetDJ"),
+    mCols(aCols)
 {
   // Automatically delete contained pointers on delete
   mClients.setAutoDelete(true);
@@ -115,6 +130,9 @@ Server::~Server()
   }
   if (mAccessChecker) {
     delete mAccessChecker;
+  }
+  if (mSongElement) {
+    delete mSongElement;
   }
 }
 
@@ -217,24 +235,24 @@ Server::ClientClosed()
 void
 Server::SongPlaying(const ISong* aSong, const ICollection* aCol)
 {
-  QMutexLocker lock(&mDocMutex);
+  QMutexLocker lock(&mSongMutex);
 
-  mSongDocument.clear();
+  if (mSongElement) {
+    delete mSongElement;
+  }
   
-  QDomElement* songXML = aSong->AsXML(&mSongDocument);
-  songXML->setAttribute("collection", aCol->GetIdentifier());  
-  mSongDocument.appendChild(*songXML);
-  delete songXML;
+  mSongElement = aSong->AsXML(&mDocument);
+  mSongElement->setAttribute("collection", aCol->GetIdentifier());  
 }
 
-QDomDocument*
+QDomElement*
 Server::GetSong()
 {
-  QMutexLocker lock(&mDocMutex);
+  QMutexLocker lock(&mSongMutex);
 
-  QDomDocument* newdoc = new QDomDocument();
+  QDomElement* newdoc = new QDomElement();
   Q_CHECK_PTR(newdoc);
-  *newdoc = mSongDocument.cloneNode(true).toDocument();
+  *newdoc = mSongElement->cloneNode(true).toElement();
 
   return newdoc;
 }
@@ -250,7 +268,8 @@ Server::NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel)
 /** Command types */
 enum cmdtype_t {
   CMD_HELP,
-  CMD_INDEX,
+  CMD_CURRENT,
+  CMD_REQUESTS,
   CMD_LOG,
   CMD_SKIP,
   CMD_SHUTDOWN,
@@ -269,12 +288,13 @@ typedef struct
 
 /** List of available commands */
 const command_t gCommands[] = {
-  {CMD_HELP,     "/help",       0, "This page"},
-  {CMD_INDEX,    "/index.xml",  0, "XML: The current song playing and the requested songs pending"},
-  {CMD_LOG,      "/log",        0, "Get log messages (continuous)"},
-  {CMD_SKIP,     "/skip",     200, "Skip the currently playing song"},
-  {CMD_SHUTDOWN, "/shutdown", 500, "Shutdown NetDJ"},
-  {CMD_NULL,     (char*) 0,     0, (char*) 0}
+  {CMD_HELP,      "/help",          0, "This page"},
+  {CMD_CURRENT,   "/current.xml",   0, "XML: The currently playing song"},
+  {CMD_REQUESTS,  "/requests.xml",  0, "XML: The request list"},
+  {CMD_LOG,       "/log",           0, "Get log messages (continuous)"},
+  {CMD_SKIP,      "/skip",        200, "Skip the currently playing song"},
+  {CMD_SHUTDOWN,  "/shutdown",    500, "Shutdown NetDJ"},
+  {CMD_NULL,      (char*) 0,        0, (char*) 0}
 };
 
 bool
@@ -285,10 +305,10 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 
   QString cmdstr = url.path();
   // Shortcuts for help for ease and backward compatibility
-  if (cmdstr == "/") {
-    cmdstr = "/help";
-  }
-  if (cmdstr == "/index.html") {
+  if (cmdstr == "/" ||
+      cmdstr == "/index.html" ||
+      cmdstr == "/index.xml")
+  {
     cmdstr = "/help";
   }
   
@@ -321,8 +341,12 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
       CmdHelp(aStream);
       break;
 
-    case CMD_INDEX:
-      CmdIndex(aStream);
+    case CMD_CURRENT:
+      CmdCurrent(aStream);
+      break;
+
+    case CMD_REQUESTS:
+      CmdRequests(aStream);
       break;
 
     case CMD_LOG:
@@ -391,17 +415,41 @@ Server::CmdHelp(QTextStream& aStream)
 }
 
 void
-Server::CmdIndex(QTextStream& aStream)
+Server::CmdCurrent(QTextStream& aStream)
 {
-  QDomDocument* songXML = GetSong();
+  QDomElement* songXML = GetSong();
 
   aStream << HTTP_200
           << HTTP_XML
           << HTTP_DATASTART
-          << songXML->toString()
+          << *songXML
           << endl;
 
   delete songXML;
+}
+
+void
+Server::CmdRequests(QTextStream& aStream)
+{
+  ICollection* request = mCols->GetCollection("request");
+  if (request) {
+    QDomElement* xml = request->AsXML(&mDocument);
+
+    aStream << HTTP_200
+            << HTTP_XML
+            << HTTP_DATASTART
+            << *xml
+            << endl;
+    
+    delete xml;
+  } else {
+    emit SigMessage("Could not retrieve request collection!", 10);
+
+    aStream << HTTP_500
+            << HTTP_HTML
+            << HTTP_DATASTART
+            << HTML_500;
+  }
 }
 
 void

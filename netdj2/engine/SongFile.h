@@ -42,9 +42,10 @@ namespace NetDJ
     /**
      * Constructor.
      *
-     * @param fname   The filename of the song
+     * @param aNname   The filename of the song
+     * @param aUNID    The unique ID of the file
      */
-    SongFile(const QString& fname,  const u_int32_t aUNID);
+    SongFile(const QString& aNname,  const u_int32_t aUNID);
     
     /** Destructor */
     virtual ~SongFile();
@@ -52,15 +53,15 @@ namespace NetDJ
     /**
      * Copy constructor.
      *
-     * @param s2      New song content.
+     * @param aSong2      New song content.
      */
     SongFile(const SongFile& aSong2);
     
     /**
      * Assignment. 
      *
-     * @param s2      New song content.
-     * @return        Reference to self.
+     * @param aSong2      New song content.
+     * @return            Reference to self.
      */
     SongFile& operator=(const SongFile& aSong2);
 

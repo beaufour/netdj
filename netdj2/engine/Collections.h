@@ -12,6 +12,8 @@
 
 #include <vector>
 
+#include <qstring.h>
+
 namespace NetDJ
 {
   class ICollection;
@@ -54,6 +56,8 @@ namespace NetDJ
      *
      */
     void AddCollection(ICollection* aCol);
+
+    ICollection* GetCollection(const QString& aName);
     
     /**
      * Get the next song to play.

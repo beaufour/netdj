@@ -28,6 +28,7 @@ namespace NetDJ
   class IAccessChecker;
   class ICollection;
   class ISong;
+  class Collections;
 
   /**
    * Maximum bytes allowed in a request
@@ -74,16 +75,22 @@ namespace NetDJ
     /** The access checker used */
     IAccessChecker* mAccessChecker;
     
-    /** XML representation of currently playing song */
-    QDomDocument mSongDocument;
+    /** Document used for XML representation */
+    QDomDocument mDocument;
 
-    /** Mutex used to lock mSongDocument */
-    mutable QMutex mDocMutex;
+    /** Document used for representation of currently playing song */
+    QDomElement* mSongElement;
+
+    /** Mutex used to lock mSongElement */
+    mutable QMutex mSongMutex;
     
+    /** Pointer to song Collections */
+    Collections* mCols;
+
     /**
      * Get a copy of the currently playing song document
      */
-    QDomDocument* GetSong();
+    QDomElement* GetSong();
     
     /**
      * Handles commands from clients.
@@ -128,6 +135,7 @@ namespace NetDJ
      * Command: Skip current song.
      *
      * @param aStream           The stream to send output to
+     * @param aUsername         The user that ran the command
      */
     void CmdSkip(QTextStream& aStream, const QString& aUsername);
     
@@ -135,25 +143,34 @@ namespace NetDJ
      * Command: Shutdown NetDJ
      *
      * @param aStream           The stream to send output to
+     * @param aUsername         The user that ran the command
      */
     void CmdShutdown(QTextStream& aStream, const QString& aUsername);
     
     /**
-     * Command: Get index file, information about current song etc.
+     * Command: Get current song playing
      *
      * @param aStream           The stream to send output to
      */
-    void CmdIndex(QTextStream& aStream);
+    void CmdCurrent(QTextStream& aStream);
+    
+    /**
+     * Command: Get the request list
+     *
+     * @param aStream           The stream to send output to
+     */
+    void CmdRequests(QTextStream& aStream);
     
   public:
     /**
      * Constructor.
      *
+     * @param aCols             A pointer to the collections
      * @param aPort             The port number to listen on
      * @param aBackLog          The backlog of connections to keep
      * @param aParent           The parent QObject
      */
-    Server(int aPort, int aBackLog, QObject* aParent = 0);
+    Server(Collections* aCols, int aPort, int aBackLog, QObject* aParent = 0);
     
     /** Destructor */
     ~Server();

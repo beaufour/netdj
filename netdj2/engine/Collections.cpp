@@ -35,6 +35,21 @@ Collections::AddCollection(ICollection* aCol)
   mColList.push_back(aCol);
 }
 
+ICollection*
+Collections::GetCollection(const QString& aName)
+{
+  vector<ICollection*>::iterator curcol;
+  for (curcol = mColList.begin();
+       curcol != mColList.end();
+       ++curcol) {
+    if ((*curcol)->GetIdentifier() == aName) {
+      return *curcol;
+    }
+  }
+
+  return 0;
+}
+
 bool
 Collections::GetNextSong(ISong** aSong, const ICollection** aCol)
 {

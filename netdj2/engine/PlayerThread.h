@@ -46,7 +46,7 @@ namespace NetDJ
      *
      * @param aCols             Pointer to Collections
      * @param aStackSize        The stacksize for the thread
-     * @patam aParent           The parent object
+     * @param aParent           The parent object
      */
     PlayerThread(Collections* aCols, unsigned int aStackSize = 0,
 		 QObject* aParent = 0);

@@ -10,7 +10,7 @@
 #ifndef __ICOLLECTION_H__
 #define __ICOLLECTION_H__
 
-#include <string>
+#include <qstring.h>
 #include "StdException.h"
 #include "IXMLOutput.h"
 
@@ -46,14 +46,14 @@ namespace NetDJ
      *
      * @return        The identifier
      */
-    virtual std::string GetIdentifier() const = 0;
+    virtual QString GetIdentifier() const = 0;
     
     /**
      * Get the description for the collection.
      *
      * @return        The description
      */
-    virtual std::string GetDescription() const = 0;
+    virtual QString GetDescription() const = 0;
     
     
     /**
@@ -91,7 +91,7 @@ namespace NetDJ
     /**
      * Add a song to the list.
      *
-     * @param sng     The song to add
+     * @param aSong     The song to add
      */
     virtual bool AddSong(ISong* aSong) = 0;
   };

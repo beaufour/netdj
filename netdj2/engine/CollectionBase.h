@@ -28,21 +28,21 @@ namespace NetDJ
     
   protected:
     /** Identifier for the collection, short id */
-    std::string mIdentifier;
+    QString mIdentifier;
     
     /** The description, long textual*/
-    std::string mDescription;
+    QString mDescription;
 
     /** Get a UNID */
     u_int32_t GetNewUNID();
 
   public:
-    CollectionBase(const std::string aId, const std::string aDescr);
+    CollectionBase(const QString& aId, const QString& aDescr);
     virtual ~CollectionBase();
     
     // ICollection
-    std::string GetIdentifier() const;
-    std::string GetDescription() const;
+    QString GetIdentifier() const;
+    QString GetDescription() const;
 
     // IXMLOutput
     QDomElement* AsXML(QDomDocument* aDocument) const;

@@ -134,7 +134,7 @@ main(int argc, char* argv[])
                    &gLogger,      SLOT(LogPlayerStop()));
 
   gLogger.LogMessage("Initializing server", 10);
-  Server* server = new Server(7676, 5, &app);
+  Server* server = new Server(&cols, 7676, 5, &app);
   Q_CHECK_PTR(server);
 
   // Connect gLogger

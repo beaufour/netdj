@@ -33,9 +33,9 @@ namespace NetDJ
     /**
      * Constructor.
      * 
-     * @param id      The identifier
-     * @param descr   The description
-     * @param fname   The filename containing the list of songs
+     * @param aId      The identifier
+     * @param aDescr   The description
+     * @param aName    The filename containing the list of songs
      */
     Collection_Songlist_File(const std::string aId, const std::string aDescr,
 			     const std::string aName);

@@ -10,9 +10,9 @@
 
 #include <qdom.h>
 
+#include "config.h"
 #include "ISong.h"
 
-using namespace std;
 using namespace NetDJ;
 
 EmptyCollection::EmptyCollection(const std::string aStr)
@@ -21,7 +21,7 @@ EmptyCollection::EmptyCollection(const std::string aStr)
 }
 
 
-CollectionBase::CollectionBase(const string aId, const string aDescr)
+CollectionBase::CollectionBase(const QString& aId, const QString& aDescr)
   : mNextUNID(0), mIdentifier(aId), mDescription(aDescr)
 {
 }
@@ -32,14 +32,14 @@ CollectionBase::~CollectionBase()
 }
 
 
-string
+QString
 CollectionBase::GetIdentifier() const
 {
   return mIdentifier;
 }
 
 
-string
+QString
 CollectionBase::GetDescription() const
 {
   return mDescription;
@@ -54,6 +54,13 @@ CollectionBase::GetNewUNID()
 QDomElement*
 CollectionBase::AsXML(QDomDocument* aDocument) const
 {
+  /* Update collection first */
+  if (gConfig.GetBool("UPDATE_BEFORE_TRANSMIT")) {
+    CollectionBase* th = const_cast<CollectionBase*>(this);
+
+    th->Update();
+  }
+
   /* Main node */
   QDomElement* col = new QDomElement();
   Q_CHECK_PTR(col);

@@ -40,9 +40,9 @@ namespace NetDJ
     /**
      * Constructor.
      * 
-     * @param id      The identifier
-     * @param descr   The description
-     * @param isq     Is the songlist a queue?
+     * @param aId      The identifier
+     * @param aDescr   The description
+     * @param aIsQ     Is the songlist a queue?
      */
     Collection_Songlist(const std::string aId, const std::string aDescr,
 			const bool aIsQ);
