@@ -85,6 +85,7 @@ Song::GetSongInfo() const {
     switch (GetSongType()) {
     case SongType_MP3:
       mSongInfo = new SongInfo_File_mp3(mFilename);
+      Q_CHECK_PTR(mSongInfo);
       break;
       
     default:
