@@ -8,16 +8,11 @@
 
 #include "ID3Tag.h"
 
-typedef struct id3tag_t {
-	char		magic[3];
-	char		songname[30];
-	char		artist[30];
-	char		album[30];
-	char		year[4];
-	char		note[30];
-	unsigned char	style;
-} id3tag_t;
+// Provides fopen, fclose, fseek
+#include <cstdio>
 
+// Provides strncmp
+#include <cstring>
 
 struct style_s {
 	unsigned char	styleid;
@@ -184,26 +179,36 @@ ID3Tag::find_style(int styleid) {
   return "Unknown Style";
 }
 
+#include <iostream>
 
 bool
 ID3Tag::InitFromFile(const string fname) {
-  id3tag_t id3tag;
-  bool retval = false;
+  static const int maxsize[] = {30, 30, 30, 4, 30};
+  char id3buf[128];
+
+  // Read file
   FILE *fin = fopen(fname.c_str(), "rb");
   if (fin != NULL) {
     fseek (fin, 0, SEEK_END);
     fseek (fin, ftell(fin) - 128, SEEK_SET);
-    if (fread (&id3tag, 128, 1, fin) == 1 &&
-	!(strncmp(id3tag.magic, "TAG", 3))) {
-      title.assign(id3tag.songname, sizeof(id3tag.songname));
-      artist.assign(id3tag.artist, sizeof(id3tag.artist));
-      album.assign(id3tag.album, sizeof(id3tag.album));
-      year.assign(id3tag.year, sizeof(id3tag.year));
-      note.assign(id3tag.note, sizeof(id3tag.note));
-      style = find_style(id3tag.style);
-      retval = true;
+    if (fread (&id3buf, 128, 1, fin) == 1 &&
+	!(strncmp(id3buf, "TAG", 3))) {
+      // Fetch ID3-tag
+      int off = 3;
+      int j;
+
+      for (int i = 0; i < 5; ++i) {
+	for (j = 0; id3buf[off + j] && j < maxsize[i]; ++j) {};
+	// Trim string
+	while (j && (id3buf[off + j - 1] == '\0'
+		     || id3buf[off + j - 1] == ' ')) --j;
+	tags[i].assign(&id3buf[off], j);
+	off += maxsize[i];
+      }
+      tags[5] = find_style((unsigned char) id3buf[off]);
+      return true;
     }
     fclose(fin);
   }
-  return retval;
+  return false;
 }

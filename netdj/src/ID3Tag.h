@@ -10,16 +10,10 @@
 #define __ID3TAG_H__
 
 #include <string>
-#include <cstdio>
 
 class ID3Tag {
 private:
-  string title;
-  string artist;
-  string album;
-  string year;
-  string note;
-  string style;
+  string tags[6];
 
   string find_style(int);
 
@@ -28,12 +22,12 @@ public:
 
   bool InitFromFile(const string);
   
-  string GetTitle() const { return title; };
-  string GetArtist() const { return artist; };
-  string GetAlbum() const { return album; };
-  string GetYear() const { return year; };
-  string GetNote() const { return note; };
-  string GetStyle() const { return style; };
+  string GetTitle() const { return tags[0]; };
+  string GetArtist() const { return tags[1]; };
+  string GetAlbum() const { return tags[2]; };
+  string GetYear() const { return tags[3]; };
+  string GetNote() const { return tags[4]; };
+  string GetStyle() const { return tags[5]; };
 };
 
 #endif
