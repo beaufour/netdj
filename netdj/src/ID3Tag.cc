@@ -184,6 +184,7 @@ bool
 ID3Tag::InitFromFile(const string fname) {
   static const int maxsize[] = {30, 30, 30, 4, 30};
   char id3buf[128];
+  bool res = false;
 
   // Read file
   FILE *fin = fopen(fname.c_str(), "rb");
@@ -205,9 +206,9 @@ ID3Tag::InitFromFile(const string fname) {
 	off += maxsize[i];
       }
       tags[5] = find_style((unsigned char) id3buf[off]);
-      return true;
+      res = true;
     }
     fclose(fin);
   }
-  return false;
+  return res;
 }
