@@ -14,6 +14,14 @@
 
 namespace NetDJ 
 {
+  /**
+   * Implementation of INetDJClient.
+   *
+   * @todo LogService::EntryClass_t should be in another file, both to remove
+   * need for LogService namespace, but also thread support because of QMutex
+   * in LogService.h... In general, the types and other generic includes
+   * should be moved to an include dir.
+   */
   class NetDJClient : public INetDJClient
   {
     Q_OBJECT
