@@ -10,7 +10,7 @@
 #ifndef __COLLECTION_SONGLIST_H__
 #define __COLLECTION_SONGLIST_H__
 
-#include "Collection.h"
+#include "CollectionBase.h"
 #include "Song.h"
 #include <deque>
 #include <qmutex.h>
@@ -19,7 +19,7 @@
 /**
  * Base class for collections maintained by a list of songs.
  */
-class Collection_Songlist : public Collection {
+class Collection_Songlist : public CollectionBase {
 protected:
   /** List of songs managed by collection */
   std::deque<Song> mSonglist;

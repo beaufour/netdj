@@ -13,7 +13,7 @@ using namespace std;
 
 Collection_Songlist::Collection_Songlist(const string aId, const string aDescr,
 					 const bool aIsQ)
-  : Collection(aId, aDescr), mIsQueue(aIsQ)
+  : CollectionBase(aId, aDescr), mIsQueue(aIsQ)
 {
 }
 

@@ -24,7 +24,7 @@ public:
 };
 
 /**
- * Base class for collections of songs.
+ * Interface for collections of songs.
  *
  * Goals: Handle everything about a collection of songs
  * - Identifier (string)
@@ -35,35 +35,13 @@ public:
  * - Retrieve list of all songs?
  */
 class Collection : public XMLOutput {
-protected:
-  /** Identifier for the collection, short id */
-  std::string mIdentifier;
-
-
-  /** The description, long textual*/
-  std::string mDescription;
-
-
 public:
-  /**
-   * Constructor.
-   *
-   * @param id      The identifier
-   * @param descr   The description
-   */
-  Collection(const std::string aId, const std::string aDescr);
-
-  /**
-   * Destructor.
-   */
-  virtual ~Collection();
-
   /**
    * Get the identifier for the collection.
    *
    * @return        The identifier
    */
-  std::string GetIdentifier() const;
+  virtual std::string GetIdentifier() const = 0;
 
 
   /**
@@ -71,7 +49,16 @@ public:
    *
    * @return        The description
    */
-  std::string GetDescription() const;
+  virtual std::string GetDescription() const = 0;
+
+
+  /**
+   * Get whether songs from this collection should be deleted from the
+   * filesystem after being played.
+   *
+   * @return        Delete after play?
+   */
+  virtual bool GetDeleteAfterPlay() const = 0;
 
 
   /**
@@ -112,8 +99,6 @@ public:
    * @param sng     The song to add
    */
   virtual bool AddSong(const Song& aSong) = 0;
-
-  void asXML(QDomDocument& aDoc, QDomElement& aRoot) const;
 };
 
 #endif

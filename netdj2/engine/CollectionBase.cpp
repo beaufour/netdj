@@ -1,45 +1,55 @@
 /**
- * \file Collection.cpp
- * Class Collection.
+ * \file CollectionBase.cpp
+ * Class CollectionBase.
  *
  * $Id$
  *
  */
 
-#include "Collection.h"
+#include "CollectionBase.h"
 
 using namespace std;
 
 EmptyCollection::EmptyCollection(const std::string aStr)
-  : StdException(aStr) {
-
+  : StdException(aStr)
+{
 }
 
 
-Collection::Collection(const string aId, const string aDescr)
+CollectionBase::CollectionBase(const string aId, const string aDescr)
   : mIdentifier(aId), mDescription(aDescr)
 {
 }
 
 
-Collection::~Collection() {
+CollectionBase::~CollectionBase()
+{
 }
 
 
 string
-Collection::GetIdentifier() const {
+CollectionBase::GetIdentifier() const
+{
   return mIdentifier;
 }
 
 
 string
-Collection::GetDescription() const {
+CollectionBase::GetDescription() const
+{
   return mDescription;
+}
+
+bool
+CollectionBase::GetDeleteAfterPlay() const
+{
+  return false;
 }
 
 
 void
-Collection::asXML(QDomDocument& aDoc, QDomElement& aRoot) const {
+CollectionBase::asXML(QDomDocument& aDoc, QDomElement& aRoot) const
+{
   /* Main node */
   QDomElement col = aDoc.createElement("collection");
   col.setAttribute("id", GetIdentifier());
