@@ -508,11 +508,11 @@ http_thread(void*) {
 
     // XML-answer
     const char xbuf1[] =
-      "HTTP/1.1 200 OK\n"
-      "Server: NetDJ\n"
-      "Connection: close\n"
-      "Content-Type: text/xml\n"
-      "\n"
+      "HTTP/1.1 200 OK\r\n"
+      "Server: NetDJ\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/xml\r\n"
+      "\r\n"
       "<?xml version=\"1.0\"?>\n"
       "<netdj>\n";
 
@@ -524,11 +524,11 @@ http_thread(void*) {
 
     // HTML-answer
     const char hbuf1[] =
-      "HTTP/1.1 200 OK\n"
-      "Server: NetDJ\n"
-      "Connection: close\n"
-      "Content-Type: text/html; charset=iso-8859-1\n"
-      "\n"
+      "HTTP/1.1 200 OK\r\n"
+      "Server: NetDJ\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/html; charset=iso-8859-1\r\n"
+      "\r\n"
       "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
       "<HTML>\n"
       "  <HEAD>\n"
@@ -587,27 +587,27 @@ http_thread(void*) {
 
     // TEXT-answer
     const char tbuf[] =
-      "HTTP/1.1 200 OK\n"
-      "Server: NetDJ\n"
-      "Connection: close\n"
-      "Content-Type: text/ascii\n"
-      "\n";
+      "HTTP/1.1 200 OK\r\n"
+      "Server: NetDJ\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/ascii\r\n"
+      "\r\n";
 
     // COMMAND-answer
     const char cbuf[] =
-      "HTTP/1.1 302 Found\n"
-      "Connection: close\n"
-      "Server: NetDJ\n"
-      "Location:/\n"
-      "\n";
+      "HTTP/1.1 302 Found\r\n"
+      "Connection: close\r\n"
+      "Server: NetDJ\r\n"
+      "Location:/\r\n"
+      "\r\n";
 
     const char abuf[] =
-      "HTTP/1.1 401 Authorization Required\n"
-      "Server: NetDJ\n"
-      "WWW-Authenticate: Basic realm=\"NetDJ\"\n"
-      "Connection: close\n"
-      "Content-Type: text/html; charset=iso-8859-1\n"
-      "\n"
+      "HTTP/1.1 401 Authorization Required\r\n"
+      "Server: NetDJ\r\n"
+      "WWW-Authenticate: Basic realm=\"NetDJ\"\r\n"
+      "Connection: close\r\n"
+      "Content-Type: text/html; charset=iso-8859-1\r\n"
+      "\r\n"
       "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
       "<HTML>\n"
       "  <HEAD>\n"
