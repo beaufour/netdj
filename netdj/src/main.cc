@@ -338,7 +338,9 @@ player_thread(void*) {
 	}
 	currentsong.Set(fobj, delete_it);
 	std::cout << std::endl << "  Playing '" << fobj.GetFilename()
-	     << "' [" << lists[i]->GetShortname() << "]" << std::endl;
+		  << "' [" << lists[i]->GetShortname()
+		  << ", " << fobj.GetOwner() << "]";
+	std::cout << std::endl;
 	screen_flush();
 	
 	if (!config.GetBool("STREAM")) {
@@ -998,6 +1000,7 @@ http_thread(void*) {
 		      sprintf(tmplint, "%ld", it->GetSize());
 		      xbuf += tmplint;
 		      xbuf += "</size>\n";
+		      xbuf += "    <owner>" + it->GetOwner() + "</owner>\n";
 		      xbuf += "    <description>" + it->GetFilenameNoType() + "</description>\n";
 		      it->GetID3Info(id3tag);
 		      xbuf += "    <artist>" + id3tag->GetArtist() + "</artist>\n";
