@@ -552,7 +552,7 @@ http_thread(void*) {
       "          }\n"
       "      }\n"
       "    </SCRIPT>\n"
-      "    Currently playing:\n"
+      "    <A HREF=\"http://netdj.sourceforge.net\">NetDJ</A> is currently playing:\n"
       "    <P>\n"
       "    <FORM TARGET=\"_CONTENT\" ACTION=\"http://www.google.com/search\">\n"
       "      <INPUT maxLength=256 size=55 name=q value=\"";
