@@ -1,0 +1,8 @@
+* NetLogListener is QtHTTP implemenation of course
+  - Another implementation is a KDE, KUrl-thingy, that uses the KDE UI to ask
+    for credentials
+  - Could make it even more generic, instead of sending out QDomElement it
+    should send out std::string? Naaah, signal/slot... but it would be nice to
+    have a non-Qt interface.
+* INetDJClient should have a constructor that takes a ILogListener as an
+  argument, and does the connect automatically... or the other way around?
