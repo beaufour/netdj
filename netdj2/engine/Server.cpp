@@ -211,65 +211,6 @@ Server::ClientClosed()
 }
 
 
-/************* COMMANDS **************/
-void
-Server::CmdHelp(QTextStream& aStream)
-{
-  aStream << HTTP_200
-          << HTTP_HTML
-          << HTTP_DATASTART
-          << HTML_200_START
-          << "<p>Help to come ...</p>\n"
-          << HTML_200_END;
-  
-}
-
-void
-Server::CmdIndex(QTextStream& aStream)
-{
-  QDomDocument doc("NetDJ");
-  QDomElement root = doc.createElement("currentsong");
-  Song cursong;
-  string curcol;
-  /** @todo Listen for PlaySong signal! */
-  // mPlayer->GetCurrentSong(cursong, curcol);
-  root.setAttribute("collection", curcol);
-  cursong.asXML(doc, root);
-  doc.appendChild(root);
-  
-  aStream << HTTP_200
-          << HTTP_XML
-          << HTTP_DATASTART
-          << doc.toString()
-          << endl;
-}
-
-void
-Server::CmdSkip(QTextStream& aStream)
-{
-  aStream << HTTP_200
-          << HTTP_HTML
-          << HTTP_DATASTART
-          << HTML_200_START
-          << "<p>Skipping song</p>\n"
-          << HTML_200_END;
-  
-  emit SigSkip();
-}
-
-void
-Server::CmdShutdown(QTextStream& aStream)
-{
-  aStream << HTTP_200
-          << HTTP_HTML
-          << HTTP_DATASTART
-          << HTML_200_START
-          << "<p>Shutting down NetDJ!</p>\n"
-          << HTML_200_END;
-  
-  emit SigQuit();
-}
-
 /********** COMMAND HANDLER ************/
 /** Command types */
 enum cmdtype_t {
@@ -371,3 +312,76 @@ Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
     return mAccessChecker->HasAccess(user, pass, aLevel);
   }
 }
+
+/************* COMMANDS **************/
+void
+Server::CmdHelp(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<table>\n"
+          << "  <tr><th>Name</th><th>Description</th></tr>\n";
+
+  for (int i = 0; gCommands[i].mName; ++i) {
+    aStream << "  <tr><td><a href=\""
+            << gCommands[i].mName
+            << "\">"
+            << gCommands[i].mName
+            << "</a></td><td>"
+            << gCommands[i].mDescription
+            << "</td></tr>\n";
+  }
+
+  aStream << "</table>\n"
+          << HTML_200_END;
+  
+}
+
+void
+Server::CmdIndex(QTextStream& aStream)
+{
+  QDomDocument doc("NetDJ");
+  QDomElement root = doc.createElement("currentsong");
+  Song cursong;
+  string curcol;
+  /** @todo Listen for PlaySong signal! */
+  // mPlayer->GetCurrentSong(cursong, curcol);
+  root.setAttribute("collection", curcol);
+  cursong.asXML(doc, root);
+  doc.appendChild(root);
+  
+  aStream << HTTP_200
+          << HTTP_XML
+          << HTTP_DATASTART
+          << doc.toString()
+          << endl;
+}
+
+void
+Server::CmdSkip(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<p>Skipping song</p>\n"
+          << HTML_200_END;
+  
+  emit SigSkip();
+}
+
+void
+Server::CmdShutdown(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<p>Shutting down NetDJ!</p>\n"
+          << HTML_200_END;
+  
+  emit SigQuit();
+}
+
