@@ -1,3 +1,15 @@
+2002-02-06 Wednesday 11:00   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* ChangeLog (1.5), acconfig.h (1.1), aclocal.m4 (1.4), autogen.sh
+	(1.1), configure.in (1.5), src/Makefile.am (1.5), src/config.h.in
+	(1.3), src/config.h.top (1.1): Fixed some errors in the
+	automake-system. Everything should work now.  
+
+2002-02-06 Wednesday 10:58   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.18): Quick hack to bypass a bug with old
+	readline-lib...  
+
 2002-02-04 Monday 12:57   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* ChangeLog (1.4), src/main.cc (1.17): Ooops a leftover created a
