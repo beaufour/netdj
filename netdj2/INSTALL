@@ -1,0 +1,4 @@
+Prerequisites:
+-- libshout (www.?????.???)
+-- taglib
+-- qt3 with multithread support

@@ -2,9 +2,40 @@
 * Qt
   - qWarning, etc.
 * JavaDoc documentation style.
+* Mozilla style naming: mMember, aParam, FunctionIsLikeThis()
+* Pure virtual interfaces for:
+  -- Player
+  -- Collection
+  -- HTTPServer?
+* Use TagLib (http://ktown.kde.org/~wheeler/taglib/api/) for file-based access
+  -- has TagLib::AudioProperties::length() and sampleRate(), etc.!
 
 Open issues:
 * All output to?
-  - cin/cout/cerr/clog ??
-  - warnings from qWarning should be caught!
+  -- cin/cout/cerr/clog ??
+  -- warnings from qWarning should be caught!
+  -- events could be the answer?
 * Threads?
+* Event-based?
+  -- Logger could listen to DebugEvents, or whatever, anyone could subscribe to
+     these types of events and use it for whatever.
+  -- Event: SkipSong, PlaySong, StartPlayer, StopPlayer, RequestListAdd,
+     RequestListRemove, ListenerAdd, ListenerRemove
+  -- All inherting from a base type that has a AsString() function?
+* Database support throgh Qt? UnixODBC?
+* Easy way to extend
+  -- Via pure virtual interfaces
+     - Implement new collections, etc.
+     - How about rating system?
+  -- Via central notification service?
+     - Everybody can subscribe to whatever events they like.
+  -- Via exposed server interface with commands for querying:
+     - lists
+     - song database
+     - song information (part of list query?)
+     - stream information, listeners, url, etc.?
+
+* CollectionAggregator/Merger?
+  -- Implements normal READONOLY CollectionInterface, maintains a list of
+     Collections and just acts as a proxy to these.
+  -- GetSong() needs to return struct that includes list information...
