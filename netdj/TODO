@@ -13,7 +13,6 @@ ENGINE:
 APPLET:
 * Show the ID3-info
 * Show proper window instead of tooltip
-* FIX: Doesn't resize to new panelsize if moved
 * FIX: Crashes when there's only one song in the cache-list
 
 

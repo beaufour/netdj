@@ -87,6 +87,12 @@ $button->add($label);
 $button->set_usize($CONFIG{MAX_SIZE}, $applet->get_panel_pixel_size);
 $box->pack_start($button, 0, 0, 1);
 
+# Catch resizing of applet
+$applet->signal_connect("change_pixel_size", sub {
+			 my ($applet, $size) = @_;
+			 $button->set_usize($CONFIG{MAX_SIZE}, $size);
+		       });
+
 # Cache status label
 my $cachestatus = new Gtk::Label "-";
 $box->pack_start($cachestatus, 0, 0, 1);
@@ -169,7 +175,7 @@ sub cmd_generic {
 
 sub menu_about {
     my $about = new Gnome::About "NetDJ applet",
-	"0.01",
+	"0.02",
 	"(c) 2002 by Allan Beaufour Larsen",
 	"Allan Beaufour Larsen <allan\@beaufour.dk>",
 	'CVSinfo: $Id$';
