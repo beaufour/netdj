@@ -6,6 +6,20 @@ AM_INIT_AUTOMAKE(netdj,[$VERSION])
 AM_CONFIG_HEADER(src/config.h)
 AM_MAINTAINER_MODE
 
+AC_DEFINE_UNQUOTED(PKGVER, "$PACKAGE v$VERSION",
+                   [Package name and version])
+
+dnl File setup
+AC_DEFINE(CONF_FILENAME, "config",
+          [Name of the configuration file])
+AC_DEFINE(CONF_STATEFILENAME, "state",
+          [Name of the state file])
+AC_DEFINE(CONF_USERFILENAME, "users",
+          [Name of the user file])
+AC_DEFINE(CONF_LOGFILENAME, "playlog",
+          [Name of log file])
+
+
 dnl Directory setup
 sysconfdir=$sysconfdir'/netdj'
 NETDJ_ETCDIR=$sysconfdir
@@ -14,11 +28,13 @@ NETDJ_ETCDIR=`(
     test "x$exec_prefix" = xNONE && exec_prefix=${prefix}
     eval echo "$NETDJ_ETCDIR"
 )`
-AC_DEFINE_UNQUOTED(NETDJ_ETCDIR,"$NETDJ_ETCDIR")
+AC_DEFINE_UNQUOTED(NETDJ_ETCDIR,"$NETDJ_ETCDIR",
+	           [Where to find global configuration files])
 AC_SUBST(NETDJ_ETCDIR)
 
 CONF_DIRNAME=".netdj/"
-AC_DEFINE_UNQUOTED(CONF_DIRNAME,"$CONF_DIRNAME")
+AC_DEFINE_UNQUOTED(CONF_DIRNAME,"$CONF_DIRNAME",
+	           [Where to find local configuration files (~/CONF_DIRNAME)])
 AC_SUBST(CONF_DIRNAME)
 
 dnl Checks for programs.
@@ -41,7 +57,8 @@ AC_ARG_WITH(readline,
 	USE_READLINE=yes)
 
 if test "$USE_READLINE" = "yes"; then
-  AC_DEFINE(USE_READLINE)
+  AC_DEFINE(USE_READLINE, 1,
+            [Define if you want to enable readline support])
   AC_LIB_READLINE
   if test "$ac_cv_lib_readline" != "no"; then
     AC_CACHE_CHECK([for rl_icpfunc_t in history.h],
@@ -57,7 +74,8 @@ if test "$USE_READLINE" = "yes"; then
       LIBS="$save_LIBS"
     ])
     if test "$dj_icpfunc" = yes; then
-      AC_DEFINE(HAVE_ICPFUNC)
+      AC_DEFINE(HAVE_ICPFUNC, 1,
+                [Define if you have icp_func defined])
     fi
   fi
 fi

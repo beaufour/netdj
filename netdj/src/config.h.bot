@@ -1,2 +1,0 @@
-/* Program and version string */
-#define PKGVER PACKAGE " v" VERSION
