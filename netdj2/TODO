@@ -1,0 +1,8 @@
+Show-stoppers:
+* Config file
+* Logger service
+* Proper command interface
+* Access Control
+
+Nice to have:
+* Use SOAP for commands
