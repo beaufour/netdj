@@ -16,6 +16,10 @@
 #include "File.h"
 #include "ID3Tag.h"
 
+// HACK to correct c++ "bug" in shout.h
+#define namespace nspace
+#include <shout/shout.h>
+
 // Provides cout and manipulation of same
 #include <iostream>
 #include <iomanip>
@@ -179,6 +183,7 @@ public:
 TCurrentSong currentsong;
 int playercmd_pid = 0;
 bool stop_player  = false;
+bool next_song = false;
 pthread_t player_t;
 
 void*
@@ -186,10 +191,37 @@ player_thread(void*) {
   unsigned int i;
   File fobj;
 
+  stop_player = false;
+  next_song = false;
+
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
+  // Init shoutcast stuff
+  shout_conn_t conn;
+  unsigned char buff[4096];
+  long read;
+  FILE *musicfile;
+
+  shout_init_connection(&conn);
+  
+  conn.ip = "127.0.0.1";
+  conn.port = 8000;
+  conn.mount = "netdj";
+  conn.password = "oopsididit"; 
+  conn.name = "NetDJ rocks!";
+  conn.genre = "Mixed";
+  conn.description = "NetDJ streaming channel";
+
+  if (config.GetBool("STREAM") && !shout_connect(&conn)) {
+    cout << endl << "  Couldn't connect to server!" << endl;
+    screen_flush();
+    stop_player = true;
+  }
+  
   while (!stop_player) {
+    // Get next song
+    next_song = false;
     for (i = 0; i < listnum; ++i) {
       if (lists[i]->GetSong(fobj))
 	break;
@@ -207,28 +239,50 @@ player_thread(void*) {
 	     << "' [" << *(lists[i]->GetShortname()) << "]" << endl;
 	screen_flush();
 	
-	// Play song
-	playercmd_pid = fork();
-	if (playercmd_pid == -1) {
-	  error(strerror(errno));
-	}
-
-	if (playercmd_pid == 0) {
-	  // Skip all output from player
-	  freopen("/dev/null", "w", stdout);
-	  freopen("/dev/null", "w", stderr);
-	  // Start player
-	  execlp(config.GetString("PLAYER").c_str(),
-		 "mpg123",
-		 "-q",
-		 "--aggressive",
-		 fobj.GetName().c_str(),
-		 NULL);
+	if (!config.GetBool("STREAM")) {
+	  // Play song with player program
+	  playercmd_pid = fork();
+	  if (playercmd_pid == -1) {
+	    error(strerror(errno));
+	  }
+	  
+	  if (playercmd_pid == 0) {
+	    // Skip all output from player
+	    freopen("/dev/null", "w", stdout);
+	    freopen("/dev/null", "w", stderr);
+	    // Start player
+	    execlp(config.GetString("PLAYER").c_str(),
+		   "mpg123",
+		   "-q",
+		   "--aggressive",
+		   fobj.GetName().c_str(),
+		   NULL);
+	  } else {
+	    wait(NULL);
+	  }
 	} else {
-	  wait(NULL);
+	  musicfile = fopen(fobj.GetName().c_str(), "r");
+	  while (!stop_player && !next_song) {
+	    read = fread(buff, 1, 4096, musicfile);
+	    if (read > 0) {
+	      if (!shout_send_data(&conn, buff, read)) {
+		cout << endl << "  Send error:" << conn.error << "..." << endl;
+		screen_flush();
+		break;
+	      }
+	    } else {
+	      break;
+	    }
+	    shout_sleep(&conn);
+	  }
+	  fclose(musicfile);
 	}
       }
     }
+  }
+
+  if (config.GetBool("STREAM")) {
+    shout_disconnect(&conn);
   }
 
   // Clear currentsong and end thread
@@ -238,7 +292,10 @@ player_thread(void*) {
 
 
 void kill_current() {
-  if (playercmd_pid) {
+  if (config.GetBool("STREAM")) {
+    // This should be packed nicely into a semaphore...
+    next_song = true;
+  } else if (playercmd_pid) {
     kill(playercmd_pid, SIGINT);
   }
 }

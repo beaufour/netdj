@@ -8,7 +8,7 @@
 
 #include "Configuration.h"
 
-const unsigned int CONFSIZE = 8 * 2;
+const unsigned int CONFSIZE = 9 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "PLAYER", "/usr/bin/mpg123",
 			      "CACHE_DIR", "/usr/share/mp3/cache",
@@ -16,7 +16,8 @@ const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "WEB_LOCKED", "false",
 			      "HTTP_START", "false",
 			      "PLAYER_START", "true",
-                              "DELETE_PLAYED", "false"};
+                              "DELETE_PLAYED", "false",
+                              "STREAM", "false"};
 
 void
 Configuration::ReadFile(string fname) {

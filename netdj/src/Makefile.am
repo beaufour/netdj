@@ -3,7 +3,7 @@ HISTORY_LIB =
 
 bin_PROGRAMS = netdj
 
-netdj_LDADD = $(READLINE_LIB) $(HISTORY_LIB)
+netdj_LDADD = $(READLINE_LIB) $(HISTORY_LIB) -lshout
 
 netdj_SOURCES = main.cc \
 		util.cc util.o \

@@ -11,6 +11,12 @@ PLAYER_START = false
 DELETE_PLAYED = false
 
 ########################################
+# STREAMER
+########################################
+# Stream music instead of playing
+STREAM = true
+
+########################################
 # DIRECTORIES
 ########################################
 # Cache location (full path!)
