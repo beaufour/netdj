@@ -9,6 +9,7 @@
 enum UserLevel {
   Level_Null  = 0,
   Level_User  = 50,
-  Level_PowerUser = 200,
+  Level_PowerUser = 100,
+  Level_PrivUser = 200,
   Level_Admin = 1000
 };
