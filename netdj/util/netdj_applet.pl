@@ -71,17 +71,21 @@ $applet->register_stock_callback("Preferences", "Preferences", , "Preferences...
 $applet->register_stock_callback("About", "About", , "About...", \&menu_about);
 
 # Box
-my $box = new Gtk::HBox(0, 4);
+my $box = new Gtk::HBox(0, 0);
 $applet->add($box);
 
 # Status button
 my $button = new Gtk::Button;
 my $label = new Gtk::Label $NOINFO_TEXT;
 $button->set_name("button");
-$button->set_usize($CONFIG{MAX_SIZE}, $applet->get_panel_pixel_size);
 $button->signal_connect("clicked", \&cmd_update);
 $button->add($label);
+$button->set_usize($CONFIG{MAX_SIZE}, $applet->get_panel_pixel_size);
 $box->pack_start($button, 0, 0, 1);
+
+# Cache status label
+my $cachestatus = new Gtk::Label "-";
+$box->pack_start($cachestatus, 0, 0, 1);
 
 # Next button
 my $nextbutton = new Gtk::Button;
@@ -128,8 +132,10 @@ sub cmd_update {
 	    foreach my $s (values %$songs) {
 		$tool .= $s->{description}."\n";
 	    }
-
 	    $applet->set_tooltip($tool);
+
+	    # Cache status
+	    $cachestatus->set_text($status->{list}->{cache}->{size});
 	}
     }
     
