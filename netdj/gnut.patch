@@ -1,63 +1,79 @@
-diff -u -r gnut-0.4.28/configure gnut-0.4.28_abl/configure
---- gnut-0.4.28/configure	Wed Oct  3 22:40:29 2001
-+++ gnut-0.4.28_abl/configure	Thu Dec  6 22:58:44 2001
-@@ -748,7 +748,7 @@
- 
- PACKAGE=gnut
- 
--VERSION=0.4.28
-+VERSION=0.4.28_abl
- 
- if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
-   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
-diff -u -r gnut-0.4.28/configure.in gnut-0.4.28_abl/configure.in
---- gnut-0.4.28/configure.in	Tue Sep 11 01:19:00 2001
-+++ gnut-0.4.28_abl/configure.in	Thu Dec  6 22:58:44 2001
-@@ -45,7 +45,7 @@
- cat_eof
- read GPL_OK_TMP
- 
--AM_INIT_AUTOMAKE(gnut,0.4.28)
-+AM_INIT_AUTOMAKE(gnut,0.4.28_abl)
- AM_MAINTAINER_MODE
- AM_ACLOCAL_INCLUDE(macros)
- 
-diff -u -r gnut-0.4.28/src/conf.c gnut-0.4.28_abl/src/conf.c
---- gnut-0.4.28/src/conf.c	Wed Oct  3 08:25:10 2001
-+++ gnut-0.4.28_abl/src/conf.c	Thu Dec  6 22:58:45 2001
-@@ -28,6 +28,7 @@
-   {"cache_parallel",  "1"},
-   {"cache_refresh",   "600"},
-   {"cache_size",      "15000"},  /* 15 megs.  Should this be measured in M instead of K? */
-+  {"cache_namecomp",  ""},
-   {"checkpoint_hosts", "600"},
-   {"checkpoint_net",  "60"},
-   {"config_file",     ""},
-diff -u -r gnut-0.4.28/src/qry.c gnut-0.4.28_abl/src/qry.c
---- gnut-0.4.28/src/qry.c	Tue Sep 11 01:31:54 2001
-+++ gnut-0.4.28_abl/src/qry.c	Thu Dec  6 22:58:46 2001
-@@ -301,11 +301,14 @@
-   int min_cache_size;
-   char *lcname;
-   char *s;
-+  char *namecomp;
- 
-   min_cache_size = conf_get_int("min_cache_size");
-   if (min_cache_size == 0) {
-     min_cache_size = 15;
-   }
-+   
-+  namecomp = conf_get_str("cache_namecomp");
- 
-   /* only cache files 1/4 the size of the cache or smaller
-    * (limits thrashing, I hope - Ray) */
-@@ -326,7 +329,8 @@
-   {
-     int allow;
- 
--    allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1);
-+    allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1)
-+            && strstr(lcname, namecomp);
-     fre_str(&lcname, 518);
-     if(! allow) {
-       if (gc_verbose & 8) {
+diff -r gnut-0.4.28/configure gnut-0.4.28_abl/configure
+751c751
+< VERSION=0.4.28
+---
+> VERSION=0.4.28_abl
+diff -r gnut-0.4.28/configure.in gnut-0.4.28_abl/configure.in
+48c48
+< AM_INIT_AUTOMAKE(gnut,0.4.28)
+---
+> AM_INIT_AUTOMAKE(gnut,0.4.28_abl2)
+diff -r gnut-0.4.28/src/conf.c gnut-0.4.28_abl/src/conf.c
+30a31,32
+>   {"cache_namecomp",  ""},
+>   {"cache_filter_file", ""},
+diff -r gnut-0.4.28/src/gnut.c gnut-0.4.28_abl/src/gnut.c
+336a337
+>   cache_init_filter();
+diff -r gnut-0.4.28/src/qry.c gnut-0.4.28_abl/src/qry.c
+23a24,68
+> /* cache filter */
+> char* cache_filter[100];
+> 
+> void
+> cache_init_filter() {
+>   char *fname = conf_get_str("cache_filter_file");
+>   FILE *fil;
+>   int pos = 0;
+>   char buf[256];
+>   ssize_t cnt;
+> 
+>   // Open fil and fill filterlist
+>   fil = fopen(fname, "r");
+>   if (fil) {
+>     while ((pos < (sizeof(cache_filter) - 1)) && fgets(buf, sizeof(buf), fil)) {
+>       cnt = strlen(buf);
+>       // Remove trailing newlines
+>       while ((cnt > 0) && (buf[cnt - 1] == '\n' || buf[cnt - 1] == '\r'))
+> 	buf[--cnt] = '\0';
+>       if (cnt && buf[0] != '#') {
+> 	cache_filter[pos] = (char*) malloc(cnt + 1);
+> 	strncpy(cache_filter[pos], buf, cnt + 1);
+> 	++pos;
+>       }
+>     }
+>     fclose(fil);
+>   }
+> 
+>   printf ("Filled cache-filter with %d entries\n", pos - 1);
+> 
+>   // Set last entry to NULL
+>   cache_filter[pos] = NULL;
+> }
+> 
+> int
+> cache_apply_filter(char *name) {
+>   int pos;
+> 
+>   // Search list
+>   for (pos = 0; cache_filter[pos] && strstr(name, cache_filter[pos]) == NULL; ++pos) {};
+> 
+>   // We reached end of list without a match...
+>   return cache_filter[pos] == NULL;
+> }
+> 
+303a349
+>   char *namecomp;
+308a355,356
+>    
+>   namecomp = conf_get_str("cache_namecomp");
+329c377,379
+<     allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1);
+---
+>     allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1)
+>             && strstr(lcname, namecomp)
+>             && cache_apply_filter(lcname);
+diff -r gnut-0.4.28/src/qry.h gnut-0.4.28_abl/src/qry.h
+50a51,52
+>   void cache_init_filter();
+> 

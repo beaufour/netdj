@@ -1,32 +1,24 @@
-My personal taste-filter. It's just a notepad for me, and absolutely
-personal. My plan is to modify gnut so it can handle a file like this, and
-only cache files according to is.
-
-... beaufour
-
-ADD:
-.+\.[m|M][p|P]3$
-
-REMOVE:
-Oakenfold
-Charlie Daniels
-Fuck
-Country
-R Kelly
-Aaron Carter
-Britney Spears
-Usher
-DivX
-Rod Stewart
-N'sync
-Usher
-Dixie Chicks
-Techno Remix
-Techno?
-Garth Brooks
-Tim McGraw
-Ja Rule
-DMX
-Nazi
-Hitler
-Ludacris
+# My _personal_ taste-filter.
+# I use it with gnut to skip caching of files with filenames matching this list.
+# ... beaufour
+oakenfold
+charlie daniels
+fuck
+country
+r kelly
+aaron carter
+britney spears
+usher
+divx
+rod stewart
+n'sync
+usher
+dixie chicks
+techno remix
+garth brooks
+tim mcgraw
+ja rule
+dmx
+nazi
+hitler
+ludacris
