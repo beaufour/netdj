@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=NetDJ
+Comment=Show status of NetDJ
+Exec=netdj_applet.pl
+Icon=
+Terminal=0
+Type=Application

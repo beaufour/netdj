@@ -1,0 +1,23 @@
+Need to have:
+-------------
+* POSIX threads
+* GNU regex
+
+Nice to have:
+-------------
+* GNU readline (well, I give no guarantees without this, but it compiles)
+* ID3LIB
+
+Compile:
+--------
+1. Edit config.h
+2. ./make
+
+Configuration:
+--------------
+Edit _netdj and copy to ~/.netdj
+Edit _netdj_users and copy to  ~/.netdj_users
+
+Bug reports to: allan@beaufour.dk with NetDJ in subject.
+
+CVS: $Id$

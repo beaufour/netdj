@@ -1,0 +1,28 @@
+# Configuration file for NetDJ
+
+########################################
+# PLAYER
+########################################
+# Full path to player (no arguments!)
+PLAYER = /home/beaufour/bin/mpg123
+# Start playing from start
+PLAYER_START = false
+
+########################################
+# DIRECTORIES
+########################################
+# Cache location (full path!)
+CACHE_DIR = /home/beaufour/gnut-cache
+# Share location (full path!)
+SHARE_DIR = /home/beaufour/mp3
+
+########################################
+# HTTP CONFIGURATION
+########################################
+# Serve HTTP-requests
+HTTP_START = true
+# Which port to server HTTP-requests on
+HTTP_PORT = 7676
+# Lock HTTP command interface
+WEB_LOCKED = false
+

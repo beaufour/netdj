@@ -1,0 +1,63 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(src/main.cc)
+
+AM_INIT_AUTOMAKE(netdj,0.10)
+AM_CONFIG_HEADER(src/config.h)
+AM_MAINTAINER_MODE
+
+dnl Checks for programs.
+AC_PROG_CXX
+# if we're using GCC, enable all warnings and optimize
+if test "$GXX" = yes; then
+   CXXFLAGS="$CXXFLAGS -Wall -O4";
+fi
+AC_PROG_INSTALL
+AC_PROG_LN_S
+
+dnl Check for POSIX threads
+ACX_PTHREAD(,[AC_MSG_ERROR("Needs POSIX threads!")])
+LIBS="$PTHREAD_LIBS $LIBS"
+CXXFLAGS="$PTHREAD_CFLAGS $CXXFLAGS"
+
+dnl Check for GNU Readline support
+AC_ARG_WITH(readline,
+        [  --without-readline      do not use GNU Readline],,
+	USE_READLINE=yes)
+
+if test "$USE_READLINE" = "yes"; then
+  AC_DEFINE(USE_READLINE)
+  AC_LIB_READLINE
+  if test "$ac_cv_lib_readline" != "no"; then
+    AC_CACHE_CHECK([for rl_icpfunc_t in history.h],
+      [dj_icpfunc],[
+      save_LIBS="$LIBS"
+      LIBS="-lreadline $LIBS"
+      AC_TRY_LINK([
+    #include <stdio.h>
+    #include <readline/history.h>
+        ],
+        [rl_icpfunc_t *func;],
+        [dj_icpfunc=yes],[dj_icpfunc=no])
+      LIBS="$save_LIBS"
+    ])
+    if test "$dj_icpfunc" = yes; then
+      AC_DEFINE(HAVE_ICPFUNC)
+    fi
+  fi
+fi
+
+dnl Checks for header files.
+AC_CHECK_HEADERS(errno.h,,[AC_MSG_ERROR("Needs errno.h!")])
+AC_CHECK_HEADERS(regex.h,,[AC_MSG_ERROR("Needs errno.h!")])
+AC_CHECK_HEADERS(id3/misc_support.h,
+		 [AC_DEFINE(HAVE_ID3LIB)
+		  LIBS="$LIBS -lid3"])
+AC_HEADER_STDC
+
+AC_OUTPUT([
+Makefile
+config/Makefile
+util/Makefile
+src/Makefile
+])

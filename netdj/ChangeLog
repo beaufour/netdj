@@ -1,0 +1,8 @@
+2001-12-06  Allan Beaufour Larsen  <allan@beaufour.dk>
+
+	* Added more flexible configuration file
+
+	* Added access control on HTTP command interface
+
+	* Changed to autoconf and automake
+	

@@ -1,0 +1,63 @@
+diff -u -r gnut-0.4.28/configure gnut-0.4.28_abl/configure
+--- gnut-0.4.28/configure	Wed Oct  3 22:40:29 2001
++++ gnut-0.4.28_abl/configure	Thu Dec  6 22:58:44 2001
+@@ -748,7 +748,7 @@
+ 
+ PACKAGE=gnut
+ 
+-VERSION=0.4.28
++VERSION=0.4.28_abl
+ 
+ if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
+   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
+diff -u -r gnut-0.4.28/configure.in gnut-0.4.28_abl/configure.in
+--- gnut-0.4.28/configure.in	Tue Sep 11 01:19:00 2001
++++ gnut-0.4.28_abl/configure.in	Thu Dec  6 22:58:44 2001
+@@ -45,7 +45,7 @@
+ cat_eof
+ read GPL_OK_TMP
+ 
+-AM_INIT_AUTOMAKE(gnut,0.4.28)
++AM_INIT_AUTOMAKE(gnut,0.4.28_abl)
+ AM_MAINTAINER_MODE
+ AM_ACLOCAL_INCLUDE(macros)
+ 
+diff -u -r gnut-0.4.28/src/conf.c gnut-0.4.28_abl/src/conf.c
+--- gnut-0.4.28/src/conf.c	Wed Oct  3 08:25:10 2001
++++ gnut-0.4.28_abl/src/conf.c	Thu Dec  6 22:58:45 2001
+@@ -28,6 +28,7 @@
+   {"cache_parallel",  "1"},
+   {"cache_refresh",   "600"},
+   {"cache_size",      "15000"},  /* 15 megs.  Should this be measured in M instead of K? */
++  {"cache_namecomp",  ""},
+   {"checkpoint_hosts", "600"},
+   {"checkpoint_net",  "60"},
+   {"config_file",     ""},
+diff -u -r gnut-0.4.28/src/qry.c gnut-0.4.28_abl/src/qry.c
+--- gnut-0.4.28/src/qry.c	Tue Sep 11 01:31:54 2001
++++ gnut-0.4.28_abl/src/qry.c	Thu Dec  6 22:58:46 2001
+@@ -301,11 +301,14 @@
+   int min_cache_size;
+   char *lcname;
+   char *s;
++  char *namecomp;
+ 
+   min_cache_size = conf_get_int("min_cache_size");
+   if (min_cache_size == 0) {
+     min_cache_size = 15;
+   }
++   
++  namecomp = conf_get_str("cache_namecomp");
+ 
+   /* only cache files 1/4 the size of the cache or smaller
+    * (limits thrashing, I hope - Ray) */
+@@ -326,7 +329,8 @@
+   {
+     int allow;
+ 
+-    allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1);
++    allow = gnut_blacklist_allow(BLACKLIST_TYPE_SEARCH, lcname, 0, 0, 1)
++            && strstr(lcname, namecomp);
+     fre_str(&lcname, 518);
+     if(! allow) {
+       if (gc_verbose & 8) {
