@@ -17,6 +17,8 @@ Showstoppers:
 - Make sure that SongInfo is not always cached!
 - Use QSettings for configuration?
 - command line config file placement
+- Logging from player in reverse order? songplaying before/after check type?
+- *ahem* Missing files???
 
 Major enhancements:
 * Database support

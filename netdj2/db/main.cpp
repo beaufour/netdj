@@ -8,6 +8,8 @@
  *  (c) 2004, Allan Beaufour Larsen <allan@beaufour.dk>
  *
  * @todo Enable user to specify database, username, and password.
+ *
+ * @todo Use libmusicbrainz? http://www.musicbrainz.org/client_howto.html
  */
 
 #include <qapplication.h>
@@ -88,6 +90,9 @@ main(int argc, char* argv[])
       err << gUsage << endl;
       return -1;
   }
+
+  out << "DB Drivers: " << QSqlDatabase::drivers().join(":") << endl;
+  
   
   out << "Creating connection to database" << endl;
   QSqlDatabase* db = QSqlDatabase::addDatabase("QMYSQL3");
@@ -96,6 +101,9 @@ main(int argc, char* argv[])
     return -2;
   }
   db->setDatabaseName("netdj");
+  db->setHostName("localhost");
+  db->setUserName("beaufour");
+  db->setPassword("");
 
   if (!db->open()) {
     err << "Could not open database: " << db->lastError().driverText() << endl;
