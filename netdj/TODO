@@ -33,16 +33,12 @@ WEB:
   - add song
 * Add support for:
   - more commands
-  - ID3-info
-  - index.xml
 * Add feedback to user for commands
 * Add info about webusage on admin display
 * Clean up songnames (in search line, or general?)
   - Remove '_' from filenames like Led_Zeppelin-The_Song_Remains_The_Same.mp3
   - Remove additional endings, .mp3.mp3, etc.
-  - Get ID3-tag, and use that
-* FIX: Shutdown thread correctly, ie. close socket
-* FIX: There seems to some kind of error with Opera and /cgi-bin/-commands,
+* FIX: There seems to some kind of error with /cgi-bin/-commands,
   they only work every second time - weird... timeout error of some sort
 
 

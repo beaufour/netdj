@@ -477,29 +477,40 @@ execute_line(char* line) {
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+int http_sock = -1;
+
+void
+http_cleanup(void*) {
+  if (http_sock != -1) {
+    close(http_sock);
+  }
+  cout << endl << "  HTTPThread: Exiting" << endl;
+  screen_flush();
+}
+
 void*
 http_thread(void*) {
-  int sock;
   struct sockaddr_in sin;
   const bool tval = true;
 
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+  pthread_cleanup_push(&http_cleanup, NULL);
 
   sin.sin_addr.s_addr = INADDR_ANY;
   sin.sin_port = htons(config.GetInteger("HTTP_PORT"));
   sin.sin_family = AF_INET;
 
-  sock = socket(PF_INET, SOCK_STREAM, 0);
-  setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void*) &tval, sizeof(tval));
+  http_sock = socket(PF_INET, SOCK_STREAM, 0);
+  setsockopt(http_sock, SOL_SOCKET, SO_REUSEADDR, (void*) &tval, sizeof(tval));
 
-  if (sock == -1) {
+  if (http_sock == -1) {
     cout << endl << "  HTTPThread: " << strerror(errno) << endl;
     screen_flush();
-  } else if (bind(sock, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)) == -1) {
+  } else if (bind(http_sock, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)) == -1) {
     cout << endl << "  HTTPThread: " << strerror(errno) << endl;
     screen_flush();
-  } else if (listen(sock, 5) == -1) {
+  } else if (listen(http_sock, 5) == -1) {
     cout << endl << "  HTTPThread: " << strerror(errno) << endl;
     screen_flush();
   } else {
@@ -633,6 +644,11 @@ http_thread(void*) {
     struct pollfd pf;
     pf.events = POLLIN;
     int z;
+    string::size_type findval;
+#ifdef HAVE_ID3LIB  
+    ID3_Tag tag;
+    ID3_Frame* id3frame;
+#endif
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
@@ -641,7 +657,7 @@ http_thread(void*) {
     screen_flush();
 
     while (1 < 2) {
-      newsock = accept(sock,  (struct sockaddr *) &newsin, &len);
+      newsock = accept(http_sock,  (struct sockaddr *) &newsin, &len);
       if (newsock != -1) {
 	//	cout << endl << "  HTTPThread: Got connectionrequest" << endl;
 	//	screen_flush();
@@ -713,7 +729,36 @@ http_thread(void*) {
 	      //////////////////
 	      if (o_xsongname != songname) {
 		xbuf = xbuf1;
-		xbuf += "  <currentsong>\n    <description>" + cfilename + "</description>\n  </currentsong>\n";
+		xbuf += "  <currentsong>\n";
+		xbuf += "     <description>" + cfilename + "</description>\n";
+#ifdef HAVE_ID3LIB  
+		tag.Link(songname.c_str());
+		xbuf += "     <artist>";
+		if ((id3frame = tag.Find(ID3FID_LEADARTIST)) ||
+		    (id3frame = tag.Find(ID3FID_BAND))       ||
+		    (id3frame = tag.Find(ID3FID_CONDUCTOR))  ||
+		    (id3frame = tag.Find(ID3FID_COMPOSER))) {
+		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		}
+		xbuf += "</artist>\n";
+		xbuf += "     <album>";
+		if ((id3frame = tag.Find(ID3FID_ALBUM))) {
+		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		};
+		xbuf += "</album>\n";
+		xbuf += "     <title>";
+		if ((id3frame = tag.Find(ID3FID_TITLE))) {
+		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		};
+		xbuf += "</title>\n";
+		xbuf += "     <comment>";
+		if ((id3frame = tag.Find(ID3FID_COMMENT))) {
+		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		};	
+		xbuf += "</comment>\n";
+		tag.Clear();
+#endif
+		xbuf += "  </currentsong>\n";
 		songs.clear();
 		lists[1]->GetEntries(songs, 10);
 		z = 0;
@@ -733,6 +778,33 @@ http_thread(void*) {
 		  xbuf += tmplint;
 		  xbuf += "</size>\n";
 		  xbuf += "    <description>" + it->GetFilename() + "</description>\n";
+#ifdef HAVE_ID3LIB  
+		  tag.Link(it->GetName().c_str());
+		  xbuf += "     <artist>";
+		  if ((id3frame = tag.Find(ID3FID_LEADARTIST)) ||
+		      (id3frame = tag.Find(ID3FID_BAND))       ||
+		      (id3frame = tag.Find(ID3FID_CONDUCTOR))  ||
+		      (id3frame = tag.Find(ID3FID_COMPOSER))) {
+		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		  }
+		  xbuf += "</artist>\n";
+		  xbuf += "     <album>";
+		  if ((id3frame = tag.Find(ID3FID_ALBUM))) {
+		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		  };
+		  xbuf += "</album>\n";
+		  xbuf += "     <title>";
+		  if ((id3frame = tag.Find(ID3FID_TITLE))) {
+		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		  };
+		  xbuf += "</title>\n";
+		  xbuf += "     <comment>";
+		  if ((id3frame = tag.Find(ID3FID_COMMENT))) {
+		    xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
+		  };	
+		  xbuf += "</comment>\n";
+		  tag.Clear();
+#endif
 		  xbuf += "  </song>\n";
 		}
 		for (unsigned int i = 0; i < listnum; ++i) {
@@ -748,6 +820,13 @@ http_thread(void*) {
 		}
 		xbuf += xbuf2;
 		o_xsongname = songname;
+	      }
+	      // Replace illegal characters
+	      while ((findval = xbuf.find("&")) != xbuf.npos) {
+		xbuf.replace(findval, 1, "and");
+	      }
+	      while ((findval = xbuf.find("´")) != xbuf.npos) {
+		xbuf.replace(findval, 1, "'");
 	      }
 	      send(newsock, xbuf.c_str(), xbuf.size(), 0);
 
@@ -787,11 +866,11 @@ http_thread(void*) {
       }
     }
   }
-  
-  cout << "  HTTPThread: Exiting" << endl;
-  screen_flush();
     
   pthread_exit(NULL);
+  // An extremely weird bug in the pthread_cleanup_push macro needs
+  // an extra }
+  }
 }
 
 ////////////////////////////////////////
@@ -875,6 +954,9 @@ main(int argc, char* argv[]) {
     }
   } while (!done);
 
+  // Save state to disk
+  savestate();
+
   cout << "Stopping player" << endl;
   stop_player = true;
   kill_current();
@@ -882,8 +964,6 @@ main(int argc, char* argv[]) {
   cout << "Stopping HTTP" << endl;
   pthread_cancel(http_t);
 
-  // Save state to disk
-  savestate();
 
   return 0;
 }
