@@ -232,7 +232,6 @@ player_thread(void*) {
       screen_flush();
       sleep(30);
     } else {
-      --i;
       if (fobj.Exists()) {
 	currentsong.Set(fobj.GetName(), i == 1 ? true : false);
 	cout << endl << "  Playing '" << fobj.GetFilename()

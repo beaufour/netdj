@@ -1,3 +1,46 @@
+2002-01-31 Thursday 15:17   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.12): Added removal of everything not 7-bit ASCII
+	from XML-output.  
+
+2002-01-31 Thursday 11:48   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.11): Fixed two bugs in 'move file' command.  
+
+2002-01-31 Thursday 11:47   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* util/netdj_applet.pl (1.13): Fixed output when netdj is stopped.  
+
+2002-01-30 Wednesday 19:38   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* config/_netdj (1.2), src/Configuration.cc (1.2), src/main.cc
+	(1.10): Added parameter to delete cache-files after they have been
+	played.  
+
+2002-01-29 Tuesday 13:06   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* util/netdj_applet.pl (1.12): Added numbering of songs in tooltip.  
+
+2002-01-29 Tuesday 13:05   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* FILTER (1.3): Refining...  
+
+2002-01-28 Monday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* aclocal.m4 (1.2), util/netdj_applet.pl (1.11): Set cacheinfo and
+	tooltip correctly when no info available.  
+
+2002-01-28 Monday 16:20   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.9): Added ability to start HTTP-thread from
+	text-mode UI.  
+
+2002-01-28 Monday 16:19   Bjarke Buur Mortensen <rodaz@diku.dk>
+
+	* util/netdj_applet.pl (1.10): The tool tip did was
+	lexicographically sorted. Now a proper numerical sort is done on the
+	id's of the songs, so the order is displayed correctly.  
+
 2002-01-28 Monday 13:48   Bjarke Buur Mortensen <rodaz@diku.dk>
 
 	* util/netdj_applet.pl (1.9): The tool tip is now output in correct
