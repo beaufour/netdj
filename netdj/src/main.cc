@@ -683,7 +683,7 @@ http_thread(void*) {
     struct pollfd pf;
     pf.events = POLLIN;
     int z;
-    string::size_type findval;
+    unsigned char ch;
 #ifdef HAVE_ID3LIB  
     ID3_Tag tag;
     ID3_Frame* id3frame;
@@ -861,12 +861,15 @@ http_thread(void*) {
 		o_xsongname = songname;
 	      }
 	      // Replace illegal characters
-	      while ((findval = xbuf.find("&")) != xbuf.npos) {
-		xbuf.replace(findval, 1, "and");
-	      }
-	      while ((findval = xbuf.find("´")) != xbuf.npos) {
-		xbuf.replace(findval, 1, "'");
-	      }
+  	      for (string::iterator it = xbuf.begin();
+  		   it != xbuf.end();
+  		   ++it) {
+		ch = (unsigned char) *it;
+  		if (ch == '&' || ch == '`' ||
+		    (ch > 127 || ch < 32 && ch != '\n' && ch != '\r')) {
+  		  *it = ' ';
+  		}
+  	      }
 	      send(newsock, xbuf.c_str(), xbuf.size(), 0);
 
 	    } else {
