@@ -15,6 +15,8 @@
 // Provides sprintf
 #include <cstdio>
 
+using namespace std;
+
 //////////////////////////////////////////////////
 // HTTP                                         //
 //////////////////////////////////////////////////
@@ -42,7 +44,7 @@ HTTP::ParseHeaders(const string& st, int pos) {
 }
 
 bool
-HTTP::Parse(const string& st, const bool savebody = false) {
+HTTP::Parse(const string& st, const bool savebody) {
   int pos;
 
   if ((pos = ParseCommand(st, 0))) {
@@ -189,7 +191,7 @@ HTTPRequest::GetURIParam(const string& st, string& res) const {
 //////////////////////////////////////////////////
 Regex HTTPResponse::comreg("^HTTP/([^ ]+) +([[:digit:]]+) *(.*)\r\n");
 
-HTTPResponse::HTTPResponse(int _status, const string &cont_type = "")
+HTTPResponse::HTTPResponse(int _status, const string &cont_type)
   : HTTP(), version("1.1"), status(_status) {
   if (cont_type.size()) {
     SetHeader("Content-Type", cont_type);

@@ -19,10 +19,10 @@ private:
   regex_t preg;
 
 public:
-  Regex(const string&, int = 0);
+  Regex(const std::string&, int = 0);
 
-  void Compile(const string&, int = 0);
-  int Match(const string&, vector<string>&, int = 0);
+  void Compile(const std::string&, int = 0);
+  int Match(const std::string&, std::vector<std::string>&, int = 0);
 };
 
 #endif

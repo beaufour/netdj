@@ -14,6 +14,8 @@
 // Provides strncmp
 #include <cstring>
 
+using namespace std;
+
 struct style_s {
 	unsigned char	styleid;
 	char		*name;

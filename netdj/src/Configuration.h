@@ -14,20 +14,20 @@
 
 class Configuration {
 private:
-  map<string, string> conflist;
+  std::map<std::string, std::string> conflist;
 
-  string Get(const string&) const;
+  std::string Get(const std::string&) const;
 
 public:
   void ReadFile();
 
-  string GetString(const string&) const;
-  int GetInteger(const string&) const;
-  bool GetBool(const string&) const;
+  std::string GetString(const std::string&) const;
+  int GetInteger(const std::string&) const;
+  bool GetBool(const std::string&) const;
 
-  void SetString(const string&, const string&);
-  void SetBool(const string&, bool);
-  void SetInteger(const string&, int);
+  void SetString(const std::string&, const std::string&);
+  void SetBool(const std::string&, bool);
+  void SetInteger(const std::string&, int);
 };
 
 #endif

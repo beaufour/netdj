@@ -23,7 +23,7 @@
 class File {
  protected:
   int id;
-  string name;
+  std::string name;
   struct stat stat_buf;
   bool validid3;
   ID3Tag id3;
@@ -33,7 +33,7 @@ class File {
  public:
   File ()
     : name(""), validid3(false) { update_stat(); };
-  File (string _name)
+  File (std::string _name)
     : name(_name), validid3(false) { update_stat(); };
 
   int GetId() const { return id; };
@@ -45,18 +45,18 @@ class File {
   off_t GetSize() const { return stat_buf.st_size; };
 
   // Name operations
-  bool SetName(const string);
-  string GetName() const { return name; };
-  string GetDirname() const;
-  string GetFilename() const;
-  string GetFilenameNoType() const;
+  bool SetName(const std::string);
+  std::string GetName() const { return name; };
+  std::string GetDirname() const;
+  std::string GetFilename() const;
+  std::string GetFilenameNoType() const;
 
   bool GetID3Info(ID3Tag const*&);
 
   // Disk operations
   bool Delete();
-  bool Rename(const string&);
-  bool Symlink(const string&) const;
+  bool Rename(const std::string&);
+  bool Symlink(const std::string&) const;
   
   bool operator< (const File& f2) const {
     return GetCtime() < f2.GetCtime();

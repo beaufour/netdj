@@ -20,23 +20,23 @@ class AccessConf : public Lockable {
   class User {
   private:
     int level;
-    string password;
+    std::string password;
 
   public:
     User() : level(0) {};
-    User(int _level, string _password)
+    User(int _level, std::string _password)
       : level(_level), password(_password) {};
 
-    void SetInfo(const int _level, const string _password) {
+    void SetInfo(const int _level, const std::string _password) {
       level = _level;
       password = _password;
     }
 
-    string GetPassword() const {return password;};
+    std::string GetPassword() const {return password;};
     int GetLevel() const {return level;};
   };
 
-  map<string, User> users;
+  std::map<std::string, User> users;
 
   Configuration *Conf;
 
@@ -44,7 +44,7 @@ class AccessConf : public Lockable {
   AccessConf(Configuration *c) : Lockable(), Conf(c) {};
 
   void ReadFile();
-  bool IsAccessAllowed(const string&, int, string* = NULL) const;
+  bool IsAccessAllowed(const std::string&, int, std::string* = NULL) const;
 };
 
 #endif

@@ -8,8 +8,11 @@
 
 #include "AccessConf.h"
 
+#include <iostream>
 #include "Regex.h"
 #include "config.h"
+
+using namespace std;
 
 void
 AccessConf::ReadFile() {
@@ -47,7 +50,7 @@ AccessConf::ReadFile() {
 }
 
 bool
-AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr = NULL) const {
+AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr) const {
   bool res = false;
   Regex reg("([^:]+):(.+)");
   vector<string> splitline;

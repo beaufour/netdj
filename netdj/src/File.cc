@@ -14,6 +14,9 @@
 // Provides rename
 #include <cstdio>
 
+
+using namespace std;
+
 bool
 File::update_stat() {
   if (name.size() != 0 && stat(name.c_str(), &stat_buf) == 0 && !S_ISDIR(stat_buf.st_mode)) {

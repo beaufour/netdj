@@ -20,29 +20,29 @@
 //////////////////////////////////////////////////
 class HTTP {
 private:
-  map<string, string> headers;
-  string body;
+  std::map<std::string, std::string> headers;
+  std::string body;
   static Regex headerreg;
-  string packet;
+  std::string packet;
 
-  int ParseHeaders(const string&, int);
+  int ParseHeaders(const std::string&, int);
 
 protected:
-  virtual int ParseCommand(const string&, int) = 0;
+  virtual int ParseCommand(const std::string&, int) = 0;
   virtual void ClearCommand() = 0;
-  virtual void CreateCommand(string&) = 0;
+  virtual void CreateCommand(std::string&) = 0;
 
 public:
   HTTP();
   virtual ~HTTP() {};
 
-  bool Parse(const string&, const bool = false);
-  bool GetHeader(const string&, string&) const;
-  void SetHeader(const string&, const string&);
+  bool Parse(const std::string&, const bool = false);
+  bool GetHeader(const std::string&, std::string&) const;
+  void SetHeader(const std::string&, const std::string&);
 
   void CreatePacket();
-  const string& Packet() const;
-  void SetBody(const string&);
+  const std::string& Packet() const;
+  void SetBody(const std::string&);
 
   void Clear();
   void ClearBody();
@@ -54,30 +54,30 @@ public:
 //////////////////////////////////////////////////
 class HTTPRequest : public HTTP {
 private:
-  string command;
-  string URI;
-  string version;
+  std::string command;
+  std::string URI;
+  std::string version;
 
-  string name;
-  map<string,string> params;
+  std::string name;
+  std::map<std::string,std::string> params;
 
   static Regex comreg;
   static Regex paramreg;
 
-  int ParseCommand(const string&, int);
+  int ParseCommand(const std::string&, int);
   void ClearCommand();
-  void CreateCommand(string&);
+  void CreateCommand(std::string&);
 
 public:
   HTTPRequest() : HTTP() {};
 
-  string GetCommand() const {return command;};
-  string GetURI() const {return URI;};
-  string GetVersion() const {return version;};
-  string GetURIResource() const {return name;};
+  std::string GetCommand() const {return command;};
+  std::string GetURI() const {return URI;};
+  std::string GetVersion() const {return version;};
+  std::string GetURIResource() const {return name;};
 
-  string GetURIName() const {return name;};
-  bool GetURIParam(const string&, string&) const;
+  std::string GetURIName() const {return name;};
+  bool GetURIParam(const std::string&, std::string&) const;
 };
 
 
@@ -86,26 +86,26 @@ public:
 //////////////////////////////////////////////////
 class HTTPResponse : public HTTP {
 private:
-  string version;
+  std::string version;
   int status;
-  string description;
+  std::string description;
 
   static Regex comreg;
 
-  int ParseCommand(const string&, int);
+  int ParseCommand(const std::string&, int);
   void ClearCommand();
-  void CreateCommand(string&);
+  void CreateCommand(std::string&);
 
 public:
   HTTPResponse() : HTTP(), status(0) {};
-  HTTPResponse(int, const string& = "");
+  HTTPResponse(int, const std::string& = "");
 
-  string GetVersion() const {return version;};
+  std::string GetVersion() const {return version;};
   int GetStatus() const {return status;};
-  string GetDescription() const {return description;};
+  std::string GetDescription() const {return description;};
 
-  void SetVersion(const string& st) {version = st;};
-  void SetDescription(const string& st) {description = st;};
+  void SetVersion(const std::string& st) {version = st;};
+  void SetDescription(const std::string& st) {description = st;};
   void SetStatus(int i) {version = i;};
 };
 

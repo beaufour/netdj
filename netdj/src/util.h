@@ -1,4 +1,4 @@
-/*
+/*  -*- c++ -*-
  *  util.h
  * 
  *  Allan Beaufour Larsen <allan@beaufour.dk>
@@ -14,6 +14,6 @@
 
 int get_rand(const int);
 void error(const char*, const bool = true);
-string base64_decode(const char*);
+std::string base64_decode(const char*);
 
 #endif

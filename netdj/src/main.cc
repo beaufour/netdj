@@ -17,12 +17,6 @@
 #include "ID3Tag.h"
 #include "HTTP.h"
 
-#ifdef HAVE_LIBSHOUT
-// HACK to correct c++ "bug" in shout.h
-#  define namespace nspace
-#  include <shout/shout.h>
-#endif
-
 // Provides cout and manipulation of same
 #include <iostream>
 #include <iomanip>
@@ -67,6 +61,14 @@ extern "C" {
 // Provides signal
 #include <csignal>
 
+using namespace std;
+
+#ifdef HAVE_LIBSHOUT
+// HACK to correct c++ "bug" in shout.h
+#  define namespace nspace
+#  include <shout/shout.h>
+#endif
+
 ////////////////////////////////////////
 // GLOBALS
 // Directories
@@ -104,7 +106,7 @@ screen_flush() {
   rl_forced_update_display();
 #else
   //  if (!config.GetBool("DAEMON_MODE")) {
-  //   cout << endl << "NetDJ> " << flush;
+  //   cout << std::endl << "NetDJ> " << flush;
   // }
 #endif
 }
@@ -117,7 +119,7 @@ screen_flush() {
 #include <fcntl.h>
 
 // Holds the full path to the statefile
-string statefile;
+std::string statefile;
 
 void
 savestate() {
@@ -125,7 +127,7 @@ savestate() {
   int fd;
   time_t upd = cache.GetNextTimestamp();
 
-  cout << "Saving state to '" << statefile << "'." << endl;
+  std::cout << "Saving state to '" << statefile << "'." << std::endl;
 
   fd = open(statefile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,  S_IWUSR | S_IRUSR);
   if (fd == -1) {
@@ -150,7 +152,7 @@ loadstate() {
   statefile += CONF_DIRNAME;
   statefile += CONF_STATEFILENAME;
 
-  cout << "Reading state from '" << statefile << "'." << endl;
+  std::cout << "Reading state from '" << statefile << "'." << std::endl;
 
   int fd;
   fd = open(statefile.c_str(), O_RDONLY);
@@ -182,7 +184,7 @@ private:
     lock();
     if (prevdelete) {
       if (!prevfile.Delete()) {
-	cout << "Couldn't delete '" << prevfile.GetName() << "'!" << endl;
+	std::cout << "Couldn't delete '" << prevfile.GetName() << "'!" << std::endl;
 	screen_flush();
       }
     }
@@ -213,7 +215,7 @@ public:
     InternalSet(File(), false);
   }
 
-  bool RenameCurrent(const string& newpath, const bool del) {
+  bool RenameCurrent(const std::string& newpath, const bool del) {
     bool res;
     lock();
     if ((res = currfile.Rename(newpath))) {
@@ -233,6 +235,7 @@ pthread_t player_t;
 void*
 player_thread(void*) {
   unsigned int i;
+  bool delete_it;
   File fobj;
   
   stop_player = false;
@@ -268,29 +271,29 @@ player_thread(void*) {
   conn.description = "NetDJ streaming channel";
   
   if (config.GetBool("STREAM") && !shout_connect(&conn)) {
-    cout << endl << "  Couldn't connect to server!" << endl;
+    std::cout << std::endl << "  Couldn't connect to server!" << std::endl;
     screen_flush();
     stop_player = true;
   }
 #else
   // Sanitycheck, when libshout isn't in binary
   if (config.GetBool("STREAM")) {
-    cout << endl
-	 << "  Shoutcast-support isn't included in this binary!" << endl
-	 << "  Set STREAM=false in configuration to use player instead" << endl;
+    std::cout << std::endl
+	 << "  Shoutcast-support isn't included in this binary!" << std::endl
+	 << "  Set STREAM=false in configuration to use player instead" << std::endl;
     screen_flush();
     stop_player = true;
   }
 #endif
   
   // Open logfile
-  ofstream logfile;
+  std::ofstream logfile;
   if (config.GetBool("PLAYER_LOG")) {
-    string logfilename = config.GetString("$$CONFDIR") + CONF_LOGFILENAME;
-    cout << endl << "  Logging to '" << logfilename << "'" << endl;
+    std::string logfilename = config.GetString("$$CONFDIR") + CONF_LOGFILENAME;
+    std::cout << std::endl << "  Logging to '" << logfilename << "'" << std::endl;
     logfile.open(logfilename.c_str(), ios::app);
     if (!logfile.is_open()) {
-      cout << endl << "  Sorry, couldn't open logfile!" << endl;
+      std::cout << std::endl << "  Sorry, couldn't open logfile!" << std::endl;
       config.SetBool("PLAYER_LOG", false);
     }
     screen_flush();
@@ -304,7 +307,7 @@ player_thread(void*) {
 	break;
     }
     if (i == listnum) {
-      cout << endl << "  Hmmm, no files to play..." << endl;
+      std::cout << std::endl << "  Hmmm, no files to play..." << std::endl;
       currentsong.Clear();
       screen_flush();
       sleep(30);
@@ -312,10 +315,30 @@ player_thread(void*) {
       if (fobj.Exists() && fobj.GetName() != currentsong.Get().GetName()) {
 	// This sucks, and should be part of the great
 	// directory-reorganization scheme...
-	currentsong.Set(fobj,
-			i == 0 ? true : (i == 1 ? config.GetBool("DELETE_PLAYED") : false));
-	cout << endl << "  Playing '" << fobj.GetFilename()
-	     << "' [" << lists[i]->GetShortname() << "]" << endl;
+	switch(i) {
+	  // Request
+	case 0:
+	  delete_it = true;
+	  break;
+
+	  // Cache
+	case 1:
+	  delete_it = config.GetBool("DELETE_PLAYED");
+	  break;
+
+	  // Share
+	case 2:
+	  delete_it = false;
+	  break;
+	
+	  // What ever...
+	default:
+	  delete_it = false;
+	  break;
+	}
+	currentsong.Set(fobj, delete_it);
+	std::cout << std::endl << "  Playing '" << fobj.GetFilename()
+	     << "' [" << lists[i]->GetShortname() << "]" << std::endl;
 	screen_flush();
 	
 	if (!config.GetBool("STREAM")) {
@@ -350,9 +373,9 @@ player_thread(void*) {
 	      read = fread(buff, 1, 4096, musicfile);
 	      if (read > 0) {
 		if (!shout_send_data(&conn, buff, read)) {
-		  cout << endl
+		  std::cout << std::endl
 		       << "  Send error:" << conn.error << "..."
-		       << endl;
+		       << std::endl;
 		  screen_flush();
 		  break;
 		}
@@ -364,9 +387,9 @@ player_thread(void*) {
 	    fclose(musicfile);
 	  } else {
 	    // Couldn't open file
-	    cout << endl
+	    std::cout << std::endl
 		 << "  Couldn't open '" << fobj.GetName() << "'"
-		 << endl;
+		 << std::endl;
 	    screen_flush();
 	  } // musicfile
 #endif
@@ -376,7 +399,7 @@ player_thread(void*) {
 		  << "\"" << fobj.GetFilenameNoType() << "\","
 		  << ((stop_player || next_song) ? 1 : 0) << ",\""
 		  << lists[i]->GetShortname() << "\""
-		  << endl;
+		  << std::endl;
 	}
       }
     }
@@ -430,7 +453,7 @@ int com_webstart(char*);
 
 int
 com_yeah(char* arg) {
-  cout << "  Coming soon (tm)" << endl;
+  std::cout << "  Coming soon (tm)" << std::endl;
   return 0;
 }
 
@@ -466,7 +489,7 @@ COMMAND commands[] = {
 
 int
 com_add(char* arg) {
-  string tmp;
+  std::string tmp;
   if (arg && *arg) {
     if (arg[0] != '/') {
       tmp = getenv("PWD");
@@ -480,12 +503,12 @@ com_add(char* arg) {
     File fobj(tmp);
 
     if (fobj.Symlink(request.GetDirname() + arg)) {
-      cout << "  Added '" << tmp << "' to request-list" << endl;
+      std::cout << "  Added '" << tmp << "' to request-list" << std::endl;
     } else {
-      cout << "  Couldn't add '" << tmp << "' to request-list" << endl;
+      std::cout << "  Couldn't add '" << tmp << "' to request-list" << std::endl;
     }
   } else {
-    cout << "  Usage: add <filename>" << endl;
+    std::cout << "  Usage: add <filename>" << std::endl;
   };
   return 0;
 }
@@ -493,11 +516,11 @@ com_add(char* arg) {
 int
 com_help(char* arg) {
   for (int i = 0; commands[i].name; ++i)
-    cout << "  " << setw(10) << commands[i].name
-	 << "   " << commands[i].doc << endl;
-  cout << endl;
-  cout << "  " << setw(10) << "quit"
-       << "   " << "Quit program" << endl;
+    std::cout << "  " << setw(10) << commands[i].name
+	 << "   " << commands[i].doc << std::endl;
+  std::cout << std::endl;
+  std::cout << "  " << setw(10) << "quit"
+       << "   " << "Quit program" << std::endl;
   return 0;
 };
 
@@ -509,17 +532,17 @@ com_info(char* arg) {
 
   fobj = currentsong.Get();
   filetime = fobj.GetMtime();
-  cout << "  " << fobj.GetName() << endl;
-  cout << "    " << setprecision(2)
+  std::cout << "  " << fobj.GetName() << std::endl;
+  std::cout << "    " << setprecision(2)
        << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
-       << ctime(&filetime) << endl;
+       << ctime(&filetime) << std::endl;
   if (fobj.GetID3Info(id3tag)) {
-    cout << "    Artist:  " << id3tag->GetArtist() << endl;
-    cout << "    Album:   " << id3tag->GetAlbum() << endl;
-    cout << "    Title:   " << id3tag->GetTitle() << endl;
-    cout << "    Year:    " << id3tag->GetYear() << endl;
-    cout << "    Style:   " << id3tag->GetStyle() << endl;
-    cout << "    Comment: " << id3tag->GetNote() << endl;
+    std::cout << "    Artist:  " << id3tag->GetArtist() << std::endl;
+    std::cout << "    Album:   " << id3tag->GetAlbum() << std::endl;
+    std::cout << "    Title:   " << id3tag->GetTitle() << std::endl;
+    std::cout << "    Year:    " << id3tag->GetYear() << std::endl;
+    std::cout << "    Style:   " << id3tag->GetStyle() << std::endl;
+    std::cout << "    Comment: " << id3tag->GetNote() << std::endl;
   }
   return 0;
 };
@@ -527,15 +550,15 @@ com_info(char* arg) {
 int
 com_list(char* arg) {
   unsigned int l = arg ? atoi(arg) : 0;
-  vector<File> songs;
+  std::vector<File> songs;
 
   if (l >= 0 && l < listnum) {
-    cout << "  [" << lists[l]->GetShortname() << "]:" << endl;
+    std::cout << "  [" << lists[l]->GetShortname() << "]:" << std::endl;
     lists[l]->GetEntries(songs, 10);
-    for (vector<File>::iterator it = songs.begin();
+    for (std::vector<File>::iterator it = songs.begin();
 	 it != songs.end();
 	 ++it) {
-      cout << "    " << it->GetFilename() << endl;
+      std::cout << "    " << it->GetFilename() << std::endl;
     }
   }
   return 0;
@@ -546,18 +569,18 @@ com_lists(char* arg) {
   Directory* dir;
   for (unsigned int i = 0; i < listnum; ++i) {
     dir = lists[i];
-    cout << setw(7) << dir->GetSize()
+    std::cout << setw(7) << dir->GetSize()
 	 << "  " << dir->GetDescription()
 	 << " [" << dir->GetShortname() << "]"
-	 << endl;
+	 << std::endl;
   }
   return 0;
 }
 
 int
 com_move(char* arg) {
-  string songname;
-  string newpath;
+  std::string songname;
+  std::string newpath;
   File songfile;
   songfile = currentsong.Get();
 
@@ -565,20 +588,20 @@ com_move(char* arg) {
     newpath = share.GetDirname();
     newpath += songfile.GetFilename();
     
-    cout << "  Moving '" << songfile.GetName() << "' to '"
-	 << newpath << "'" << endl;
+    std::cout << "  Moving '" << songfile.GetName() << "' to '"
+	 << newpath << "'" << std::endl;
     if (currentsong.RenameCurrent(newpath, false)) {
-      cout << "  Error! " << endl;
+      std::cout << "  Error! " << std::endl;
     }
   } else {
-    cout << "  Error: File doesn't exist..." << endl;
+    std::cout << "  Error: File doesn't exist..." << std::endl;
   }
   return 0;
 }
 
 int
 com_next(char* arg) {
-  cout << "  Skipping current song..." << endl;
+  std::cout << "  Skipping current song..." << std::endl;
   kill_current();
   usleep(500);
   return 0;
@@ -587,13 +610,13 @@ com_next(char* arg) {
 int
 com_reload(char* arg) {
   if (!strncmp(arg, "users", 5)) {
-    cout << "Reloading users..." << endl;
+    std::cout << "Reloading users..." << std::endl;
     acc.ReadFile();
   } else if (!strncmp(arg, "config", 6)) {
-    cout << "Reloading config (EXPERIMENTAL!)..." << endl;
+    std::cout << "Reloading config (EXPERIMENTAL!)..." << std::endl;
     config.ReadFile();
   } else {
-    cout << "  You have to give either 'users' or 'config' as parameter" << endl;
+    std::cout << "  You have to give either 'users' or 'config' as parameter" << std::endl;
   }
   return 0;
 }
@@ -614,17 +637,17 @@ com_stop(char* arg) {
 
 int
 com_version(char* arg) {
-  cout << "  " << PKGVER << endl
+  std::cout << "  " << PKGVER << std::endl
        << "  main.cc - CVS id  :"
-       << " $Id$" << endl
-       << "  main.cc - compiled: " << __DATE__ << " " << __TIME__ << endl
+       << " $Id$" << std::endl
+       << "  main.cc - compiled: " << __DATE__ << " " << __TIME__ << std::endl
        << "  Compiled with Shoutcast support: " <<
 #ifdef HAVE_LIBSHOUT
     "Yes"
 #else
     "No"
 #endif
-       << endl;
+       << std::endl;
 
   return 0;
 }
@@ -632,7 +655,7 @@ com_version(char* arg) {
 int
 com_weblock(char* arg) {
   http_locked = !http_locked;
-  cout << "  WebAccess " << (http_locked ? "OFF" : "ON") << endl;
+  std::cout << "  WebAccess " << (http_locked ? "OFF" : "ON") << std::endl;
   return 0;
 }
 
@@ -681,7 +704,7 @@ execute_line(char* line) {
   // Find command and execute it
   COMMAND* com = find_command(line, true);
   if (!com) {
-    cout << "  Hmmm, did you really mean '" << line << "'?" << endl;
+    std::cout << "  Hmmm, did you really mean '" << line << "'?" << std::endl;
   } else {
     ((*(com->func)) (arg));
   }
@@ -701,7 +724,7 @@ http_cleanup(void*) {
   if (http_sock != -1) {
     close(http_sock);
   }
-  cout << endl << "  HTTPThread: Exiting" << endl;
+  std::cout << std::endl << "  HTTPThread: Exiting" << std::endl;
   screen_flush();
 }
 
@@ -722,13 +745,13 @@ http_thread(void*) {
   setsockopt(http_sock, SOL_SOCKET, SO_REUSEADDR, (void*) &tval, sizeof(tval));
 
   if (http_sock == -1) {
-    cout << endl << "  HTTPThread: " << strerror(errno) << endl;
+    std::cout << std::endl << "  HTTPThread: " << strerror(errno) << std::endl;
     screen_flush();
   } else if (bind(http_sock, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)) == -1) {
-    cout << endl << "  HTTPThread: " << strerror(errno) << endl;
+    std::cout << std::endl << "  HTTPThread: " << strerror(errno) << std::endl;
     screen_flush();
   } else if (listen(http_sock, 5) == -1) {
-    cout << endl << "  HTTPThread: " << strerror(errno) << endl;
+    std::cout << std::endl << "  HTTPThread: " << strerror(errno) << std::endl;
     screen_flush();
   } else {
     int newsock;
@@ -805,12 +828,12 @@ http_thread(void*) {
       "  </BODY>\n"
       "</HTML>\n";
 
-    string hbuf;
+    std::string hbuf;
 
     // text/xml packet
     HTTPResponse HTTPxml(200, "text/xml");
     HTTPxml.SetHeader("Connection", "Close");
-    string xbuf;
+    std::string xbuf;
     
     // text/ascii packet
     HTTPResponse HTTPtext(200, "text/ascii");
@@ -839,11 +862,11 @@ http_thread(void*) {
     HTTPauth.CreatePacket();
 
     File songfile;
-    string o_hsongname, o_xsongname;
-    string cfilename;
-    string tmpstr;
-    string cmdbyuser;
-    vector<File> songs;
+    std::string o_hsongname, o_xsongname;
+    std::string cfilename;
+    std::string tmpstr;
+    std::string cmdbyuser;
+    std::vector<File> songs;
     COMMAND *com;
     Directory* dir;
     char tmpint[10];
@@ -854,18 +877,18 @@ http_thread(void*) {
     unsigned char ch;
     const ID3Tag* id3tag = NULL;
     HTTPRequest req;
-    string auth;
+    std::string auth;
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
 
-    cout << endl << "  HTTPThread: Accepting new connections" << endl;
+    std::cout << std::endl << "  HTTPThread: Accepting new connections" << std::endl;
     screen_flush();
     while (1 < 2) {
       len = sizeof(struct sockaddr_in);
       newsock = accept(http_sock,  (struct sockaddr *) &newsin, &len);
       if (newsock != -1) {
-	//	cout << endl << "  HTTPThread: Got connectionrequest" << endl;
+	//	std::cout << std::endl << "  HTTPThread: Got connectionrequest" << std::endl;
 	//	screen_flush();
 	
 	songfile = currentsong.Get();
@@ -881,7 +904,7 @@ http_thread(void*) {
 	  // #define _DEBUG_HTTP
 	  
 #ifdef _DEBUG_HTTP
-	  cout << endl << "  HTTPThread: Received = " << endl << rbuf << endl;
+	  std::cout << std::endl << "  HTTPThread: Received = " << std::endl << rbuf << std::endl;
 	  screen_flush();
 #endif
 	  
@@ -890,7 +913,7 @@ http_thread(void*) {
 	      // Commands
 	      if (req.GetURIName().substr(0, 9) == "/cgi-bin/") {
 #ifdef _DEBUG_HTTP
-		cout  << endl<< "  HTTPThread: COMMAND: " << req.GetURI() << endl;
+		std::cout  << std::endl<< "  HTTPThread: COMMAND: " << req.GetURI() << std::endl;
 		screen_flush();
 #endif
 		
@@ -898,17 +921,17 @@ http_thread(void*) {
 		if (req.GetHeader("Authorization", auth) && auth.substr(0, 6) == "Basic ") {
 		  tmpstr = base64_decode(auth.substr(6).c_str());
 #ifdef _DEBUG_HTTP
-		  cout << "  HTTPThread: '" << auth.substr(6) << "'" << endl;
-		  cout << "  HTTPThread: Authorization: " << tmpstr << endl;
+		  std::cout << "  HTTPThread: '" << auth.substr(6) << "'" << std::endl;
+		  std::cout << "  HTTPThread: Authorization: " << tmpstr << std::endl;
 		  screen_flush();
 #endif
 		  if (acc.IsAccessAllowed(tmpstr, Level_PowerUser, &cmdbyuser)) {
 		    // Seperate command from rest of request
 		    com = find_command(req.GetURIName().substr(9).c_str(), false);
 		    if (com) {
-		      cout << endl << "  HTTP-CMD: '" << cmdbyuser
+		      std::cout << std::endl << "  HTTP-CMD: '" << cmdbyuser
 			   << "' requested '"
-			   << req.GetURIName().substr(9) << "'" << endl;
+			   << req.GetURIName().substr(9) << "'" << std::endl;
 		      ((*(com->func)) ((char*) NULL));
 		    }
 		    // Send redirect to '/'
@@ -959,7 +982,7 @@ http_thread(void*) {
 		  for (unsigned int listno = 0; listno < listnum; ++listno) {
 		    songs.clear();
 		    songsgot += lists[listno]->GetEntries(songs, 10 - songsgot);
-		    for (vector<File>::iterator it = songs.begin();
+		    for (std::vector<File>::iterator it = songs.begin();
 			 it != songs.end();
 			 ++it) {
 		      xbuf += "  <song id=\"";
@@ -1003,7 +1026,7 @@ http_thread(void*) {
 		  xbuf += "</netdj>\n";
 		  o_xsongname = songfile.GetName();
 		  // Replace illegal characters
-		  for (string::iterator it = xbuf.begin();
+		  for (std::string::iterator it = xbuf.begin();
 		       it != xbuf.end();
 		       ++it) {
 		    ch = (unsigned char) *it;
@@ -1031,7 +1054,7 @@ http_thread(void*) {
 		    hbuf += hbuf3;
 		    songs.clear();
 		    lists[1]->GetEntries(songs, 10);
-		    for (vector<File>::iterator it = songs.begin();
+		    for (std::vector<File>::iterator it = songs.begin();
 			 it != songs.end();
 			 ++it) {
 		      hbuf += "    " + it->GetFilenameNoType() + "<BR>\n";
@@ -1077,12 +1100,12 @@ quit() {
   // Save state to disk
   savestate();
 
-  cout << "Stopping player" << endl;
+  std::cout << "Stopping player" << std::endl;
   stop_player = true;
   kill_current();
   pthread_cancel(player_t);
 
-  cout << "Stopping HTTP" << endl;
+  std::cout << "Stopping HTTP" << std::endl;
   pthread_cancel(http_t);
  
   return 0;
@@ -1093,7 +1116,7 @@ quit() {
 // SIGNAL-HANDLING
 void
 sig_handler(int signum) {
-  cout << "Caught signal " << signum << ", exiting." << endl;
+  std::cout << "Caught signal " << signum << ", exiting." << std::endl;
   quit();
   exit(0);
 }
@@ -1105,8 +1128,8 @@ int
 main(int argc, char* argv[]) {
   int pid = fork();
   if (pid == -1) {
-    cout << "Hmmm, couldn't fork into the background?!" << endl;
-    cout << "  " << strerror(errno) << endl;
+    std::cout << "Hmmm, couldn't fork into the background?!" << std::endl;
+    std::cout << "  " << strerror(errno) << std::endl;
     exit (-1);
   } else if (!pid) {
     // Daemon
@@ -1114,7 +1137,7 @@ main(int argc, char* argv[]) {
     freopen("/dev/null", "r", stdin);
     freopen("/var/log/netdj", "w", stdout);
     freopen("/dev/null", "w", stderr);
-    cout << "NetDJ v" << VERSION << " starting up." << endl;
+    std::cout << "NetDJ v" << VERSION << " starting up." << std::endl;
     
     // Read configuration
     config.ReadFile();
@@ -1129,9 +1152,10 @@ main(int argc, char* argv[]) {
     srand(time(NULL));
     
     // Init playlists
-    cache.SetDirname(config.GetString("CACHE_DIR"));
-    share.SetDirname(config.GetString("SHARE_DIR"));
     request.SetDirname(config.GetString("REQUEST_DIR"));
+    cache.SetDirname(config.GetString("CACHE_DIR"));
+    /* !!UGLY!! Should be configurable! */
+    share.SetDirname(config.GetString("SHARE_DIR"), true);
     
     // Start player-thread
     if (config.GetBool("PLAYER_START")) {
@@ -1157,7 +1181,7 @@ main(int argc, char* argv[]) {
     }
     
   } else {
-    cout << "Spawned daemon (pid " << pid << ")" << endl;
+    std::cout << "Spawned daemon (pid " << pid << ")" << std::endl;
   }
 
   return 0;

@@ -12,8 +12,12 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 #include "Regex.h"
 #include "config.h"
+#include "util.h"
+
+using namespace std;
 
 const unsigned int CONFSIZE = 20 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
@@ -55,13 +59,22 @@ Configuration::ReadFile() {
 
   // Open file in user's home directory
   string fullname = dotpath + CONF_FILENAME;
+  cout << "Trying configuration file '" << fullname << "':" << endl;
   ifstream conf(fullname.c_str());
   if (!conf.is_open()) {
     // Not found, try global directory
     fullname = NETDJ_ETCDIR;
     fullname += "/";
     fullname += CONF_FILENAME;
+    cout << "... Failed!" << endl;
+    cout << "Trying configuration file '" << fullname << "':" << endl;
+    conf.clear();
     conf.open(fullname.c_str());
+  }
+
+  if (!conf.is_open()) {
+    cout << "... Failed!" << endl;
+    error("Couldn't open configuration file!", true);
   }
 
   // Insert default values
@@ -70,11 +83,11 @@ Configuration::ReadFile() {
   }
 
   // Read file
-  cout << "Reading configuration entries from '" << fullname << "':" << endl;
   Regex reg("([^ ]+) *= *([^ ]+)");
   char line[255];
   vector<string> splitline;
-  while (conf.getline(line, sizeof(line))) {
+  while (!conf.eof()) {
+    conf.getline(line, sizeof(line));
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {
       cout << "  " << splitline[0] << " = " << splitline[1] << endl;

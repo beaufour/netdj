@@ -25,16 +25,17 @@
 
 class Directory : public Lockable {
 private:
-  typedef deque<File> list_t;
+  typedef std::deque<File> list_t;
 
-  string shname, descr;
-  string dirname;
+  std::string shname, descr;
+  std::string dirname;
   int nextfileid;
   time_t lastupdate, lastplay;
   list_t list;
   bool playlist;
   pthread_mutex_t mutex;
   pthread_mutexattr_t mutexattr;
+  bool fromfile;
 
   void Update();
 
@@ -44,20 +45,20 @@ public:
       shname(_shname), descr(_descr), nextfileid(0),
       lastupdate(time_t(0)), lastplay(time_t(0)), playlist(_playlist) {};
   
-  void SetDirname(const string&);
-  const string& GetDirname() const;
+  void SetDirname(const std::string&, bool = false);
+  const std::string& GetDirname() const;
 
   void SetLastupdate(const time_t);
   time_t GetNextTimestamp() const;
 
   bool Empty();
   bool GetSong(File&);
-  void AddSong(const string&);
+  void AddSong(const std::string&);
   int GetSize();
-  int GetEntries(vector<File>&, unsigned int) const;
+  int GetEntries(std::vector<File>&, unsigned int) const;
 
-  const string& GetShortname() const;
-  const string& GetDescription() const;
+  const std::string& GetShortname() const;
+  const std::string& GetDescription() const;
 };
 
 #endif

@@ -11,6 +11,9 @@
 
 // Provides rand, srand and system
 #include <cstdlib>
+#include <iostream>
+
+using namespace std;
 
 int
 get_rand(const int max) {
@@ -18,8 +21,8 @@ get_rand(const int max) {
 }
 
 void
-error(const char* errmsg, const bool isfatal = true) {
-  cout << "  ARGH: " << errmsg << endl;
+error(const char* errmsg, const bool isfatal) {
+  std::cout << "  ARGH: " << errmsg << std::endl;
   if (isfatal) {
     exit(100);
   }
