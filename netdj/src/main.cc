@@ -185,19 +185,18 @@ void*
 player_thread(void*) {
   unsigned int i;
   File fobj;
-  bool gotsong;
 
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
   while (!stop_player) {
-    i = 0;
-    do {
-      gotsong = lists[i]->GetSong(fobj);
-      ++i;
-    } while (!gotsong && i < listnum);
+    for (i = 0; i < listnum; ++i) {
+      if (lists[i]->GetSong(fobj))
+	break;
+    }
     if (i == listnum) {
       cout << endl << "  Hmmm, no files to play..." << endl;
+      currentsong.Set("", false);
       screen_flush();
       sleep(30);
     } else {
@@ -360,6 +359,8 @@ com_info(char* arg) {
       cout << "    Artist:  " << id3tag->GetArtist() << endl;
       cout << "    Album:   " << id3tag->GetAlbum() << endl;
       cout << "    Title:   " << id3tag->GetTitle() << endl;
+      cout << "    Year:    " << id3tag->GetYear() << endl;
+      cout << "    Style:   " << id3tag->GetStyle() << endl;
       cout << "    Comment: " << id3tag->GetNote() << endl;
     }
   }
