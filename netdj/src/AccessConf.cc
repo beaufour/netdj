@@ -24,7 +24,6 @@ AccessConf::ReadFile() {
     conf.open(fullname.c_str());
   }
 
-  // Parse configuration
   cout << "Reading user entries from '" << fullname << "':" << endl;
   Regex reg("^([^:]+):([[:digit:]]+):(.+)$");
   vector<string> splitline;
@@ -32,6 +31,10 @@ AccessConf::ReadFile() {
   User user;
 
   lock();
+  // Clear list
+  users.clear();
+
+  // Read list from file
   while (conf.getline(line, sizeof(line))) {
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {

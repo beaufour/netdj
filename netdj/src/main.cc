@@ -384,6 +384,7 @@ int com_list(char*);
 int com_lists(char*);
 int com_move(char*);
 int com_next(char*);
+int com_reload(char*);
 int com_start(char*);
 int com_stop(char*);
 int com_version(char*);
@@ -416,6 +417,7 @@ COMMAND commands[] = {
   {"move",     com_move,     false, "Move current song to share"},
   {"next",     com_next,     true,  "Skip to next song"},
   {"otw",      com_yeah,     false, "(!) Show song(s) currently being downloaded"},
+  {"reload",   com_reload,   false, "Reload configuration"},
   {"save",     com_yeah,     false, "(!) Save current song to share"},
   {"start",    com_start,    true,  "Start player"},
   {"stop",     com_stop,     true,  "Stop player"},
@@ -552,6 +554,20 @@ com_next(char* arg) {
 };
 
 int
+com_reload(char* arg) {
+  if (!strncmp(arg, "users", 5)) {
+    cout << "Reloading users..." << endl;
+    acc.ReadFile();
+  } else if (!strncmp(arg, "config", 6)) {
+    cout << "Reloading config (EXPERIMENTAL!)..." << endl;
+    config.ReadFile();
+  } else {
+    cout << "  You have to give either 'users' or 'config' as parameter" << endl;
+  }
+  return 0;
+}
+
+int
 com_start(char* arg) {
   stop_player = false;
   pthread_create(&player_t, NULL, &player_thread, NULL);
@@ -569,9 +585,9 @@ int
 com_version(char* arg) {
   cout << "  " << PKGVER << endl
        << "  CVS (main.cc):"
-       << "$Id$" << endl;
+       << " $Id$" << endl;
 
-  cout << "Shoucast-support: " <<
+  cout << "  Compiled with Shoutcast support: " <<
 #ifdef HAVE_LIBSHOUT
     "Yes"
 #else
