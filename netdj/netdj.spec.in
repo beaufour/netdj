@@ -1,6 +1,6 @@
 # -*- rpm-spec -*-
-%define name	netdj
-%define version	0.12
+%define name	@PACKAGE@
+%define version	@VERSION@
 %define release 1
 
 Summary:	NetDJ  - Fully automated streaming radio
