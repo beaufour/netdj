@@ -86,7 +86,8 @@ main(int argc, char* argv[])
   // Connect signal and slots
   QObject::connect(server, SIGNAL(SigQuit()), qApp, SLOT(quit()));
   QObject::connect(server, SIGNAL(SigSkip()), playerthread, SLOT(Skip()));
-
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)), server, SLOT(SongPlaying(const Song&, const Collection*)));
+  
   cout << "Starting player" << endl;
   playerthread->start(QThread::HighPriority);
 

@@ -31,21 +31,6 @@ PlayerThread::~PlayerThread()
 {
 }
 
-bool
-PlayerThread::GetNextSong() {
-  QMutexLocker lock(&mSongMutex);
-
-  return mCols->GetNextSong(mCurrentSong, &mCurrentCollection);
-}
-
-void
-PlayerThread::GetCurrentSong(Song& aSong, string& aColId) const {
-  QMutexLocker lock(&mSongMutex);
-
-  aSong = mCurrentSong;
-  aColId = mCurrentCollection->GetIdentifier();
-}
-
 void
 PlayerThread::Stop() {
   mStopPlayer = true;
@@ -80,31 +65,35 @@ PlayerThread::run() {
     unsigned char buf[4096];
     int bytes;
 
+    Song currentSong;
+    const Collection* currentCollection;
+
     while (true) {
       cout << "-----=====> Get next song" << endl;
 
       /* Check whether we have found a song */
-      if (!GetNextSong()) {
+      if (!mCols->GetNextSong(currentSong, &currentCollection)) {
 	cout << "Hmmmm, no files to play" << endl;
 	cout << "...waiting a wee time" << endl;
-	/** \todo Can we do something better than just waiting 10 secs? */
+	/** @todo Can we do something better than just waiting 10 secs? */
 	sleep(10);
 	continue;
       }
+      emit SigSongPlaying(currentSong, currentCollection);
 
       cout << "** Song info " << endl;
-      cout << "UNID :      " << mCurrentSong.GetUNID() << endl;
-      cout << "Type :      " << mCurrentSong.GetSongType() << endl;
-      cout << "Filename :  " << mCurrentSong.GetFilename() << endl;
-      cout << "Collection: " << mCurrentCollection->GetIdentifier() << endl;
+      cout << "UNID :      " << currentSong.GetUNID() << endl;
+      cout << "Type :      " << currentSong.GetSongType() << endl;
+      cout << "Filename :  " << currentSong.GetFilename() << endl;
+      cout << "Collection: " << currentCollection->GetIdentifier() << endl;
       
-      if (mCurrentSong.GetSongType() != SongType_MP3) {
+      if (currentSong.GetSongType() != SongType_MP3) {
 	cout << "INVALID SONGTYPE!" << endl;
 	continue;
       }
       
       try {
-	const SongInfo* info = mCurrentSong.GetSongInfo();
+	const SongInfo* info = currentSong.GetSongInfo();
 	if (info) {
 	  cout << "** Song content info" << endl;
 	  cout << "Description:  " << info->GetDescription() << endl;
@@ -126,13 +115,13 @@ PlayerThread::run() {
       }
 
       cout << "-----=====> Send song to icecast" << endl;
-      QFile file(mCurrentSong.GetFilename());
+      QFile file(currentSong.GetFilename());
       if (!file.open(IO_ReadOnly)) {
 	continue;
       }
       
       /* Send song */
-      shout.SetSongName(mCurrentSong.GetFilename());
+      shout.SetSongName(currentSong.GetFilename());
       while ((bytes = file.readBlock((char*) buf, sizeof(buf))) > 0
 	     && mStopPlayer == false && mSkipSong == false) {
 	shout.Send(buf, bytes);
@@ -144,8 +133,8 @@ PlayerThread::run() {
 
 
       /* Delete file, if collection is request-queue */
-      if (mCurrentCollection->GetDeleteAfterPlay()) {
-	/** \todo Delete file! */
+      if (currentCollection->GetDeleteAfterPlay()) {
+	/** @todo Delete file! */
 	cout << "TODO: delete file" << endl;
       }
 

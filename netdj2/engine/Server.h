@@ -10,15 +10,18 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
-#include <qptrdict.h>
-#include <qobject.h>
 #include <qhttp.h>
+#include <qmutex.h>
+#include <qobject.h>
+#include <qptrdict.h>
 
 #include "Client.h"
+#include "Song.h"
 #include "StdException.h"
 
 class ServerSocket;
 class IAccessChecker;
+class Collection;
 
 /**
  * Maximum bytes allowed in a request
@@ -60,21 +63,21 @@ private:
 
   /** The access checker used */
   IAccessChecker* mAccessChecker;
-  
-public:
-  /**
-   * Constructor.
-   *
-   * @param aPort             The port number to listen on
-   * @param aBackLog          The backlog of connections to keep
-   * @param aParent           The parent QObject
-   */
-  Server(int aPort, int aBackLog, QObject* aParent = 0);
 
-  /** Destructor */
-  ~Server();
+  /** Mutex used to lock mCurrentSong and mCurrentCol */
+  mutable QMutex mSongMutex;
+
+  /** The currently playing song */
+  Song mCurrentSong;
+
+  /** The collection mCurrentSong comes from */
+  const Collection* mCurrentCol;
   
-private:
+  /**
+   * Get a copy of the currently playing song.
+   */
+  void GetSong(Song& aSong, const Collection** aCol);
+
   /**
    * Handles commands from clients.
    * It throws CMD_Unauthorized and CMD_Invalid.
@@ -124,6 +127,19 @@ private:
    */
   void CmdIndex(QTextStream& aStream);
   
+public:
+  /**
+   * Constructor.
+   *
+   * @param aPort             The port number to listen on
+   * @param aBackLog          The backlog of connections to keep
+   * @param aParent           The parent QObject
+   */
+  Server(int aPort, int aBackLog, QObject* aParent = 0);
+
+  /** Destructor */
+  ~Server();
+  
 signals:
   /** Emitted on receiving a 'quit' command */
   void SigQuit();
@@ -144,6 +160,14 @@ private slots:
    * @param aSocket           The network socket for the client
    */
   void NewClient(QSocket* aSocket);
+
+  /**
+   * Called when a new song is playing.
+   *
+   * @param aSong             The song
+   * @param aCol              The collection it comes from
+   */
+  void SongPlaying(const Song& aSong, const Collection* aCol);
 };
 
 #endif

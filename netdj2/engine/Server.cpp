@@ -15,6 +15,7 @@
 
 #include "config.h"
 #include "AccessChecker.h"
+#include "Collection.h"
 #include "Server.h"
 #include "ServerSocket.h"
 #include "Song.h"
@@ -88,7 +89,7 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
   // Automatically delete contained pointers on delete
   mClients.setAutoDelete(true);
 
-  /** @todo Set this somewhere */
+  // Initialize Access Controll
   QString Filename = NETDJ_CONF.GetString("CONFIG_DIR");
   Filename += Filename.isEmpty() ? "" : "/";
   Filename += NETDJ_CONF.GetString("USER_LIST_FILE");
@@ -210,6 +211,23 @@ Server::ClientClosed()
   mClients.remove(socket);
 }
 
+void
+Server::SongPlaying(const Song& aSong, const Collection* aCol)
+{
+  QMutexLocker lock(&mSongMutex);
+
+  mCurrentSong = aSong;
+  mCurrentCol = aCol;
+}
+
+void
+Server::GetSong(Song& aSong, const Collection** aCol)
+{
+  QMutexLocker lock(&mSongMutex);
+
+  aSong = mCurrentSong;
+  *aCol = mCurrentCol;
+}
 
 /********** COMMAND HANDLER ************/
 /** Command types */
@@ -268,8 +286,7 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
     throw CMDUnauthorized();
   }
 
-  // Create argument structure
-  /** @todo create argument structure for commands? */
+  // If/when commands with structures are needed header needs to be unpacked.
 
   // Call command
   switch (cmd.mType) {
@@ -342,14 +359,14 @@ Server::CmdHelp(QTextStream& aStream)
 void
 Server::CmdIndex(QTextStream& aStream)
 {
+  Song cursong;
+  const Collection* curcol;
+  GetSong(cursong, &curcol);
+  
   QDomDocument doc("NetDJ");
   QDomElement root = doc.createElement("currentsong");
-  Song cursong;
-  string curcol;
-  /** @todo Listen for PlaySong signal! */
-  // mPlayer->GetCurrentSong(cursong, curcol);
-  root.setAttribute("collection", curcol);
-  cursong.asXML(doc, root);
+  root.setAttribute("collection", mCurrentCol->GetIdentifier());
+  mCurrentSong.asXML(doc, root);
   doc.appendChild(root);
   
   aStream << HTTP_200

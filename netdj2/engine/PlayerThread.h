@@ -11,7 +11,6 @@
 #define __PLAYERTHREAD_H__
 
 #include <qthread.h>
-#include <qmutex.h>
 #include <qobject.h>
 
 #include "Client.h"
@@ -39,18 +38,6 @@ private:
   /** Pointer to song Collections */
   Collections* mCols;
 
-  /** Mutex protecting CurrentSong */
-  mutable QMutex mSongMutex;
-
-  /** The song currently playing */
-  Song mCurrentSong;
-
-  /** The collection the currently playing song is from */
-  const Collection* mCurrentCollection;
-
-  /** Get next song to play */
-  bool GetNextSong();
-
 public:
   /**
    * Constructor.
@@ -70,13 +57,14 @@ public:
   /** Stop the thread */
   void Stop();
 
-  /**
-   * Get the currently playing Song and Collection.
+signals:
+  /*
+   * Emitted when a new song is put on
    *
-   * @param aSong             Current song
-   * @param aColId            Current collection.
+   * @param aSong             The song
+   * @param aCol              The collection it comes from
    */
-  void GetCurrentSong(Song& aSong, std::string& aColId) const;
+  void SigSongPlaying(const Song& aSong, const Collection* aCol);
 
 public slots:
   /** Skip current song */
