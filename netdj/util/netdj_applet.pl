@@ -116,9 +116,6 @@ sub cmd_update {
     } else {
 	$_ = $response->content;
 	if (!($_ eq $last_status)) {
-	    # Hack to delete any '&' and '´' (should be fixed in netdj-bin...)
-	    while (s/\&/and/) {};
-	    while (s/\´//) {};
 	    my $status = XMLin($_);
 	    
 	    # Current song
