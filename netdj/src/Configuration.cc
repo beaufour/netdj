@@ -90,7 +90,7 @@ Configuration::ReadFile() {
     conf.getline(line, sizeof(line));
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {
-      cout << "  " << splitline[0] << " = " << splitline[1] << endl;
+      //      cout << "  " << splitline[0] << " = " << splitline[1] << endl;
       conflist[splitline[0]] = splitline[1];
     }
   }
