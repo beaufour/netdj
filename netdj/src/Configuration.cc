@@ -19,9 +19,8 @@
 
 using namespace std;
 
-const unsigned int CONFSIZE = 20 * 2;
+const unsigned int CONFSIZE = 18 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
-			      "PLAYER", "/usr/bin/mpg123",
 			      "CACHE_DIR", "/usr/share/mp3/cache",
 			      "SHARE_DIR", "/usr/share/mp3/share",
 			      "REQUEST_DIR", "/usr/share/mp3/request",
@@ -31,7 +30,6 @@ const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "PLAYER_START", "true",
 			      "PLAYER_LOG", "false",
                               "DELETE_PLAYED", "false",
-                              "STREAM", "false",
                               "STREAM_IP", "127.0.0.1",
                               "STREAM_PORT", "8000",
                               "STREAM_MOUNT", "netdj",
@@ -90,7 +88,7 @@ Configuration::ReadFile() {
     conf.getline(line, sizeof(line));
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {
-      //      cout << "  " << splitline[0] << " = " << splitline[1] << endl;
+      // cout << "  " << splitline[0] << " = " << splitline[1] << endl;
       conflist[splitline[0]] = splitline[1];
     }
   }

@@ -13,11 +13,7 @@ Need to have:
 -------------
 * POSIX threads
 * GNU regex
-
-Nice to have:
--------------
-* GNU readline (well, I give no guarantees without this, but it compiles)
-* libshout to stream through an icecast/shoutcast-server
+* libshout2
 
 Compile:
 --------

@@ -61,13 +61,10 @@ extern "C" {
 // Provides signal
 #include <csignal>
 
-using namespace std;
+// libshout
+#include <shout/shout.h>
 
-#ifdef HAVE_LIBSHOUT
-// HACK to correct c++ "bug" in shout.h
-#  define namespace nspace
-#  include <shout/shout.h>
-#endif
+using namespace std;
 
 ////////////////////////////////////////
 // GLOBALS
@@ -237,6 +234,10 @@ player_thread(void*) {
   unsigned int i;
   bool delete_it;
   File fobj;
+
+  FILE *musicfile;
+  unsigned char buff[4096];
+  long read;
   
   stop_player = false;
   next_song = false;
@@ -245,50 +246,41 @@ player_thread(void*) {
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
   
   // Init shoutcast stuff
-#ifdef HAVE_LIBSHOUT
-  shout_conn_t conn;
-  unsigned char buff[4096];
-  long read;
-  FILE *musicfile;
-  
-  shout_init_connection(&conn);
+  shout_init();
+  shout_t* shout = shout_new();
+  shout_metadata_t* metadata = shout_metadata_new();
+  if (!shout || !metadata) {
+    std::cout << std::endl << "  Couldn't create libshout structures!"
+	      << shout_get_error(shout)
+	      << std::endl;
+    screen_flush();
+    stop_player = true;
+  }
   
   // Setup stream
-  char stream_ip[16];
-  char stream_mount[256];
-  char stream_passwd[256];
+  shout_set_user(shout, "source");
+  shout_set_public(shout, 0);
+  shout_set_format(shout, SHOUT_FORMAT_MP3);
+  shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP);
+  shout_set_host(shout, config.GetString("STREAM_IP").c_str());
+  shout_set_port(shout, config.GetInteger("STREAM_PORT"));
+  shout_set_password(shout, config.GetString("STREAM_PASSWD").c_str());
+  shout_set_mount(shout, config.GetString("STREAM_MOUNT").c_str());
+  shout_set_name(shout, "NetDJ");
+  shout_set_genre(shout, "Mixed");
+  shout_set_description(shout, "NetDJ streaming channel");
   
-  strncpy(stream_ip, config.GetString("STREAM_IP").c_str(), sizeof(stream_ip));
-  strncpy(stream_mount, config.GetString("STREAM_MOUNT").c_str(), sizeof(stream_mount));
-  strncpy(stream_passwd, config.GetString("STREAM_PASSWD").c_str(), sizeof(stream_passwd));
-  
-  conn.ip = stream_ip;
-  conn.port = config.GetInteger("STREAM_PORT");
-  conn.mount = stream_mount;
-  conn.password = stream_passwd;
-  conn.name = "NetDJ";
-  conn.genre = "Mixed";
-  conn.description = "NetDJ streaming channel";
-  
-  if (config.GetBool("STREAM") && !shout_connect(&conn)) {
-    std::cout << std::endl << "  Couldn't connect to server!" << std::endl;
+  if (!stop_player && shout_open(shout) != SHOUTERR_SUCCESS) {
+    std::cout << std::endl << "  Couldn't connect to icecast server: "
+	      << shout_get_error(shout)
+	      << std::endl;
     screen_flush();
     stop_player = true;
   }
-#else
-  // Sanitycheck, when libshout isn't in binary
-  if (config.GetBool("STREAM")) {
-    std::cout << std::endl
-	 << "  Shoutcast-support isn't included in this binary!" << std::endl
-	 << "  Set STREAM=false in configuration to use player instead" << std::endl;
-    screen_flush();
-    stop_player = true;
-  }
-#endif
   
   // Open logfile
   std::ofstream logfile;
-  if (config.GetBool("PLAYER_LOG")) {
+  if (!stop_player && config.GetBool("PLAYER_LOG")) {
     std::string logfilename = config.GetString("$$CONFDIR") + CONF_LOGFILENAME;
     std::cout << std::endl << "  Logging to '" << logfilename << "'" << std::endl;
     logfile.open(logfilename.c_str(), ios::app);
@@ -343,59 +335,34 @@ player_thread(void*) {
 	std::cout << std::endl;
 	screen_flush();
 	
-	if (!config.GetBool("STREAM")) {
-	  // Play song with player program
-	  playercmd_pid = fork();
-	  if (playercmd_pid == -1) {
-	    error(strerror(errno));
-	  }
-	  
-	  if (playercmd_pid == 0) {
-	    // childproc
-	    // Skip all output from player
-	    freopen("/dev/null", "w", stdout);
-	    freopen("/dev/null", "w", stderr);
-	    // Start player
-	    execlp(config.GetString("PLAYER").c_str(),
-		   "mpg123",
-		   "-q",
-		   "--aggressive",
-		   fobj.GetName().c_str(),
-		   NULL);
-	  } else { // parentproc
-	    wait(NULL);
-	  } // playercmd_pid
-#ifdef HAVE_LIBSHOUT
-	} else {
-	  // Stream song
-	  musicfile = fopen(fobj.GetName().c_str(), "r");
-	  if (musicfile) {
-	    shout_update_metadata(&conn, fobj.GetFilename().c_str());
-	    while (!stop_player && !next_song) {
-	      read = fread(buff, 1, 4096, musicfile);
-	      if (read > 0) {
-		if (!shout_send_data(&conn, buff, read)) {
-		  std::cout << std::endl
-		       << "  Send error:" << conn.error << "..."
-		       << std::endl;
-		  screen_flush();
-		  break;
-		}
-	      } else {
+	// Stream song
+	musicfile = fopen(fobj.GetName().c_str(), "r");
+	if (musicfile) {
+	  // TODO: Metadata
+	  // shout_update_metadata(&conn, (char*) fobj.GetFilename().c_str());
+	  while (!stop_player && !next_song) {
+	    read = fread(buff, 1, 4096, musicfile);
+	    if (read > 0) {
+	      if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
+		std::cout << std::endl
+			  << "  Send error:" << shout_get_error(shout) << "..."
+			  << std::endl;
+		screen_flush();
 		break;
 	      }
-	      shout_sleep(&conn);
+	    } else {
+	      break;
 	    }
-	    fclose(musicfile);
-	  } else {
-	    // Couldn't open file
-	    std::cout << std::endl
-		 << "  Couldn't open '" << fobj.GetName() << "'"
-		 << std::endl;
-	    screen_flush();
-	  } // musicfile
-#endif
-	}
+	    shout_sync(shout);
+	  }
+	  fclose(musicfile);
+	} else {
+	  // Couldn't open file
+	  std::cout << std::endl
+		    << "  Couldn't open '" << fobj.GetName() << "'"
+		    << std::endl;
+	  screen_flush();
+	} // musicfile
 	if (logfile.is_open()) {
 	  logfile << time(NULL) << ","
 		  << "\"" << fobj.GetFilenameNoType() << "\","
@@ -407,13 +374,15 @@ player_thread(void*) {
     }
   }
   
-#ifdef HAVE_LIBSHOUT
   // Disconnect from streaming server
-  if (config.GetBool("STREAM")) {
-    shout_update_metadata(&conn, NULL);
-    shout_disconnect(&conn);
+  if (shout) {
+    if (metadata) {
+      shout_metadata_free(metadata);
+    }
+    shout_close(shout);
+    shout_free(shout);
   }
-#endif
+  shout_shutdown();
 
   // Close logfile
   if (logfile.is_open()) {
@@ -429,9 +398,6 @@ player_thread(void*) {
 void kill_current() {
   // This should be packed nicely into a semaphore...
   next_song = true;
-  if (!config.GetBool("STREAM") && playercmd_pid) {
-    kill(playercmd_pid, SIGINT);
-  }
 }
 
 
@@ -643,13 +609,7 @@ com_version(char* arg) {
        << "  main.cc - CVS id  :"
        << " $Id$" << std::endl
        << "  main.cc - compiled: " << __DATE__ << " " << __TIME__ << std::endl
-       << "  Compiled with Shoutcast support: " <<
-#ifdef HAVE_LIBSHOUT
-    "Yes"
-#else
-    "No"
-#endif
-       << std::endl;
+       << "  Shoutcast support: " << shout_version(0,0,0) << std::endl;
 
   return 0;
 }
