@@ -516,7 +516,8 @@ http_thread(void*) {
       "Content-Type: text/xml\r\n"
       "\r\n"
       "<?xml version=\"1.0\"?>\n"
-      "<netdj>\n";
+      "<netdj id=\"netdj\" xmlns:html=\"http://www.w3.org/1999/xhtml\"\n"
+      "                    xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n";
 
     const char xbuf2[] =
       "</netdj>\n";
@@ -631,6 +632,7 @@ http_thread(void*) {
     char tmplint[20];
     struct pollfd pf;
     pf.events = POLLIN;
+    int z;
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
@@ -714,14 +716,18 @@ http_thread(void*) {
 		xbuf += "  <currentsong>\n    <description>" + cfilename + "</description>\n  </currentsong>\n";
 		songs.clear();
 		lists[1]->GetEntries(songs, 10);
+		z = 0;
 		for (vector<File>::iterator it = songs.begin();
 		     it != songs.end();
 		     ++it) {
-		  xbuf += "  <song>\n";
-		  xbuf += "    <id>";
+		  xbuf += "  <song id=\"";
+		  sprintf(tmpint, "%d", ++z);
+		  xbuf += tmpint;
+		  xbuf += "\">\n";
+		  xbuf += "    <unid>";
 		  sprintf(tmpint, "%d", it->GetId());
 		  xbuf += tmpint;
-		  xbuf += "</id>\n";
+		  xbuf += "</unid>\n";
 		  xbuf += "    <size>";
 		  sprintf(tmplint, "%ld", it->GetSize());
 		  xbuf += tmplint;
@@ -736,7 +742,7 @@ http_thread(void*) {
 		  xbuf += "     <size>";
 		  xbuf += tmpint;
 		  xbuf += "</size>\n";
-		  xbuf += "     <shortname>" + *(dir->GetShortname()) + "</shortname>\n";
+		  xbuf += "     <id>" + *(dir->GetShortname()) + "</id>\n";
 		  xbuf += "     <description>" + *(dir->GetDescription()) + "</description>\n";
 		  xbuf += "  </list>\n";
 		}
