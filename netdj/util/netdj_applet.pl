@@ -8,7 +8,7 @@ use Gtk;
 use Gnome;
 use Gnome::Applet;
 use Gtk::GladeXML;
-
+use Data::Dumper;
 
 ########################################
 # CONFIG
@@ -124,7 +124,8 @@ sub cmd_update {
 	    # Songlist
 	    my $tool = "";
 	    my $songs = $status->{song};
-	    for my $s (@$songs) {
+
+	    foreach my $s (values %$songs) {
 		$tool .= $s->{description}."\n";
 	    }
 
