@@ -9,6 +9,8 @@
 #include "Directory.h"
 
 #include <iostream>
+#include <errno.h>
+#include <cstring>
 
 ////////////////////////////////////////
 // PRIVATE
@@ -18,7 +20,10 @@ Directory::Update() {
   if (!dirname.empty()) {
     DIR *dir_ptr = opendir(dirname.c_str());
     if (dir_ptr == NULL) {
-      cout << dirname << endl;
+      cout << "Problems with '" << dirname << "':" << endl
+	   << strerror(errno)
+	   << endl;
+
       error("  Can't open directory!");
     }
     struct dirent *dirent_ptr = readdir(dir_ptr);
