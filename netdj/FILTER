@@ -1,4 +1,8 @@
-My personal filter -- to be incorporated in gnut....
+My personal taste-filter. It's just a notepad for me, and absolutely
+personal. My plan is to modify gnut so it can handle a file like this, and
+only cache files according to is.
+
+... beaufour
 
 ADD:
 .+\.[m|M][p|P]3$
@@ -19,3 +23,6 @@ Usher
 Dixie Chicks
 Techno Remix
 Techno?
+Garth Brooks
+Tim McGraw
+Ja Rule
