@@ -1,5 +1,7 @@
 Remember:
 - Fix comments
+  - all parameters
+  - ///\n/// @todo, @bug, etc.
 - Get STL and std::string out of the code...
 - Find all qDebug, qWarning, etc. and convert to signals
 - Check all todo's
@@ -7,24 +9,12 @@ Remember:
 - Check all calls to 'new'! Q_PTR...
 
 Showstoppers:
-- LogService should only run in Server context...
-  -- PlayerThread emits SongPlaying, gets to LogService, gets to Server, needs
-     to send it to all clients... ouch!
-  -- Mutex and timer, or something?
-  -- Queue LogEntries in Server?
-  -- Would be better to queue them in LogService, more generic
-  -- Seperate LogService thread would mean mutexes in Server too...
-  -- Queue them in LogService and tend to them with a timer...
-  -- use Events:
-     - QApplication::postEvent()?
-     - QCustomEvent
-     - use events in general to signal from PlayerThread
-     - that would need a MainLoop class that translates the event to a signal
-- Get rid of SigException?
+- Get rid of SigException? Yes, use message and the types:
 - Add EntryType = INFO, WARN, CRIT to log entries
 - Default log file placement
-- Network logging
 - Make sure that SongInfo is not always cached!
+- Use QSettings for configuration?
+- command line config file placement
 
 Major enhancements:
 * Database support
