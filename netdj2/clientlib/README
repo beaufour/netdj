@@ -1,0 +1,20 @@
+Purpose of the clientlib is:
+----------------------------
+1) Make a Qt library to receive log stream from engine and convert this to
+   specific signals.
+2) Should be as generic as possible so transport mechanism can be changed.
+3) Should be an interface, so implementation can be changed.
+
+Design plan:
+------------
+Two interfaces:
+A) Gets information from NetDJ, and emits QDomElement* entries
+B) Gets QDomElement* entry signals, and emits specific signals
+
+Two implementations:
+A) Interface to TCP stream
+B) Well, implementation...
+
+And finally:
+A test GUI client that shows events in a nice dialog. Maybe a combined
+curses/GUI client or an example app of both. getenv(DISPLAY)...
