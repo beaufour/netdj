@@ -8,6 +8,9 @@
 
 #include "File.h"
 
+// Provides basename
+#include <libgen.h>
+
 bool
 File::update_stat() {
   if (name.size() != 0 && stat(name.c_str(), &stat_buf) == 0 && S_ISREG(stat_buf.st_mode)) {

@@ -18,9 +18,6 @@
 // Provides time_t
 #include <ctime>
 
-// Provides basename
-#include <libgen.h>
-
 #include "ID3Tag.h"
 
 class File {

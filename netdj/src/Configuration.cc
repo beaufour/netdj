@@ -8,6 +8,11 @@
 
 #include "Configuration.h"
 
+#include <vector>
+#include <fstream>
+#include <cstdlib>
+#include "Regex.h"
+
 const unsigned int CONFSIZE = 13 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "PLAYER", "/usr/bin/mpg123",

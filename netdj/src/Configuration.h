@@ -10,11 +10,7 @@
 #define __CONFIGURATION_H__
 
 #include <map>
-#include <vector>
 #include <string>
-#include <fstream>
-#include <cstdlib>
-#include "Regex.h"
 
 class Configuration {
 private:
