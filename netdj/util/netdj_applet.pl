@@ -16,10 +16,10 @@ my %CONFIG;
 my $config_file = "$ENV{HOME}/.netdj_applet";
 open(CONFFILE, $config_file) || die "Can't open $config_file: $!\n";
 while (<CONFFILE>) {
-    chomp;
-    if ((!m/^#.*/) && m/([^ ]+) *= *([^ ]+)/) {
-	$CONFIG{$1} = $2;
-    }
+  chomp;
+  if ((!m/^#.*/) && m/([^ ]+) *= *([^ ]+)/) {
+    $CONFIG{$1} = $2;
+  }
 };
 close(CONFFILE);
 
@@ -28,7 +28,7 @@ close(CONFFILE);
 # GLOBALS
 my $NOINFO_TEXT = '- No Info - ';
 my $last_status = "";
-
+my $current = "";
 
 ########################################
 # INITIALIZATION
@@ -60,11 +60,15 @@ EOF
 my $applet = new Gnome::AppletWidget 'netdj_applet.pl';
 
 # Commands
-$applet->register_callback("Next", "Næste", \&cmd_generic, "next");
+$applet->register_callback("Next", "Next", \&cmd_generic, "next");
 $applet->register_callback("Start", "Start", \&cmd_generic, "start");
 $applet->register_callback("Stop", "Stop", \&cmd_generic, "stop");
-$applet->register_stock_callback("Preferences", "Preferences", , "Egenskaber...", \&menu_pref);
-$applet->register_stock_callback("About", "About", , "Om...", \&menu_about);
+$applet->register_callback("GoogleSearch", "Search google...", sub
+			   {
+			     `gnome-moz-remote 'http://www.google.com/search?q=$current'`;
+			   });
+$applet->register_stock_callback("Preferences", "Preferences", , "Preferences...", \&menu_pref);
+$applet->register_stock_callback("About", "About", , "About...", \&menu_about);
 
 # Box
 my $box = new Gtk::HBox(0, 1);
@@ -114,7 +118,7 @@ sub cmd_update {
 	    my $status = XMLin($_);
 	    
 	    # Current song
-	    my $current = $status->{currentsong}->{description};
+	    $current = $status->{currentsong}->{description};
 	    $label->set_text($current);
     
 	    # Songlist
