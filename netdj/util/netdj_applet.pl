@@ -108,6 +108,10 @@ main Gtk;
 
 ########################################
 # SUBROUTINES
+sub keysort {
+    $a <=> $b
+}
+
 sub cmd_update {
     my $response = $ua->get("http://$CONFIG{HOST}/index.xml");
     if ($response->is_error) {
@@ -126,7 +130,7 @@ sub cmd_update {
 	    my $tool = "";
 	    my $songs = $status->{song};
 	    
-	    foreach my $s (sort keys %$songs) {
+	    foreach my $s (sort {$a <=> $b} keys %$songs) {
 		$tool .= $songs->{$s}->{description}."\n";
 	    }
 	    $applet->set_tooltip($tool);
