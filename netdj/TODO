@@ -1,65 +1,72 @@
+Comming up:
+* Seperation of NetDJ-core (engine) and client functions.
+  - all non-server tasks (next number, add request, etc.) should be
+    done via XML-interface. Start and stop should be removed from same
+
+
 Missing
 -------
 ENGINE:
 * Multiple shares
 * Enable directories in lists (especially shares)
 * Enable HTTP GET of songs
-* Save history of played songs
-  - a playlist history
-  - check history before playing song (avoid too frequent repeats)
+* Check playlisthistory before playing song (avoid too frequent repeats)
+* Add better info about client usage
+* Take generic player-command and args from config file
+* Do generic full_path-function (with either pwd or home as added path)     
+* Enable exchange about listeners, etc. with streaming server
 
 
-APPLET:
+ADMIN INTERFACE
+* Remove all non-engine functions (next, request, list, lists, ...)
+* Enable logging to file of information written to screen
+
+
+CLIENT INTERFACE:
+* Add feedback to commands
+* Make all output XML
+* Extra commands
+  - request
+  - fetch (over http)
+  - delete arbitrary files in cache
+  - save (not move) file to share
+  - list content of all lists
+* Enable showing of playlist in sharedir
+* Get playing time for songs
+* Make playlog available (just previous song for a start)
+* Clean up songname?
+  - Remove '_' from filenames like Led_Zeppelin-The_Song_Remains_The_Same.mp3
+  - Remove additional endings, .mp3.mp3, etc.
+
+
+APPLET UI:
 * Show the ID3-info
 * Show proper window instead of tooltip
 * FIX: Crashes when there's only one song in the cache-list
 
 
-ADMIN UI:
-* Take generic player-command and args from config file
-* Do generic full_path-function (with either pwd or home as added path)     
-* Save (not move) file to share
-* Delete should accept parameter current/previous/number
-* Show current downloads (*.gnut)
-* Show playlist for sharedir
-* Show playingtime when showing songinfo
-* Clear cache-list (set lastupdate = now());
-* Show previous song
-* Delete individual songs from playlist(s)
-* Better playlist-listings
-  - userchosen numbers
-  - choose by listname
-* Errorhandling should be made more flexible
-
-
 WEB UI:
-* Add 'search on freedb'
-* Add commands from UI
-  - add song
-* Add support for more commands
-* Add feedback to user for commands
-* Add info about webusage on admin display
-* Clean up songnames (in search line, or general?)
-  - Remove '_' from filenames like Led_Zeppelin-The_Song_Remains_The_Same.mp3
-  - Remove additional endings, .mp3.mp3, etc.
-* FIX: There seems to some kind of error with /cgi-bin/-commands,
-  they only work every second time - weird... timeout error of some sort
+... moved responsibility to PHP. It should basically just utilize
+whatever the client interface enables...
 
 
 GNUT:
-* real blacklist-function for the cache
+* more mature and real blacklist-function for the cache
 * check for already existing files in all lists before caching
 * Weird idea: connect only to host in a geographical area?
 
 
 BIG ISSUES
 ----------
-* Do better seperation of UI and commands
+* Use exceptions to enable better errorhandling
+* Full seperation of engine and client interface
+  - could be done using CORBA. That would enable other interfaces than
+    XML. For example a basic text-mode client, to compensate for lack of
+    client functions in server.
+* Make two program-modes: daemon and interactive
+  - make engine-commands oblivious and run in background
+  - interactive mode would just mean text-mode client included with core?
 * Prioritize playlistchoosing (fx. 60% from share, 40% cache)
-* An idea: Full seperation of engine, player and UI so it's three different
-  programs.
-  - UI can be handled solely by HTML over HTTP (or XML over HTTP/SOAP).
-  - Playing can be handled solely by streaming the data
 * Handle wishes? Send requests through underlying file fetcher
   (ie. search for xxx on gnut, don't download, just search -- would
    maybe trigger caching...)
