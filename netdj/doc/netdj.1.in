@@ -10,8 +10,8 @@ The NetDJ program.
 .SH GETTING STARTED
 FIXME
 .SH CONFIGURATION FILES
-Configuration files are first searched for in ~/.netdj/ and then
-in /usr/local/etc/netdj.
+Configuration files are first searched for in ~/@CONF_DIRNAME@ and then
+in @NETDJ_ETCDIR@.
 .TP
 .B config
 Configuration
@@ -19,7 +19,7 @@ Configuration
 .B users
 Users
 .SH VERSION
-This documentation applies to version 0.12 of NetDJ
+This documentation applies to version @VERSION@ of NetDJ
 .SH AUTHOR
 Written by Allan Beaufour Larsen <allan@beaufour.dk>
 .SH "REPORTING BUGS"
