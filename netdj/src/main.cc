@@ -78,6 +78,9 @@ Configuration config;
 AccessConf acc;
 bool http_locked;
 
+void* http_thread(void*);
+pthread_t http_t;
+
 
 ////////////////////////////////////////
 // SAVE/LOAD state
@@ -224,6 +227,7 @@ void kill_current() {
   }
 }
 
+
 ////////////////////////////////////////
 // COMMANDS
 typedef void (*COMFUNC)(char*);
@@ -239,6 +243,7 @@ int com_next(char*);
 int com_start(char*);
 int com_stop(char*);
 int com_weblock(char*);
+int com_webstart(char*);
 
 int
 com_yeah(char* arg) {
@@ -258,19 +263,20 @@ typedef struct {
 } COMMAND;
 
 COMMAND commands[] = {
-  {"add",     com_add,     false, "Add song to list"},
-  {"del",     com_del,     false, "Delete (!!!) current song from disk"},
-  {"help",    com_help,    false, "This listing"},
-  {"info",    com_info,    false, "Get information about the current song"},
-  {"list",    com_list,    false, "Show next 10 entries in LIST"},
-  {"lists",   com_lists,   false, "Show status for lists"},
-  {"move",    com_move,    false, "Move current song to share"},
-  {"next",    com_next,    true,  "Skip to next song"},
-  {"otw",     com_yeah,    false, "(!) Show song(s) currently being downloaded"},
-  {"save",    com_yeah,    false, "(!) Save current song to share"},
-  {"start",   com_start,   true,  "Start player"},
-  {"stop",    com_stop,    true,  "Stop player"},
-  {"weblock", com_weblock, false, "Lock webacces"},
+  {"add",      com_add,      false, "Add song to list"},
+  {"del",      com_del,      false, "Delete (!!!) current song from disk"},
+  {"help",     com_help,     false, "This listing"},
+  {"info",     com_info,     false, "Get information about the current song"},
+  {"list",     com_list,     false, "Show next 10 entries in LIST"},
+  {"lists",    com_lists,    false, "Show status for lists"},
+  {"move",     com_move,     false, "Move current song to share"},
+  {"next",     com_next,     true,  "Skip to next song"},
+  {"otw",      com_yeah,     false, "(!) Show song(s) currently being downloaded"},
+  {"save",     com_yeah,     false, "(!) Save current song to share"},
+  {"start",    com_start,    true,  "Start player"},
+  {"stop",     com_stop,     true,  "Stop player"},
+  {"weblock",  com_weblock,  false, "Lock webacces"},
+  {"webstart", com_webstart, false, "Start web_thread"},
   { (char*) NULL, (rl_icpfunc_t*) NULL, false, (char*) NULL}
 };
 
@@ -425,6 +431,13 @@ com_weblock(char* arg) {
   cout << "  WebAccess " << (http_locked ? "OFF" : "ON") << endl;
   return 0;
 }
+
+int
+com_webstart(char* arg) {
+  pthread_create(&http_t, NULL, &http_thread, NULL);
+  return 0;
+}
+
 
 COMMAND*
 find_command(char* name, bool admin) {
@@ -873,6 +886,7 @@ http_thread(void*) {
   }
 }
 
+
 ////////////////////////////////////////
 // MAIN
 int
@@ -913,9 +927,8 @@ main(int argc, char* argv[]) {
   http_locked = config.GetBool("WEB_LOCKED");
 
   // Start http-thread
-  pthread_t http_t;
   if (config.GetBool("HTTP_START")) {
-    pthread_create(&http_t, NULL, &http_thread, NULL);
+    com_webstart(NULL);
   };
 
   // Give the threads a chance to start before starting UI
