@@ -94,7 +94,7 @@ savestate() {
   int fd;
   time_t upd = cache.GetNextTimestamp();
 
-  fd = open(statefile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+  fd = open(statefile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,  S_IWUSR | S_IRUSR);
   if (fd == -1) {
     error(strerror(errno), false);
   } else if (write(fd, (void*) &upd, sizeof(time_t)) == -1) {
