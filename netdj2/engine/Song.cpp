@@ -14,7 +14,7 @@
 
 using namespace std;
 
-u_int32_t Song::mNextUNID = 0;
+u_int32_t Song::sNextUNID = 0;
 
 Song::Song()
   : mSongInfo(0) {
@@ -48,7 +48,7 @@ Song::operator=(const Song& aSong2) {
 
 void
 Song::AssignUNID() {
-  mUNID = mNextUNID++;
+  mUNID = sNextUNID++;
 }
 
 u_int32_t

@@ -12,6 +12,7 @@
 
 #include <qptrdict.h>
 #include <qobject.h>
+#include <qhttp.h>
 
 #include "Client.h"
 #include "StdException.h"
@@ -23,7 +24,6 @@ class PlayerThread;
  * Maximum bytes allowed in a request
  * @todo Move this somewhere else!!
  */
-
 const unsigned int MAX_REQUEST_SIZE = 8192;
 
 /**
@@ -41,7 +41,11 @@ public:
 };
 
 /**
- * The server.
+ * The main server process.
+ *
+ * Handles all commands from users.
+ *
+ * @todo Implement Digest authentication (http://rfc.sunsite.dk/rfc/rfc2617.html)
  */
 class Server : public QObject
 {
@@ -64,12 +68,62 @@ public:
    */
   Server(int aPort, int aBackLog, QObject* aParent = 0);
 
+private:
+  /**
+   * Handles commands from clients.
+   * It throws CMD_Unauthorized and CMD_Invalid.
+   *
+   * @param aStream           Stream to write results to
+   * @param aHeader           The request header
+   */
+  void HandleCommand(QTextStream& aStream,
+                     const QHttpRequestHeader& aHeader);
+
+  /**
+   * Check user authorization for a given level.
+   * 
+   * For now, the aAuthString is just a HTTP Basic authentication string.
+   *
+   * @param aLevel            Authorization level
+   * @param aAuthString       User authorization string
+   * @return                  Is user authorized?
+   */
+  bool CheckAuthorization(unsigned int aLevel, QString aAuthString);
+
+  /**
+   * Command: Show help.
+   *
+   * @param aStream           The stream to send output to
+   */
+  void CmdHelp(QTextStream& aStream);
+  
+  /**
+   * Command: Skip current song.
+   *
+   * @param aStream           The stream to send output to
+   */
+  void CmdSkip(QTextStream& aStream);
+  
+  /**
+   * Command: Shutdown NetDJ
+   *
+   * @param aStream           The stream to send output to
+   */
+  void CmdShutdown(QTextStream& aStream);
+  
+  /**
+   * Command: Get index file, information about current song etc.
+   *
+   * @param aStream           The stream to send output to
+   */
+  void CmdIndex(QTextStream& aStream);
+  
 signals:
   /** Emitted on receiving a 'quit' command */
-  void CmdQuit();
+  void SigQuit();
   
   /** Emitted on receiving a 'skip' command */
-  void CmdSkip();
+  void SigSkip();
   
 private slots:
   /** Called when data is ready to be read from client */

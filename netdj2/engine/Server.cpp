@@ -7,16 +7,17 @@
  *
  */
 
-#include "Server.h"
-#include "ServerSocket.h"
-#include "Song.h"
-#include "StdException.h"
-
 #include <qdom.h>
 #include <qhttp.h>
 #include <qregexp.h>
 #include <qsocket.h>
 #include <qurl.h>
+
+#include "Server.h"
+#include "ServerSocket.h"
+#include "Song.h"
+#include "StdException.h"
+#include "util.h"
 
 using namespace std;
 
@@ -25,6 +26,8 @@ ServerError::ServerError(string aErr)
 }
 
 const char* HTTP_200       = "HTTP/1.0 200 Ok\r\n";
+const char* HTTP_401       = "HTTP/1.0 401 Unauthorized\r\n"
+                             "WWW-Authenticate: Basic realm=\"NetDJ\"\r\n";
 const char* HTTP_404       = "HTTP/1.0 404 Not Found\r\n";
 const char* HTTP_501       = "HTTP/1.0 501 Not Implemented\r\n";
 const char* HTTP_HTML      = "Content-Type: text/html; charset=\"utf-8\"\r\n";
@@ -44,6 +47,17 @@ const char* HTML_200_END =
   "</body>\n"
   "</html>\n";
 
+const char* HTML_401 = 
+  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
+  "<HTML>\n"
+  "<HEAD>\n"
+  "<TITLE>404 Unathorized</TITLE>\n"
+  "</HEAD>\n"
+  "<BODY BGCOLOR=\"#FFFFFF\">\n"
+  "You need proper authentication to access this!\n"
+  "</BODY>\n"
+  "</HTML>\n";
+
 const char* HTML_404 = 
   "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
   "<HTML>\n"
@@ -51,7 +65,7 @@ const char* HTML_404 =
   "<TITLE>404 Not found</TITLE>\n"
   "</HEAD>\n"
   "<BODY BGCOLOR=\"#FFFFFF\">\n"
-  "Sorry, the requested URI cannot be found.\n"
+  "The requested command is invalid.\n"
   "</BODY>\n"
   "</HTML>\n";
 
@@ -85,8 +99,6 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
 void
 Server::NewClient(QSocket* aSocket)
 {
-  qDebug("NewClient()");
-  
   // Insert new client
   Client* client = new Client(aSocket);
   Q_CHECK_PTR(client);
@@ -104,6 +116,24 @@ Server::NewClient(QSocket* aSocket)
 #include <iostream>
 
 
+/**
+ * Exception thrown by HandleCommand() when it encounters an invalid command.
+ */
+class CMDInvalid 
+{
+public:
+  CMDInvalid() {};
+};
+
+/**
+ * Exception thrown by HandleCommand() when a user is not authorized to
+ * perform a commands.
+ */
+class CMDUnauthorized
+{
+public:
+  CMDUnauthorized() {};
+};
 
 void
 Server::ReadClient()
@@ -129,46 +159,17 @@ Server::ReadClient()
   QTextStream os(socket);
   os.setEncoding(QTextStream::UnicodeUTF8);
   if (header.method() == "GET") {
-    cout << "GET request: " << endl;
-    QString path = header.path();
-    QUrl url(QUrl("http://127.0.0.1/"), header.path());
-    cout << "\t Path:    " << url.path() << endl;
-    cout << "\t Query:   " << url.query() << endl;
-    
-    if (url.path() == "/" || url.path() == "/index.xml") {
-      QDomDocument doc("NetDJ");
-      QDomElement root = doc.createElement("currentsong");
-      Song cursong;
-      string curcol;
-      // TODO: Listen for PlaySong signal!
-      // mPlayer->GetCurrentSong(cursong, curcol);
-      root.setAttribute("collection", curcol);
-      cursong.asXML(doc, root);
-      doc.appendChild(root);
-
-      os << HTTP_200
-         << HTTP_XML
+    try {
+      HandleCommand(os, header);
+    }
+    catch (CMDUnauthorized& e) {
+      os << HTTP_401
+         << HTTP_HTML
          << HTTP_DATASTART
-         << doc.toString()
+         << HTML_401
          << endl;
-    } else if (url.path() == "/cgi-bin/next") {
-      os << HTTP_200
-         << HTTP_HTML
-         << HTTP_DATASTART
-         << HTML_200_START
-         << "<p>Skipping song</p>\n"
-         << HTML_200_END;
-
-      emit CmdSkip();
-    } else if (url.path() == "/cgi-bin/quit") {
-      os << HTTP_200
-         << HTTP_HTML
-         << HTTP_DATASTART
-         << HTML_200_START
-         << "<p>Shutting down NetDJ</p>\n"
-         << HTML_200_END;
-      emit CmdQuit();
-    } else {
+    }
+    catch (CMDInvalid& e) {
       os << HTTP_404
          << HTTP_HTML
          << HTTP_DATASTART
@@ -198,4 +199,174 @@ Server::ClientClosed()
 
   // Remove from client list
   mClients.remove(socket);
+}
+
+
+/************* COMMANDS **************/
+void
+Server::CmdHelp(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<p>Help to come ...</p>\n"
+          << HTML_200_END;
+  
+}
+
+void
+Server::CmdIndex(QTextStream& aStream)
+{
+  QDomDocument doc("NetDJ");
+  QDomElement root = doc.createElement("currentsong");
+  Song cursong;
+  string curcol;
+  /** @todo Listen for PlaySong signal! */
+  // mPlayer->GetCurrentSong(cursong, curcol);
+  root.setAttribute("collection", curcol);
+  cursong.asXML(doc, root);
+  doc.appendChild(root);
+  
+  aStream << HTTP_200
+          << HTTP_XML
+          << HTTP_DATASTART
+          << doc.toString()
+          << endl;
+}
+
+void
+Server::CmdSkip(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<p>Skipping song</p>\n"
+          << HTML_200_END;
+  
+  emit SigSkip();
+}
+
+void
+Server::CmdShutdown(QTextStream& aStream)
+{
+  aStream << HTTP_200
+          << HTTP_HTML
+          << HTTP_DATASTART
+          << HTML_200_START
+          << "<p>Shutting down NetDJ!</p>\n"
+          << HTML_200_END;
+  
+  emit SigQuit();
+}
+
+/********** COMMAND HANDLER ************/
+/** Command types */
+enum cmdtype_t {
+  CMD_HELP,
+  CMD_INDEX,
+  CMD_SKIP,
+  CMD_SHUTDOWN,
+  CMD_NULL
+};
+
+
+/** Contains information about a command */
+typedef struct 
+{
+  const cmdtype_t mType;
+  const char* mName;
+  const unsigned int mAuthLevel;
+  const char* mDescription;
+} command_t;
+
+/** List of available commands */
+const command_t gCommands[] = {
+  {CMD_HELP,     "/help",       0, "This page"},
+  {CMD_INDEX,    "/index.xml",  0, "XML: The current song playing and the requested songs pending"},
+  {CMD_SKIP,     "/skip",     200, "Skip the currently playing song"},
+  {CMD_SHUTDOWN, "/shutdown", 500, "Shutdown NetDJ"},
+  {CMD_NULL,     (char*) 0,     0, (char*) 0}
+};
+
+void
+Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
+{
+  // Analyze command
+  const QUrl url(QUrl("http://127.0.0.1/"), aHeader.path());
+  cout << "\t Path:    " << url.path() << endl;
+  cout << "\t Query:   " << url.query() << endl;
+
+  QString cmdstr = url.path();
+  // Shortcuts for help for ease and backward compatibility
+  if (cmdstr == "/") {
+    cmdstr = "/help";
+  }
+  if (cmdstr == "/index.html") {
+    cmdstr = "/help";
+  }
+  
+  int i;
+  for (i = 0; gCommands[i].mName && gCommands[i].mName != cmdstr; ++i) {
+  }
+  command_t cmd = gCommands[i];
+  if (cmd.mType == CMD_NULL) {
+    throw CMDInvalid();
+  }
+
+  // Check Auth
+  if (!CheckAuthorization(cmd.mAuthLevel, aHeader.value("Authorization"))) {
+    throw CMDUnauthorized();
+  }
+
+  // Create argument structure
+  /** @todo create argument structure for commands? */
+
+  // Call command
+  switch (cmd.mType) {
+    case CMD_HELP:
+      CmdHelp(aStream);
+      break;
+
+    case CMD_INDEX:
+      CmdIndex(aStream);
+      break;
+
+    case CMD_SHUTDOWN:
+      CmdShutdown(aStream);
+      break;
+
+    case CMD_SKIP:
+      CmdSkip(aStream);
+      break;
+
+    default:
+      throw new ServerError("Shoot the programmer, HandleCommand() gets an unknown command type!\n");
+      break;
+  }
+}
+
+bool
+Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
+{
+  if (aLevel == 0) {
+    return true;
+  } else {
+    if (!aAuthString.length() || !aAuthString.startsWith("Basic ")) {
+      return false;
+    }
+    QString auth = base64_decode(aAuthString.mid(6).ascii());
+
+    QString user = auth.section(':', 0, 0);
+    QString pass = auth.section(':', 1, 1);
+    
+    cout << "CREDS: User=" << user << ", Pass=" << pass << endl;
+
+    if (user == "allan" && pass == "smadder") {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

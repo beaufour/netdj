@@ -41,7 +41,7 @@ typedef enum {
 class Song : public XMLOutput {
 private:
   /** Next unique ID to assign */
-  static u_int32_t mNextUNID;
+  static u_int32_t sNextUNID;
 
   /** The filename */
   std::string mFilename;

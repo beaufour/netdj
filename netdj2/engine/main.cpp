@@ -72,8 +72,8 @@ main(int argc, char* argv[])
   Q_CHECK_PTR(server);
   
   // Connect signal and slots
-  QObject::connect(server, SIGNAL(CmdQuit()), qApp, SLOT(quit()));
-  QObject::connect(server, SIGNAL(CmdSkip()), playerthread, SLOT(Skip()));
+  QObject::connect(server, SIGNAL(SigQuit()), qApp, SLOT(quit()));
+  QObject::connect(server, SIGNAL(SigSkip()), playerthread, SLOT(Skip()));
 
   cout << "Starting player" << endl;
   playerthread->start(QThread::HighPriority);
