@@ -1,0 +1,7 @@
+# netdj_applet example configuration file
+#
+# Should be edited and placed as ~/.netdj_applet
+USER = allan
+PASS = slartibarfast
+HOST = localhost:7676
+MAX_SIZE = 350

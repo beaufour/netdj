@@ -12,10 +12,16 @@ use Gtk::GladeXML;
 
 ########################################
 # CONFIG
-my $USER = 'allan';
-my $PASS = 'slartibarfast';
-my $HOST = 'localhost:7676';
-my $MAX_SIZE = 350;
+my %CONFIG;
+my $config_file = "$ENV{HOME}/.netdj_applet";
+open(CONFFILE, $config_file) || die "Can't open $config_file: $!\n";
+while (<CONFFILE>) {
+    chop;
+    if ((!m/^#.*/) && m/([^ ]+) *= *([^ ]+)/) {
+	$CONFIG{$1} = $2;
+    }
+};
+close(CONFFILE);
 
 
 ########################################
@@ -33,7 +39,7 @@ init Gnome::AppletWidget 'netdj_applet.pl';
 my $ua = LWP::UserAgent->new(timeout => 1,
 			     keep_alive => 0,
 			     env_proxy => 1);
-$ua->credentials($HOST, 'NetDJ', $USER, $PASS);
+$ua->credentials($CONFIG{HOST}, 'NetDJ', $CONFIG{USER}, $CONFIG{PASS});
 
 # Glade
 my $glade = new Gtk::GladeXML('netdj_applet.glade');
@@ -68,7 +74,7 @@ $applet->add($box);
 my $button = new Gtk::Button;
 my $label = new Gtk::Label $NOINFO_TEXT;
 $button->set_name("button");
-$button->set_usize($MAX_SIZE, $applet->get_panel_pixel_size);
+$button->set_usize($CONFIG{MAX_SIZE}, $applet->get_panel_pixel_size);
 $button->signal_connect("clicked", \&cmd_update);
 $button->add($label);
 $box->pack_start($button, 0, 0, 1);
@@ -95,15 +101,16 @@ main Gtk;
 ########################################
 # SUBROUTINES
 sub cmd_update {
-    my $response = $ua->get("http://$HOST/index.xml");
+    my $response = $ua->get("http://$CONFIG{HOST}/index.xml");
     if ($response->is_error) {
 	print "Information retrieval returned: ".$response->status_line."\n";
 	$label->set_text($NOINFO_TEXT);
     } else {
 	$_ = $response->content;
 	if (!($_ eq $last_status)) {
-	    # Hack to delete any '&' (should be fixed in netdj-bin...)
+	    # Hack to delete any '&' and '´' (should be fixed in netdj-bin...)
 	    while (s/\&/and/) {};
+	    while (s/\´//) {};
 	    my $status = XMLin($_);
 	    
 	    my $tool = "";
@@ -124,7 +131,7 @@ sub cmd_generic {
     my $cmd = shift;
     $cmd = shift;
 
-    my $response = $ua->get("http://$HOST/cgi-bin/$cmd");
+    my $response = $ua->get("http://$CONFIG{HOST}/cgi-bin/$cmd");
 
     if ($response->is_error) {
 	print "Command '$cmd' returned: ".$response->status_line."\n";
