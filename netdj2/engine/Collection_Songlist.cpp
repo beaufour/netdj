@@ -45,8 +45,8 @@ Collection_Songlist::GetNextSong() {
   }
 }
 
-Song&
-Collection_Songlist::operator[] (const int pos) {
+const Song&
+Collection_Songlist::GetSong(const int pos) const {
   QMutexLocker locker(&mutex);
   
   return Songlist[pos];

@@ -33,6 +33,7 @@ myMessageOutput(QtMsgType type, const char *msg ) {
 }
 
 ///////////// DEBUG
+#include "Collection_Songlist_File.h"
 #include "SongInfo_File_mp3.h"
 #include <qdom.h>
 
@@ -44,11 +45,12 @@ main(int argc, char* argv[]) {
 
   SongInfo_File_mp3 tst("/home/beaufour/LimeWire/Shared/Tube & Berger - Straight Ahead.mp3");
 
+  Collection_Songlist_File col("share", "Shares", "mp3.list");
+
   QDomDocument doc("NetDJ");
-  QDomElement songinfo = doc.createElement("Song");
-  songinfo.setAttribute("UNID", 123456789);
-  tst.asXML(doc, songinfo);
-  doc.appendChild(songinfo);
+  QDomElement root = doc.createElement("collections");
+  col.asXML(doc, root);
+  doc.appendChild(root);
   cout << doc.toString() << endl;
 
   return 0;

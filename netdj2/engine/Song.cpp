@@ -16,14 +16,34 @@ using namespace std;
 
 u_int32_t Song::NextUNID = 0;
 
-Song::Song() {
+Song::Song()
+  : sInfo(0) {
   
 }
 
 Song::Song(const string fname)
-  : Filename(fname)
+  : Filename(fname), sInfo(0)
 {
   AssignUNID();
+}
+
+
+Song::~Song() {
+  if (sInfo) {
+    delete sInfo;
+  }
+}
+
+Song::Song(const Song& s2)
+  : XMLOutput(), Filename(s2.Filename), sInfo(0), UNID(s2.UNID) {
+}
+
+Song&
+Song::operator=(const Song& s2) {
+  Filename = s2.Filename;
+  UNID = s2.UNID;
+  sInfo = 0;
+  return *this;
 }
 
 void
@@ -59,18 +79,36 @@ Song::GetSongType() const {
   return SongType_Unknown;
 }
 
-SongInfo*
+const SongInfo*
 Song::GetSongInfo() const {
-  SongInfo* si = 0;
-
-  switch (GetSongType()) {
-  case SongType_MP3:
-    si = new SongInfo_File_mp3(Filename);
-    break;
-
-  default:
-    break;
+  if (!sInfo) {
+    switch (GetSongType()) {
+    case SongType_MP3:
+      sInfo = new SongInfo_File_mp3(Filename);
+      break;
+      
+    default:
+      break;
+    }
   }
 
-  return si;
+  return sInfo;
+}
+
+
+void
+Song::asXML(QDomDocument& doc, QDomElement& root) const {
+  QDomElement song = doc.createElement("song");
+  root.appendChild(song);
+  song.setAttribute("unid", GetUNID());
+
+  QDomElement fname = doc.createElement("filename");
+  song.appendChild(fname);
+  QDomText fname_text = doc.createTextNode(GetFilename());
+  fname.appendChild(fname_text);
+
+  
+  if (GetSongInfo()) {
+    sInfo->asXML(doc, song);
+  }
 }

@@ -101,8 +101,8 @@ PlayerThread::run() {
       }
       
       try {
-	auto_ptr<SongInfo> info(song.GetSongInfo());
-	if (info.get()) {
+	const SongInfo* info = song.GetSongInfo();
+	if (info) {
 	  cout << "** Song content info" << endl;
 	  cout << "Description:  " << info->GetDescription() << endl;
 	  cout << "Album:        " << info->GetAlbum() << endl;

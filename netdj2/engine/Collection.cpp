@@ -36,3 +36,35 @@ string
 Collection::GetDescription() const {
   return Description;
 }
+
+
+void
+Collection::asXML(QDomDocument& doc, QDomElement& root) const {
+  /* Main node */
+  QDomElement col = doc.createElement("collection");
+  col.setAttribute("id", GetIdentifier());
+  root.appendChild(col);
+
+  /* Description */
+  QDomElement col_descr = doc.createElement("description");
+  col.appendChild(col_descr);
+  QDomText col_descr_text = doc.createTextNode(GetDescription());
+  col_descr.appendChild(col_descr_text);
+
+  /* Size */
+  QDomElement col_size = doc.createElement("size");
+  col.appendChild(col_size);
+  QString col_size_str;
+  col_size_str.setNum(Size());
+  QDomText col_size_text = doc.createTextNode(col_size_str);
+  col_size.appendChild(col_size_text);
+  
+
+  /* Songs */
+  for (int i = 0; i < Size(); ++i) {
+    QDomElement elem = doc.createElement("entry");
+    elem.setAttribute("position", i);
+    col.appendChild(elem);
+    GetSong(i).asXML(doc, elem);
+  }
+}

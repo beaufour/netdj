@@ -13,6 +13,7 @@
 #include <string>
 #include "Song.h"
 #include "StdException.h"
+#include "XMLOutput.h"
 
 /**
  * Exception thrown by GetNextSong if Collection is empty.
@@ -30,9 +31,10 @@ public:
  * - Textual description
  * - Number of songs
  * - Retrieve next song to play
- * - Retrieve list of all songs
+ * - Retrieve song at specific position
+ * - Retrieve list of all songs?
  */
-class Collection {
+class Collection : public XMLOutput {
 protected:
   /** Identifier for the collection, short id */
   std::string Identifier;
@@ -96,9 +98,12 @@ public:
   /**
    * Get a song from the list.
    *
+   * \note Hmmm, would like to use operator[], but how do you call
+   * that function from a class funtion (in asXML?).
+   *
    * @param pos     The song number to get
    */
-  virtual Song& operator[] (const int pos) = 0;
+  virtual const Song& GetSong(const int pos) const = 0;
 
 
   /**
@@ -107,6 +112,8 @@ public:
    * @param sng     The song to add
    */
   virtual bool AddSong(const Song& sng) = 0;
+
+  void asXML(QDomDocument& doc, QDomElement& root) const;
 };
 
 #endif

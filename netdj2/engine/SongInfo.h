@@ -15,6 +15,7 @@
 #include <qdom.h>
 
 #include "StdException.h"
+#include "XMLOutput.h"
 
 /**
  * Exception thrown by SongInfo and sub-classes when no SongInfo can
@@ -36,8 +37,11 @@ public:
  *
  * Handles all information about the song: Title, artist, etc. Should
  * be implemented by classes that fill in the values.
+ *
+ * It is assumed that the information does not change, so all
+ * information needs only to be fetched once, i.e. can be cached.
  */
-class SongInfo {
+class SongInfo : public XMLOutput {
 protected:
   /** Textual description of song (ie. "Aha - Take On Me") */
   std::string Description;
@@ -140,12 +144,6 @@ public:
    */
   std::string GetOwner() const;
 
-  /**
-   * Create XML structure for object.
-   *
-   * @param doc     The DomDocument to use
-   * @param root    The DomElement to use as root
-   */
   void asXML(QDomDocument& doc, QDomElement& root) const;
 };
 

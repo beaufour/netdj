@@ -51,7 +51,7 @@ public:
   virtual void Update();
   int Size() const;
   Song GetNextSong();
-  Song& operator[] (const int pos);
+  const Song& GetSong(const int pos) const;
   bool AddSong(const Song& sng);
 };
 
