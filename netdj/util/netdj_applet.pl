@@ -139,7 +139,9 @@ sub cmd_update {
 	    # Songlist
 	    my $tool = "";
 	    my $songs = $status->{song};
-	    
+
+	    # BUG: Crashes when only one song in list ....
+	    # grrrr, I hate XML-Simple..
 	    foreach my $s (sort {$a <=> $b} keys %$songs) {
 		$tool .= "$s) ".$songs->{$s}->{description}."\n";
 	    }
