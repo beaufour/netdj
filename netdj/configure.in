@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE(netdj,[$VERSION])
 AM_CONFIG_HEADER(src/config.h)
 AM_MAINTAINER_MODE
 
-dnl ETC-directory
+dnl Directory setup
 sysconfdir=$sysconfdir'/netdj'
 NETDJ_ETCDIR=$sysconfdir
 NETDJ_ETCDIR=`(
@@ -16,6 +16,10 @@ NETDJ_ETCDIR=`(
 )`
 AC_DEFINE_UNQUOTED(NETDJ_ETCDIR,"$NETDJ_ETCDIR")
 AC_SUBST(NETDJ_ETCDIR)
+
+CONF_DIRNAME=".netdj/"
+AC_DEFINE_UNQUOTED(CONF_DIRNAME,"$CONF_DIRNAME")
+AC_SUBST(CONF_DIRNAME)
 
 dnl Checks for programs.
 AC_PROG_CXX
@@ -67,6 +71,7 @@ AC_OUTPUT([
 Makefile
 config/Makefile
 doc/Makefile
+doc/netdj.1
 src/Makefile
 util/Makefile
 netdj.spec

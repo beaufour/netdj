@@ -1,6 +1,5 @@
 /* -*- c++ -*- */
-/* Defines the location and names of files */
-#define CONF_DIRNAME ".netdj/"
+/* Defines the names of files */
 #define CONF_FILENAME "config"
 #define CONF_STATEFILENAME "state"
 #define CONF_USERFILENAME "users"

@@ -1,3 +1,37 @@
+2002-02-16 Saturday 15:27   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* doc/netdj.1 (1.2): Wrote a skeleton for the documentation.  
+
+2002-02-16 Saturday 15:19   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* netdj.spec (1.2), netdj.spec.in (1.1): RPM .spec-file.  
+
+2002-02-16 Saturday 15:16   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* doc/: Makefile.am (1.1), netdj.1 (1.1): Started working on
+	man-page.  
+
+2002-02-16 Saturday 15:14   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* netdj.spec (1.1): RPM .spec-file almost finished, sysconfdir is
+	giving me a hard time...  
+
+2002-02-16 Saturday 15:13   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* ChangeLog (1.9), Makefile.am (1.4), acconfig.h (1.2),
+	configure.in (1.7), config/Makefile.am (1.2), config/config (1.2),
+	src/AccessConf.cc (1.4), src/AccessConf.h (1.4),
+	src/Configuration.cc (1.7), src/Configuration.h (1.3),
+	src/Directory.cc (1.4), src/Directory.h (1.3), src/HTTP.cc (1.3),
+	src/HTTP.h (1.3), src/config.h.bot (1.2), src/config.h.top (1.3),
+	src/main.cc (1.23): Reorganized a lot of the engine, and finished
+	HTTPResponse-handling with new classes.  
+	
+	Added a logfile of played songs.  
+	
+	Configurationfiles are now searched for in ~/.netdj/, and
+	/etc/netdj/.  
+
 2002-02-15 Friday 23:20   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* config/: _netdj (1.5), _netdj_users (1.3), config (1.1), users
