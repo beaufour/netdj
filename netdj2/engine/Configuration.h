@@ -26,7 +26,7 @@ namespace NetDJ
     QMap<QString, QString> mConfig;
     
   public:
-    bool Init();  
+    bool Init(const QString& aFilename);
     
     QString GetString(const QString&) const;
     int GetInteger(const QString&) const;
@@ -35,6 +35,8 @@ namespace NetDJ
     void SetString(const QString&, const QString&);
     void SetBool(const QString&, bool);
     void SetInteger(const QString&, int);
+
+    void Dump() const;
   };
 }
 

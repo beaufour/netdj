@@ -14,8 +14,20 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// Command line handling
+#include <popt.h>
+
+// setuid, etc.
+#include <pwd.h>
+#include <grp.h>
+
+// Signal handling
+#include <csignal>
+
+// QT Main App
 #include <qapplication.h>
 
+// NetDJ includes
 #include "config.h"
 #include "Collections.h"
 #include "Collection_Songlist_File.h"
@@ -35,6 +47,16 @@ namespace NetDJ
 using namespace std;
 using namespace NetDJ;
 
+QApplication* mainApp = 0;
+
+void sig_handler(int signal)
+{
+  QString signum;
+  signum.setNum(signal);
+  gLogger.LogMessage("Received signal " + signum + ", quitting", 0);
+  mainApp->quit();
+}
+
 void
 myMessageOutput(QtMsgType aType, const char *aMsg)
 {
@@ -52,55 +74,10 @@ myMessageOutput(QtMsgType aType, const char *aMsg)
 }
 
 int
-main(int argc, char* argv[])
+mainloop(QApplication* aApp)
 {
-  /* Use verbose terminate handler, prints out name of exception,
-     etc. */
-  std::set_terminate (__gnu_cxx::__verbose_terminate_handler);
-
-  // @todo Catch ctrl-c and call quit()
-  
-  QApplication app( argc, argv );
-  
-  /* Seed random number generator */
-  srand(time(0));
-  
-  /* Install Qt message handler */
-  qInstallMsgHandler(myMessageOutput);
-
-  cout << "Reading configuration" << endl;
-  if (!gConfig.Init()) {
-    cerr << "FATAL ERROR! Could not get configuration!\n" << endl;
-    return -1;
-  }
-
-  // @todo parse command line options, should overrule configuration file.
-
-  /* Fork code
-  int pid = fork();
-  if (pid == -1) {
-    std::cout << "Hmmm, couldn't fork into the background?!" << std::endl;
-    std::cout << "  " << strerror(errno) << std::endl;
-    exit (-1);
-  }
-
-  if (pid) {
-    std::cout << "Spawned daemon (pid " << pid << ")" << std::endl;
-    exit(0);
-  }
-
-  // Daemon
-  setpgid(0, 0);
-  freopen("/dev/null", "r", stdin);
-  freopen("/var/log/netdj", "w", stdout);
-  freopen("/dev/null", "w", stderr);
-  std::cout << "NetDJ v" << VERSION << " starting up." << std::endl;  
-
-  */
-
-
   /* Create logger service */
-  FileLogger flog(&gLogger, "-", 999, &app);
+  FileLogger flog(&gLogger, "-", 999, aApp);
 
   gLogger.LogMessage("Initializing song collections", 10);
   Collections cols;
@@ -113,12 +90,12 @@ main(int argc, char* argv[])
   cols.AddCollection(newcol);
   newcol = new Collection_Songlist_File("share",
                                         "Shares",
-                                        "mp3.list");
+                                        gConfig.GetString("SHARE_DIR"));
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
   
   gLogger.LogMessage("Initializing player", 10);
-  PlayerThread* playerthread = new PlayerThread(&cols, 0, &app);
+  PlayerThread* playerthread = new PlayerThread(&cols, 0, aApp);
   Q_CHECK_PTR(playerthread);
 
   // Connect gLogger
@@ -134,7 +111,7 @@ main(int argc, char* argv[])
                    &gLogger,      SLOT(LogPlayerStop()));
 
   gLogger.LogMessage("Initializing server", 10);
-  Server* server = new Server(&cols, 7676, 5, &app);
+  Server* server = new Server(&cols, gConfig.GetInteger("SERVER_PORT"), 5, aApp);
   Q_CHECK_PTR(server);
 
   // Connect gLogger
@@ -153,7 +130,7 @@ main(int argc, char* argv[])
 
   // Connect quit signal to application
   QObject::connect(server, SIGNAL(SigQuit(const QString&)),
-                   qApp,   SLOT(quit()));
+                   aApp,   SLOT(quit()));
 
   // Connect playerthread and server
   QObject::connect(server,       SIGNAL(SigSkip(const QString&)),
@@ -166,11 +143,128 @@ main(int argc, char* argv[])
   playerthread->start(QThread::HighPriority);
 
   // Main application loop
-  app.exec();
+  aApp->exec();
 
   // Main application loop has ended
   playerthread->Stop();
 
   /* Wait for thread to quit */
   playerthread->wait();
+
+  return 0;  
+}
+
+
+int
+main(int argc, char* argv[])
+{
+  /* Use verbose terminate handler, prints out name of exception,
+     etc. */
+  std::set_terminate (__gnu_cxx::__verbose_terminate_handler);
+
+  // @todo Catch ctrl-c and call quit()
+  
+  QApplication app( argc, argv );
+  mainApp = &app;
+  
+  /* Seed random number generator */
+  srand(time(0));
+  
+  /* Install Qt message handler */
+  qInstallMsgHandler(myMessageOutput);
+
+  // Parse options
+  int daemon = 0;
+  int dump = 0;
+  int port = 0;
+  char *config = 0;
+  
+  struct poptOption optionsTable[] = {
+    {"daemon", 'd', 0, &daemon, 0, "run in background", 0},
+    {"config", 'c', POPT_ARG_STRING, config, 0, "use specific config file", 0},
+    {"port",   'p', POPT_ARG_INT, &port, 0, "server TCP port", 0},
+    {"dump",     0, 0, &dump, 0, "dump configuration and exit", 0},
+    POPT_AUTOHELP
+    {0, 0, 0, 0, 0, 0, 0}
+  };
+
+  poptContext poptCon = poptGetContext(0, app.argc(), (const char**) app.argv(), optionsTable, 0);
+  if (poptGetNextOpt(poptCon) < -1) {
+    poptPrintHelp(poptCon, stdout, 0);
+    return -1;
+  }
+
+  // Read configuration
+  // @todo: Get popt to accept string arguments....
+  if (!gConfig.Init(QString::null)) {
+    cerr << "FATAL ERROR! Could not get configuration!\n" << endl;
+    return -1;
+  }
+  poptFreeContext(poptCon);
+
+  if (port) {
+    gConfig.SetInteger("SERVER_PORT", port);
+  }
+
+  if (daemon) {
+    gConfig.SetBool("DAEMON_MODE", true);
+  }
+
+  if (dump) {
+    gConfig.Dump();
+    return -1;
+  }
+
+  if (gConfig.GetBool("DAEMON_MODE")) {
+    int pid = fork();
+    if (pid == -1) {
+      cerr << "Hmmm, couldn't fork into the background?!" << std::endl;
+      cerr << "  " << strerror(errno) << std::endl;
+      exit (-1);
+    }
+    
+    if (pid) {
+      // cout << "Spawned daemon (pid " << pid << ")" << std::endl;
+      exit(0);
+    }
+  }
+
+  // If forked, daemon continues here
+  setpgrp();
+  // Change to other uid/gid
+  if (gConfig.GetBool("DAEMON_CHANGE_USER")) {
+    if (gConfig.GetString("DAEMON_GROUP").isEmpty() ||
+        gConfig.GetString("DAEMON_USER").isEmpty()) {
+      cerr << "You need to set DAEMON_GROUP and DAEMON_USER to make DAEMON_CHANGE_USER work"
+           << endl;
+      return -1;
+    }
+    
+    struct group *gr = getgrnam(gConfig.GetString("DAEMON_GROUP").latin1());
+    if (!gr || !setgid(gr->gr_gid)) {
+      cerr << "Could not change to group='"
+           << gConfig.GetString("DAEMON_GROUP") << "'!"
+           << endl;
+      return -1;
+    }  
+    struct passwd *pw = getpwnam(gConfig.GetString("DAEMON_USER").latin1());
+    if (!pw || !setuid(pw->pw_uid)) {
+      cerr << "Could not change to user='"
+           << gConfig.GetString("DAEMON_USER") << "'!"
+           << endl;
+      return -1;
+    }
+
+    // No unwanted input/output, please
+    freopen("/dev/null", "r", stdin);
+    freopen("/dev/null", "w", stdout);
+    freopen("/dev/null", "w", stderr);
+  }
+
+  // Install signal handler
+  signal(SIGHUP, sig_handler);
+  signal(SIGINT, sig_handler);
+  signal(SIGTERM, sig_handler);
+
+  return mainloop(&app);
 }

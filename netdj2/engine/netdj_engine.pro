@@ -5,7 +5,7 @@
 TEMPLATE = app
 CONFIG += debug warn_on qt exceptions thread
 INCLUDEPATH += . /usr/include/taglib /usr/local/include
-LIBS += -ltag -lshout # -lefence
+LIBS += -ltag -lshout -lpopt # -lefence
 DEFINES += QT_FATAL_ASSERT
 
 # Input

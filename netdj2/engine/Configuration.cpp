@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qtextstream.h>
 
 using namespace std;
@@ -25,7 +26,7 @@ typedef struct
 } defvalue_t;
 
 const defvalue_t gDefValues[] = {
-  {"HTTP_PORT",         "7676"},
+  {"SERVER_PORT",       "7676"},
   {"SHARE_DIR",         "/usr/share/mp3/share"},
   {"REQUEST_DIR",       "/usr/share/mp3/request"},
   {"USER_LIST_FILE",    "netdj-users"},
@@ -40,39 +41,36 @@ const defvalue_t gDefValues[] = {
   {"STREAM_DESCR",      "NetDJ Streaming Channel"},
   {"STREAM_PUBLIC",     "false"},
   {"DAEMON_MODE",       "false"},
-  {"DAEMON_CHANGEUSER", "false"},
-  {"DAEMON_UID",        "nobody"},
-  {"DAEMON_GID",        "nobody"},
+  {"DAEMON_CHANGE_USER", "false"},
+  {"DAEMON_GROUP",      "nobody"},
+  {"DAEMON_USER",       "nobody"},
   {0,                   0}
 };
 
 bool
-Configuration::Init() {
+Configuration::Init(const QString& aFilename) {
   // Fill in default values
   for (int i = 0; gDefValues[i].mName; ++i) {
     mConfig[gDefValues[i].mName] = gDefValues[i].mValue;
   }
 
   // Try to find config-file
-  QString ConfDir;
   QFile file(QString(".") + NETDJ_CONF_FILENAME);
   if (!file.open(IO_ReadOnly)) {
-    ConfDir = QString(getenv("HOME"));
-    file.setName(ConfDir + "/." + NETDJ_CONF_FILENAME);
+    file.setName(QString(getenv("HOME")) + "/." + NETDJ_CONF_FILENAME);
     if (!file.open(IO_ReadOnly)) {
-      ConfDir = QString(NETDJ_ETCDIR);
-      file.setName(ConfDir + "/" + NETDJ_CONF_FILENAME);
+      file.setName(QString(NETDJ_ETCDIR) + "/" + NETDJ_CONF_FILENAME);
       if (!file.open(IO_ReadOnly)) {
 	cout << "Could not find configuration file (."
 	     << NETDJ_CONF_FILENAME
 	     << " | ~/." << NETDJ_CONF_FILENAME
 	     << " | " << NETDJ_ETCDIR << "/" << NETDJ_CONF_FILENAME
 	     << "), using defaults!!!" << endl;
-	return true;
+	return false;
       }
     }
   }
-
+  
   // Read file
   QTextStream is (&file);
   int i = 1;
@@ -98,9 +96,21 @@ Configuration::Init() {
   file.close();
 
   // Insert configuration dir
-  mConfig["CONFIG_DIR"] = ConfDir;
+  mConfig["CONFIG_DIR"] = QFileInfo(file).dirPath();
 
   return true;
+}
+
+void
+Configuration::Dump() const
+{
+  for (QMap<QString, QString>::const_iterator it = mConfig.begin();
+       it != mConfig.end();
+       ++it) {
+    cout << it.key() << " = "
+	 << (it.data().isEmpty() ? "<null>" : it.data())
+	 << endl;
+  }
 }
 
 QString
