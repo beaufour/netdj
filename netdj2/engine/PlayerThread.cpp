@@ -12,15 +12,23 @@
 
 #include "Collection_Songlist_File.h"
 #include "Collection_Songlist_Dir.h"
+#include "Collections.h"
+#include "Shout.h"
 #include "Song.h"
 #include "StdException.h"
-#include "Shout.h"
 
 using namespace std;
 
-PlayerThread::PlayerThread(Collections* aCols, unsigned int aStackSize)
-  : QThread(aStackSize), mStopPlayer(false), mSkipSong(false), mCols(aCols) {
+PlayerThread::PlayerThread(Collections* aCols, unsigned int aStackSize,
+			   QObject* aParent)
+  : QObject(aParent, "PlayerThread"),
+    QThread(aStackSize),
+    mStopPlayer(false), mSkipSong(false), mCols(aCols)
+{
+}
 
+PlayerThread::~PlayerThread()
+{
 }
 
 bool
