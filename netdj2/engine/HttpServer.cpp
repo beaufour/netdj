@@ -10,6 +10,9 @@
 
 #include <qsocket.h>
 #include <qregexp.h>
+#include <qdom.h>
+
+#include "Song.h"
 
 using namespace std;
 
@@ -67,9 +70,19 @@ HttpServer::readClient() {
       QTextStream os(socket);
       os.setEncoding(QTextStream::UnicodeUTF8);
       os << "HTTP/1.0 200 Ok\r\n"
-	"Content-Type: text/html; charset=\"utf-8\"\r\n"
-	"\r\n"
-	"<h1>Song Info ... to appear</h1>\n";
+	"Content-Type: text/xml; charset=\"utf-8\"\r\n"
+	"\r\n";
+     
+      QDomDocument doc("NetDJ");
+      QDomElement root = doc.createElement("currentsong");
+      Song cursong;
+      string curcol;
+      Player->GetCurrentSong(cursong, curcol);
+      root.setAttribute("collection", curcol);
+      cursong.asXML(doc, root);
+      doc.appendChild(root);
+      os << doc.toString() << endl;
+
     }
   }
 }

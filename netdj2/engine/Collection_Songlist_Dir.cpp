@@ -41,6 +41,9 @@ Collection_Songlist_Dir::Update() {
   const QFileInfoList* list = dir.entryInfoList();
   QFileInfoListIterator it(*list);
   QFileInfo* fi;
+
+  /** \bug Something is wrong with the timestamp handling!! */
+
   while ((fi = it.current()) != 0 ) {
     try {
       if (isQueue) {
@@ -58,6 +61,15 @@ Collection_Songlist_Dir::Update() {
       qWarning("Could not add '%s' to collection '%s'!", fi->filePath().ascii(), GetIdentifier().c_str());
     }
   }
+
+  /**
+   * Add a second to timestamp, or last file(s) will show up in next
+   * iteration.
+   *
+   * \note Can I do something smarter than add one second to the
+   * timestamp?
+   */
+  LastTimeStamp.addSecs(1);
   
   /* Swap content */
   if (!isQueue) {

@@ -14,6 +14,9 @@
 
 #include "PlayerThread.h"
 #include "HttpServer.h"
+#include "Collections.h"
+#include "Collection_Songlist_File.h"
+#include "Collection_Songlist_Dir.h"
 
 using namespace std;
 
@@ -32,28 +35,11 @@ myMessageOutput(QtMsgType type, const char *msg ) {
   }
 }
 
-///////////// DEBUG
-#include "Collection_Songlist_File.h"
-#include "SongInfo_File_mp3.h"
-#include <qdom.h>
-
 int
 main(int argc, char* argv[]) {
   /* Use verbose terminate handler, prints out name of exception,
      etc. */
   std::set_terminate (__gnu_cxx::__verbose_terminate_handler);
-
-  SongInfo_File_mp3 tst("/home/beaufour/LimeWire/Shared/Tube & Berger - Straight Ahead.mp3");
-
-  Collection_Songlist_File col("share", "Shares", "mp3.list");
-
-  QDomDocument doc("NetDJ");
-  QDomElement root = doc.createElement("collections");
-  col.asXML(doc, root);
-  doc.appendChild(root);
-  cout << doc.toString() << endl;
-
-  return 0;
 
   QApplication app( argc, argv );
 
@@ -63,8 +49,13 @@ main(int argc, char* argv[]) {
   /* Install Qt message handler */
   qInstallMsgHandler( myMessageOutput );
 
+  cout << "Initializing song collections" << endl;
+  Collections cols;
+  cols.AddCollection(new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true));
+  cols.AddCollection(new Collection_Songlist_File("share", "Shares", "mp3.list"));
+
   cout << "Starting player" << endl;
-  PlayerThread* playerthread = new PlayerThread();
+  PlayerThread* playerthread = new PlayerThread(&cols);
   playerthread->start(QThread::HighPriority);
 
   HttpServer* httpd = new HttpServer(7676, 5, playerthread);
