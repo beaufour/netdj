@@ -162,6 +162,9 @@ signals:
   
   /** Emitted when a client connection is closed */
   void SigClientClose();  
+
+  /** Emits a general information message */
+  void SigMessage(const QString& aMsg, const unsigned int aLevel);
   
 private slots:
   /** Called when data is ready to be read from client */

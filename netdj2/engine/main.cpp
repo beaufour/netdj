@@ -20,6 +20,7 @@
 #include "Collection_Songlist_File.h"
 #include "Collection_Songlist_Dir.h"
 #include "Configuration.h"
+#include "FileLogger.h"
 #include "LogService.h"
 #include "PlayerThread.h"
 #include "Server.h"
@@ -50,6 +51,8 @@ main(int argc, char* argv[])
   /* Use verbose terminate handler, prints out name of exception,
      etc. */
   std::set_terminate (__gnu_cxx::__verbose_terminate_handler);
+
+  // @todo Catch ctrl-c and call quit()
   
   QApplication app( argc, argv );
   
@@ -65,10 +68,16 @@ main(int argc, char* argv[])
     return -1;
   }
 
+  // @todo parse command line options, should overrule configuration file.
+
+
   /* Create logger service */
   LogService logger(&app);
+  FileLogger flog("-", 999, &app);
+  QObject::connect(&logger, SIGNAL(NewLogEntry(const QDomElement*, const unsigned int)),
+                   &flog,   SLOT(NewLogEntry(const QDomElement*, const unsigned int)));
 
-  cout << "Initializing song collections" << endl;
+  logger.LogMessage("Initializing song collections", 10);
   Collections cols;
   Collection* newcol = new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true);
   Q_CHECK_PTR(newcol);
@@ -77,40 +86,54 @@ main(int argc, char* argv[])
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
   
-  cout << "Initializing player" << endl;
+  logger.LogMessage("Initializing player", 10);
   PlayerThread* playerthread = new PlayerThread(&cols, 0, &app);
   Q_CHECK_PTR(playerthread);
 
   // Connect logger
-  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)), &logger, SLOT(LogSongPlaying(const Song&, const Collection*)));
-  QObject::connect(playerthread, SIGNAL(SigStart()), &logger, SLOT(LogPlayerStart()));
-  QObject::connect(playerthread, SIGNAL(SigStop()), &logger, SLOT(LogPlayerStop()));
+  QObject::connect(playerthread, SIGNAL(SigMessage(const QString&, const unsigned int)),
+                   &logger,      SLOT(LogMessage(const QString&, const unsigned int)));
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)),
+                   &logger,      SLOT(LogSongPlaying(const Song&, const Collection*)));
+  QObject::connect(playerthread, SIGNAL(SigStart()),
+                   &logger,      SLOT(LogPlayerStart()));
+  QObject::connect(playerthread, SIGNAL(SigStop()),
+                   &logger,      SLOT(LogPlayerStop()));
 
-  cout << "Initializing server" << endl;
+  logger.LogMessage("Initializing server", 10);
   Server* server = new Server(7676, 5, &app);
   Q_CHECK_PTR(server);
 
   // Connect logger
-  QObject::connect(server, SIGNAL(SigQuit()), &logger, SLOT(LogQuit()));
-  QObject::connect(server, SIGNAL(SigSkip()), &logger, SLOT(LogSkip()));
-  QObject::connect(server, SIGNAL(SigClientNew()), &logger, SLOT(LogClientNew()));
-  QObject::connect(server, SIGNAL(SigClientClose()), &logger, SLOT(LogClientClose()));
+  QObject::connect(server,  SIGNAL(SigMessage(const QString&, const unsigned int)),
+                   &logger, SLOT(LogMessage(const QString&, const unsigned int)));
+  QObject::connect(server,  SIGNAL(SigQuit()),
+                   &logger, SLOT(LogQuit()));
+  QObject::connect(server,  SIGNAL(SigSkip()),
+                   &logger, SLOT(LogSkip()));
+  QObject::connect(server,  SIGNAL(SigClientNew()),
+                   &logger, SLOT(LogClientNew()));
+  QObject::connect(server,  SIGNAL(SigClientClose()),
+                   &logger, SLOT(LogClientClose()));
 
   // Connect quit signal to application
-  QObject::connect(server, SIGNAL(SigQuit()), qApp, SLOT(quit()));
+  QObject::connect(server, SIGNAL(SigQuit()),
+                   qApp,   SLOT(quit()));
 
   // Connect playerthread and server
-  QObject::connect(server, SIGNAL(SigSkip()), playerthread, SLOT(Skip()));
-  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)), server, SLOT(SongPlaying(const Song&, const Collection*)));
+  QObject::connect(server,       SIGNAL(SigSkip()),
+                   playerthread, SLOT(Skip()));
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)),
+                   server,       SLOT(SongPlaying(const Song&, const Collection*)));
   
-  cout << "Starting player" << endl;
+
+  // Starting playerthread
   playerthread->start(QThread::HighPriority);
 
   // Main application loop
   app.exec();
 
   // Main application loop has ended
-  cout << "Stopping player" << endl;
   playerthread->Stop();
 
   /* Wait for thread to quit */

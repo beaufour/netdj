@@ -15,6 +15,9 @@
 
 /**
  * Basic exception class.
+ *
+ * @todo Somehow hook up StdException to the logger, to all exceptions are
+ * logged? It could be a mess, since that may also throw an exception...
  */
 class StdException : public std::exception {
 protected:

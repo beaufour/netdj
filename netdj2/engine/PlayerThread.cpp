@@ -21,7 +21,7 @@ using namespace std;
 
 PlayerThread::PlayerThread(Collections* aCols, unsigned int aStackSize,
 			   QObject* aParent)
-  : QObject(aParent, "PlayerThread"),
+  : QObject(aParent, "Player"),
     QThread(aStackSize),
     mStopPlayer(false), mSkipSong(false), mCols(aCols)
 {
@@ -46,7 +46,6 @@ PlayerThread::run() {
   try {
     emit SigStart();
     
-    cout << "-----=====> Setup libshout" << endl;
     Shout shout(NETDJ_CONF.GetString("STREAM_NAME"),
 		NETDJ_CONF.GetString("STREAM_GENRE"),
 		NETDJ_CONF.GetString("STREAM_DESCR"));
@@ -59,10 +58,7 @@ PlayerThread::run() {
     shout.SetFormat(SHOUT_FORMAT_MP3);
     shout.SetProtocol(SHOUT_PROTOCOL_HTTP);
     
-    cout << "-----=====> Connect to icecast" << endl;
     shout.Connect();
-    
-    cout << endl << "-----=====> MAIN LOOP" << endl;
     
     unsigned char buf[4096];
     int bytes;
@@ -75,25 +71,19 @@ PlayerThread::run() {
 
       /* Check whether we have found a song */
       if (!mCols->GetNextSong(currentSong, &currentCollection)) {
-	cout << "Hmmmm, no files to play" << endl;
-	cout << "...waiting a wee time" << endl;
+	emit SigMessage("I have no files to play...", 10);
 	/** @todo Can we do something better than just waiting 10 secs? */
 	sleep(10);
 	continue;
       }
       emit SigSongPlaying(currentSong, currentCollection);
 
-      cout << "** Song info " << endl;
-      cout << "UNID :      " << currentSong.GetUNID() << endl;
-      cout << "Type :      " << currentSong.GetSongType() << endl;
-      cout << "Filename :  " << currentSong.GetFilename() << endl;
-      cout << "Collection: " << currentCollection->GetIdentifier() << endl;
-      
       if (currentSong.GetSongType() != SongType_MP3) {
-	cout << "INVALID SONGTYPE!" << endl;
+	cout << "INVALID SONGTYPE, skipping!" << endl;
 	continue;
       }
-      
+
+      /*
       try {
 	const SongInfo* info = currentSong.GetSongInfo();
 	if (info) {
@@ -115,8 +105,8 @@ PlayerThread::run() {
       catch (NoSongInfo& h) {
 	cout << "No header info" << endl;
       }
+      */
 
-      cout << "-----=====> Send song to icecast" << endl;
       QFile file(currentSong.GetFilename());
       if (!file.open(IO_ReadOnly)) {
 	continue;
@@ -145,7 +135,6 @@ PlayerThread::run() {
       }
       if (mSkipSong) {
 	mSkipSong = false;
-	cout << "Skipping current song!" << endl;
       }
     } // Main loop
   }

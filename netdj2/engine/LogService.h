@@ -11,10 +11,10 @@
 #define __LOGSERVICE_H__
 
 #include <qobject.h>
+#include <qdom.h>
 
 #include "Song.h"
 
-class QDomElement;
 class Collection;
 
 /**
@@ -41,7 +41,17 @@ private:
   /** The number of log entries */
   unsigned int mLogCount;
 
+  /** The DOM document containing the log entries */
+  QDomDocument mDocument;
+
+  /** Create a new entry */
+  void CreateEntry(QDomElement& aEntry, const int aLevel, const QString aType);
+
+  /** Emit a simple entry */
+  void SimpleEntry(const int aLevel, const QString aType);
+  
 public:
+  /** Constructor */
   LogService(QObject* aParent = 0);
 
 public slots:
@@ -71,9 +81,12 @@ public slots:
   /** A client connection is closed */
   void LogClientClose();
 
+  /** A generic message */
+  void LogMessage(const QString& aMsg, const unsigned int aLevel);
+
 signals:
   /**
-   * Emitted when a new log entry is registred.
+   * Emitted when a new log entry is registered.
    *
    * NB. aLevel seems unecessary since it is also in the aEntry, but it is a
    * lot quicker filtering on an integer, than parsing through a QDomElement.

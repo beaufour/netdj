@@ -72,6 +72,9 @@ signals:
   /** Emitted when the player stops */
   void SigStop();
   
+  /** Emits a general information message */
+  void SigMessage(const QString& aMsg, const unsigned int aLevel);
+
 public slots:
   /** Skip current song */
   void Skip();

@@ -14,55 +14,84 @@
 #include "Song.h"
 #include "Collection.h"
 
-
-#include <iostream>
-
+using namespace std;
 
 LogService::LogService(QObject* aParent)
   : QObject(aParent, "LogService"),
-    mLogCount(0)
+    mLogCount(0),
+    mDocument("log")
 {
 }
 
 void
+LogService::CreateEntry(QDomElement& aEntry, const int aLevel, const QString aType)
+{
+  aEntry = mDocument.createElement("entry");
+
+  aEntry.setAttribute("sender", sender() ? sender()->name() : "(none)");
+  aEntry.setAttribute("type", aType);
+  aEntry.setAttribute("level", aLevel);
+  aEntry.setAttribute("id", ++mLogCount);
+}
+
+void
+LogService::SimpleEntry(const int aLevel, const QString aType)
+{
+  QDomElement e;
+  CreateEntry(e, aLevel, aType);
+  emit NewLogEntry(&e, aLevel);
+}
+
+
+void
 LogService::LogSongPlaying(const Song& aSong, const Collection* aCol)
 {
-  printf("LOG: LogSongPlaying\n");
+  SimpleEntry(10, "SongPlaying");
 }
 
 void
 LogService::LogQuit()
 {
-  printf("LOG: LogQuit\n");
+  SimpleEntry(0, "Quit");
 }
   
 void
 LogService::LogSkip()
 {
-  printf("LOG: LogSkip\n");
+  SimpleEntry(20, "Skip");
 }
 
 void
 LogService::LogClientNew()
 {
-  printf("LOG: LogClientNew\n");
+  SimpleEntry(100, "ClientNew");
 }  
 
 void
 LogService::LogClientClose()
 {
-  printf("LOG: LogClientClose\n");
+  SimpleEntry(100, "ClientClose");
 }
 
 void
 LogService::LogPlayerStart()
 {
-  printf("LOG: LogPlayerStart\n");
+  SimpleEntry(30, "PlayerStart");
 }
 
 void
 LogService::LogPlayerStop()
 {
-  printf("LOG: LogPlayerStop\n");
+  SimpleEntry(30, "PlayerStop");
+}
+
+void
+LogService::LogMessage(const QString& aMsg, const unsigned int aLevel)
+{
+  QDomElement e;
+  CreateEntry(e, aLevel, "Message");
+  QDomText msg = mDocument.createTextNode(aMsg);
+  e.appendChild(msg);
+  emit NewLogEntry(&e, aLevel);
 }
 
