@@ -133,7 +133,7 @@ sub cmd_update {
 	    my $songs = $status->{song};
 	    
 	    foreach my $s (sort {$a <=> $b} keys %$songs) {
-		$tool .= $songs->{$s}->{description}."\n";
+		$tool .= "$s) ".$songs->{$s}->{description}."\n";
 	    }
 	    $applet->set_tooltip($tool);
 
