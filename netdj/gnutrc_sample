@@ -1,3 +1,12 @@
+# These are the vital cache entries
+set cache_path /home/beaufour/gnut-cache/
+set cache_size 500000
+set cache_parallel 20
+set min_cache_size 2500
+# Extra features added by me
+set cache_namecomp .mp3
+set cache_filter_file /home/beaufour/netdj/FILTER
+# The rest ...
 set GDJ_extra_paths 
 set http_client_headers User-Agent: Gnut 0.4.28_abl\nReferrer: Gnutella file sharing network\nConnection: Keep-Alive\n
 set update_clear 0
@@ -10,11 +19,9 @@ set max_searches 10
 set verbose 3
 set max_incoming 4
 set search_min_rating 0
-set cache_path /home/beaufour/gnut-cache/
 set auto_download_retry 60
 set packet_stats 0
 set transfer_log 
-set cache_size 500000
 set speed 1000
 set search_log 
 set stats_format 0
@@ -61,14 +68,10 @@ set password_only 0
 set max_uploads 10
 set leave_turds 512
 set auto_forget 0
-set cache_parallel 20
 set prompt gnut> 
-set cache_namecomp .mp3
-set cache_filter_file /home/beaufour/netdj/FILTER
 set eval_echo 1
 set no_rfc_1597 0
 set search_log_all 0
-set min_cache_size 2500
 set max_results 64
 set checkpoint_hosts 600
 set log_level 0
