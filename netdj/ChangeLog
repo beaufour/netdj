@@ -1,3 +1,46 @@
+2002-01-28 Monday 13:48   Bjarke Buur Mortensen <rodaz@diku.dk>
+
+	* util/netdj_applet.pl (1.9): The tool tip is now output in correct
+	order based on song id.  
+
+2002-01-28 Monday 13:46   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* AUTHORS (1.3): Added rodaz as an author.  
+
+2002-01-26 Saturday 16:44   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* util/netdj_applet.pl (1.8): Removed 'illegal character'-hack as
+	it's handled by main program now.  
+
+2002-01-26 Saturday 16:44   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* TODO (1.3), src/main.cc (1.8): Added ID3-info to XML output and
+	changed HTTP-thread so it exits more gracefully now.  
+
+2002-01-26 Saturday 16:40   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* configure.in (1.3): Added -lz to commandline when compiling with
+	ID3lib.  
+
+2002-01-26 Saturday 14:59   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* .cvsignore (1.1), config/.cvsignore (1.1), src/.cvsignore (1.1),
+	util/.cvsignore (1.1): Got tired of all those questionmarks from
+	CVS, added ignore-files.  
+
+2002-01-26 Saturday 14:58   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* ChangeLog (1.2): Updated ...  
+
+2002-01-26 Saturday 14:57   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* AUTHORS (1.2), NEWS (1.2): Minor changes.  
+
+2002-01-26 Saturday 14:57   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* Makefile.am (1.2), cvs2cl.pl (1.1): Added automatic creation of
+	ChangeLog.  
+
 2002-01-26 Saturday 14:00   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* src/: File.cc (1.1), File.h (1.1): Enhanced file-handling object.  
@@ -71,6 +114,23 @@
 
 2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
 
+	* AUTHORS (1.1), ChangeLog (1.1), COPYING (1.1), FILTER (1.1),
+	INSTALL (1.1), Makefile.am (1.1), NEWS (1.1), README (1.1), TODO
+	(1.1), acinclude.m4 (1.1), aclocal.m4 (1.1), config.guess (1.1),
+	config.sub (1.1), configure.in (1.1), gnut.patch (1.1), install-sh
+	(1.1), missing (1.1), mkinstalldirs (1.1), config/Makefile.am
+	(1.1), config/_netdj (1.1), config/_netdj_users (1.1),
+	src/AccessConf.cc (1.1), src/AccessConf.h (1.1),
+	src/Configuration.cc (1.1), src/Configuration.h (1.1),
+	src/Directory.cc (1.1), src/Directory.h (1.1), src/Lockable.cc
+	(1.1), src/Lockable.h (1.1), src/Makefile.am (1.1), src/Regex.cc
+	(1.1), src/Regex.h (1.1), src/config.h.in (1.1), src/main.cc (1.1),
+	src/util.cc (1.1), src/util.h (1.1), util/Makefile.am (1.1),
+	util/netdj_applet.desktop (1.1), util/netdj_applet.glade (1.1),
+	util/netdj_applet.pl (1.1): Initial revision 
+
+2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
+
 	* AUTHORS (1.1.1.1), ChangeLog (1.1.1.1), COPYING (1.1.1.1), FILTER
 	(1.1.1.1), INSTALL (1.1.1.1), Makefile.am (1.1.1.1), NEWS
 	(1.1.1.1), README (1.1.1.1), TODO (1.1.1.1), acinclude.m4
@@ -88,21 +148,4 @@
 	util/Makefile.am (1.1.1.1), util/netdj_applet.desktop (1.1.1.1),
 	util/netdj_applet.glade (1.1.1.1), util/netdj_applet.pl (1.1.1.1)
 	(utags: start): Imported sources.  
-
-2002-01-20 Sunday 16:21   Allan Beaufour Larsen <allan@beaufour.dk>
-
-	* AUTHORS (1.1), ChangeLog (1.1), COPYING (1.1), FILTER (1.1),
-	INSTALL (1.1), Makefile.am (1.1), NEWS (1.1), README (1.1), TODO
-	(1.1), acinclude.m4 (1.1), aclocal.m4 (1.1), config.guess (1.1),
-	config.sub (1.1), configure.in (1.1), gnut.patch (1.1), install-sh
-	(1.1), missing (1.1), mkinstalldirs (1.1), config/Makefile.am
-	(1.1), config/_netdj (1.1), config/_netdj_users (1.1),
-	src/AccessConf.cc (1.1), src/AccessConf.h (1.1),
-	src/Configuration.cc (1.1), src/Configuration.h (1.1),
-	src/Directory.cc (1.1), src/Directory.h (1.1), src/Lockable.cc
-	(1.1), src/Lockable.h (1.1), src/Makefile.am (1.1), src/Regex.cc
-	(1.1), src/Regex.h (1.1), src/config.h.in (1.1), src/main.cc (1.1),
-	src/util.cc (1.1), src/util.h (1.1), util/Makefile.am (1.1),
-	util/netdj_applet.desktop (1.1), util/netdj_applet.glade (1.1),
-	util/netdj_applet.pl (1.1): Initial revision 
 
