@@ -170,6 +170,13 @@ public:
     currdelete = del;
     unlock();
   }
+
+  void ModifyCurrent(const string& str, const bool del) {
+    lock();
+    currsong = str;
+    currdelete = del;
+    unlock();
+  };
 };
 
 TCurrentSong currentsong;
@@ -403,15 +410,21 @@ com_move(char* arg) {
   string songname;
   string newpath;
   currentsong.Get(songname);
-  newpath = *(share.GetDirname());
-  newpath += File(songname).Exists();
+  File songfile(songname);
 
-  cout << "  Moving '" << songname << "' to '"
-       << newpath << "'" << endl;
-  if (rename(songname.c_str(), newpath.c_str()) == -1) {
-    cout << "  Error: " << strerror(errno) << endl;
+  if (songfile.Exists()) {
+    newpath = *(share.GetDirname());
+    newpath += songfile.GetFilename();
+    
+    cout << "  Moving '" << songname << "' to '"
+	 << newpath << "'" << endl;
+    if (rename(songname.c_str(), newpath.c_str()) == -1) {
+      cout << "  Error: " << strerror(errno) << endl;
+    } else {
+      currentsong.ModifyCurrent(newpath, false);
+    }
   } else {
-    currentsong.Set(newpath, false);
+    cout << "  Error: File doesn't exist..." << endl;
   }
   return 0;
 }
