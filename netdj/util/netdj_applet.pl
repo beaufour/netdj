@@ -117,6 +117,8 @@ sub cmd_update {
     if ($response->is_error) {
 	print "Information retrieval returned: ".$response->status_line."\n";
 	$label->set_text($NOINFO_TEXT);
+	$cachestatus->set_text("?");
+	$applet->set_tooltip("");
     } else {
 	$_ = $response->content;
 	if (!($_ eq $last_status)) {
