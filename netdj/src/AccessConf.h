@@ -13,6 +13,7 @@
 #include <string>
 #include <fstream>
 #include "Lockable.h"
+#include "Configuration.h"
 
 class AccessConf : public Lockable {
  private:
@@ -37,10 +38,12 @@ class AccessConf : public Lockable {
 
   map<string, User> users;
 
- public:
-  AccessConf() : Lockable() {};
+  Configuration *Conf;
 
-  void ReadFile(const string&);
+ public:
+  AccessConf(Configuration *c) : Lockable(), Conf(c) {};
+
+  void ReadFile();
   bool IsAccessAllowed(const string&, int, string* = NULL);
 };
 

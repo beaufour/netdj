@@ -71,9 +71,9 @@ Directory::SetDirname(const string &_dirname) {
   }
 }
 
-const string*
-Directory::GetDirname() {
-  return &dirname;
+const string&
+Directory::GetDirname() const {
+  return dirname;
 }
 
 
@@ -84,7 +84,7 @@ Directory::SetLastupdate(const time_t _lastupdate) {
 
 
 time_t
-Directory::GetNextTimestamp() {
+Directory::GetNextTimestamp() const {
   // Only makes sense for non-playlists...
   return list.front().GetCtime();
 }
@@ -155,12 +155,12 @@ Directory::GetEntries(vector<File> &vect, unsigned int max) {
   return i;
 }
 
-const string*
-Directory::GetShortname() {
-  return &shname;
+const string&
+Directory::GetShortname() const {
+  return shname;
 }
 
-const string*
-Directory::GetDescription() {
-  return &descr;
+const string&
+Directory::GetDescription() const {
+  return descr;
 }

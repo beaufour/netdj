@@ -9,18 +9,28 @@
 #include "AccessConf.h"
 
 #include "Regex.h"
+#include "config.h"
 
 void
-AccessConf::ReadFile(const string& fname) {
-  // userid:userlevel:password
+AccessConf::ReadFile() {
+  // Open configuration files
+  string fullname = Conf->GetString("$$CONFDIR") + CONF_USERFILENAME;
+  ifstream conf(fullname.c_str());
+  if (!conf.is_open()) {
+    // Not found, try global directory
+    fullname = NETDJ_ETCDIR;
+    fullname += "/";
+    fullname +=  CONF_USERFILENAME;
+    conf.open(fullname.c_str());
+  }
+
+  // Parse configuration
+  cout << "Reading user entries from '" << fullname << "':" << endl;
   Regex reg("^([^:]+):([[:digit:]]+):(.+)$");
-  ifstream conf(fname.c_str());
   vector<string> splitline;
   char line[255];
   User user;
 
-  cout << "Reading user entries: " << endl;
-  
   lock();
   while (conf.getline(line, sizeof(line))) {
     splitline.clear();

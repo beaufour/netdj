@@ -12,10 +12,17 @@
 // Provides atoi
 #include <cstdlib>
 
+// Provides sprintf
+#include <cstdio>
+
 //////////////////////////////////////////////////
 // HTTP                                         //
 //////////////////////////////////////////////////
 Regex HTTP::headerreg("^([^\r]+) *: *([^\r]+)\r\n");
+
+HTTP::HTTP() {
+  SetHeader("Server", PKGVER);
+}
 
 int
 HTTP::ParseHeaders(const string& st, int pos) {
@@ -53,6 +60,17 @@ HTTP::Parse(const string& st, const bool savebody = false) {
   return pos ? true : false;
 };
 
+void
+HTTP::Clear() {
+  ClearCommand();
+  ClearBody();
+}
+
+void
+HTTP::ClearBody() {
+  body = "";
+}
+
 bool
 HTTP::GetHeader(const string& st, string &res) const {
   map<string, string>::const_iterator it = headers.find(st);
@@ -68,13 +86,47 @@ HTTP::SetHeader(const string& hdr, const string& val) {
   headers[hdr] = val;
 }
 
+void
+HTTP::CreatePacket() {
+  // Create Command first
+  CreateCommand(packet);
+
+  // Add contentlength
+  if (body.size()) {
+    char tmplen[10];
+    sprintf(tmplen, "%d", body.size());
+    headers["Content-Length"] = tmplen;
+  }
+
+  // Add headers
+  for (map<string,string>::const_iterator it = headers.begin();
+       it != headers.end();
+       ++it) {
+    packet += it->first + ": " + it->second + "\r\n";
+  }
+
+  // Empty line between header and body
+  packet += "\r\n";
+
+  // And finnaly the body
+  packet += body;
+}
+
+const string&
+HTTP::Packet() const {
+  return packet;
+}
+
+void
+HTTP::SetBody(const string &str) {
+  body = str;
+}
+
 //////////////////////////////////////////////////
 // HTTPRequest                                  //
 //////////////////////////////////////////////////
 Regex HTTPRequest::comreg("^([^ ]+) +([^ ]+) +HTTP/([^\r]+)\r\n");
 Regex HTTPRequest::paramreg("([^=&]+)(=([^&]*))?&?");
-
-#include <iostream>
 
 int
 HTTPRequest::ParseCommand(const string& st, int pos) {
@@ -111,6 +163,17 @@ HTTPRequest::ParseCommand(const string& st, int pos) {
   return pos + newpos;
 }
 
+void
+HTTPRequest::ClearCommand() {
+  command = URI = version = "";
+  params.clear();
+}
+
+void
+HTTPRequest::CreateCommand(string &str) {
+  str = command + " " + URI + " HTTP/" + version + "\r\n";
+}
+
 bool
 HTTPRequest::GetURIParam(const string& st, string& res) const {
   map<string, string>::const_iterator it = params.find(st);
@@ -131,7 +194,6 @@ HTTPResponse::HTTPResponse(int _status, const string &cont_type = "")
   if (cont_type.size()) {
     SetHeader("Content-Type", cont_type);
   }
-  SetHeader("Server", PKGVER);
 }
 
 int
@@ -146,4 +208,17 @@ HTTPResponse::ParseCommand(const string& st, int pos) {
   };
 
   return pos + newpos;
+}
+
+void
+HTTPResponse::ClearCommand() {
+  version = description = "";
+  status = 0;
+}
+
+void
+HTTPResponse::CreateCommand(string &str) {
+  char tmpstat[10];
+  sprintf(tmpstat, "%d", status);
+  str = "HTTP/" + version + " " + tmpstat + " " + description + "\r\n";
 }

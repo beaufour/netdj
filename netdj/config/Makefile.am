@@ -1,5 +1,5 @@
-## Please update this variable if any new macros are created
+all:
 
-EXTRA_DIST = _netdj \
-             _netdj_users
-	     
+sysconf_DATA = config users
+
+EXTRA_DIST = $(sysconf_DATA)

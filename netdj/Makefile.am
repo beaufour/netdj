@@ -1,7 +1,7 @@
-SUBDIRS = src config util
+SUBDIRS = config doc src util
 
 EXTRA_DIST = \
-	AUTHORS COPYING INSTALL README TODO gnut.patch
+	AUTHORS COPYING INSTALL README TODO gnut.patch netdj.spec
 
 .PHONY:	ChangeLog
 

@@ -45,10 +45,10 @@ public:
       lastupdate(time_t(0)), lastplay(time_t(0)), playlist(_playlist) {};
   
   void SetDirname(const string&);
-  const string* GetDirname();
+  const string& GetDirname() const;
 
   void SetLastupdate(const time_t);
-  time_t GetNextTimestamp();
+  time_t GetNextTimestamp() const;
 
   bool Empty();
   bool GetSong(File&);
@@ -56,8 +56,8 @@ public:
   int GetSize();
   int GetEntries(vector<File>&, unsigned int);
 
-  const string* GetShortname();
-  const string* GetDescription();
+  const string& GetShortname() const;
+  const string& GetDescription() const;
 };
 
 #endif

@@ -1,7 +1,10 @@
-/* Defines the filename of configuration files */
-const char CONF_DOTFILENAME[] = ".netdj";
-const char CONF_STATEFILENAME[] = ".netdj_state";
-const char CONF_USERFILENAME[] = ".netdj_users";
+/* -*- c++ -*- */
+/* Defines the location and names of files */
+#define CONF_DIRNAME ".netdj/"
+#define CONF_FILENAME "config"
+#define CONF_STATEFILENAME "state"
+#define CONF_USERFILENAME "users"
+#define CONF_LOGFILENAME "playlog"
 
 /* Definition of userlevels */
 enum UserLevel {

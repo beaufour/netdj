@@ -9,6 +9,8 @@ PLAYER = /home/beaufour/bin/mpg123
 PLAYER_START = false
 # Deleted played cache-files
 DELETE_PLAYED = false
+# Should player do a log of played songs (no limit!)
+PLAYER_LOG = false
 
 
 ########################################

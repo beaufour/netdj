@@ -25,6 +25,9 @@
 #include <iostream>
 #include <iomanip>
 
+// Provides file streams
+#include <fstream>
+
 // Provides stdout and stderr
 #include <cstdio>
 
@@ -78,7 +81,7 @@ const unsigned int listnum = 3;
 Directory *lists[] = {&request, &cache, &share};
 
 Configuration config;
-AccessConf acc;
+AccessConf acc(&config);
 bool http_locked;
 
 void* http_thread(void*);
@@ -101,6 +104,8 @@ savestate() {
   int fd;
   time_t upd = cache.GetNextTimestamp();
 
+  cout << "Saving state to '" << statefile << "'." << endl;
+
   fd = open(statefile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,  S_IWUSR | S_IRUSR);
   if (fd == -1) {
     error(strerror(errno), false);
@@ -121,7 +126,10 @@ loadstate() {
       statefile += '/';
     }
   }
+  statefile += CONF_DIRNAME;
   statefile += CONF_STATEFILENAME;
+
+  cout << "Reading state from '" << statefile << "'." << endl;
 
   int fd;
   fd = open(statefile.c_str(), O_RDONLY);
@@ -242,6 +250,19 @@ player_thread(void*) {
     screen_flush();
     stop_player = true;
   }
+
+  // Open logfile
+  ofstream logfile;
+  if (config.GetBool("PLAYER_LOG")) {
+    string logfilename = config.GetString("$$CONFDIR") + CONF_LOGFILENAME;
+    cout << endl << "  Logging to '" << logfilename << "'" << endl;
+    logfile.open(logfilename.c_str(), ios::app);
+    if (!logfile.is_open()) {
+      cout << endl << "  Sorry, couldn't open logfile!" << endl;
+      config.SetBool("PLAYER_LOG", false);
+    }
+    screen_flush();
+  }
   
   while (!stop_player) {
     // Get next song
@@ -259,7 +280,7 @@ player_thread(void*) {
       if (fobj.Exists()) {
 	currentsong.Set(fobj, i == 1 ? true : false);
 	cout << endl << "  Playing '" << fobj.GetFilename()
-	     << "' [" << *(lists[i]->GetShortname()) << "]" << endl;
+	     << "' [" << lists[i]->GetShortname() << "]" << endl;
 	screen_flush();
 	
 	if (!config.GetBool("STREAM")) {
@@ -301,13 +322,24 @@ player_thread(void*) {
 	  }
 	  fclose(musicfile);
 	}
+	if (logfile.is_open()) {
+	  logfile << "\"" << fobj.GetFilenameNoType() << "\","
+		  << ((stop_player || next_song) ? 1 : 0)
+		  << endl;
+	}
       }
     }
   }
 
+  // Disconnect from streaming server
   if (config.GetBool("STREAM")) {
     shout_update_metadata(&conn, NULL);
     shout_disconnect(&conn);
+  }
+
+  // Close logfile
+  if (logfile.is_open()) {
+    logfile.close();
   }
 
   // Clear currentsong and end thread
@@ -317,10 +349,9 @@ player_thread(void*) {
 
 
 void kill_current() {
-  if (config.GetBool("STREAM")) {
-    // This should be packed nicely into a semaphore...
-    next_song = true;
-  } else if (playercmd_pid) {
+  // This should be packed nicely into a semaphore...
+  next_song = true;
+  if (!config.GetBool("STREAM") && playercmd_pid) {
     kill(playercmd_pid, SIGINT);
   }
 }
@@ -450,7 +481,7 @@ com_list(char* arg) {
   vector<File> songs;
 
   if (l >= 0 && l < listnum) {
-    cout << "  [" << *(lists[l]->GetShortname()) << "]:" << endl;
+    cout << "  [" << lists[l]->GetShortname() << "]:" << endl;
     lists[l]->GetEntries(songs, 10);
     for (vector<File>::iterator it = songs.begin();
 	 it != songs.end();
@@ -467,8 +498,8 @@ com_lists(char* arg) {
   for (unsigned int i = 0; i < listnum; ++i) {
     dir = lists[i];
     cout << setw(7) << dir->GetSize()
-	 << "  " << *(dir->GetDescription())
-	 << " [" << *(dir->GetShortname()) << "]"
+	 << "  " << dir->GetDescription()
+	 << " [" << dir->GetShortname() << "]"
 	 << endl;
   }
   return 0;
@@ -482,7 +513,7 @@ com_move(char* arg) {
   currentsong.Get(songfile);
 
   if (songfile.Exists()) {
-    newpath = *(share.GetDirname());
+    newpath = share.GetDirname();
     newpath += songfile.GetFilename();
     
     cout << "  Moving '" << songfile.GetName() << "' to '"
@@ -498,9 +529,6 @@ com_move(char* arg) {
 
 int
 com_next(char* arg) {
-  if (check_web(arg)) {
-
-  };
   cout << "  Skipping current song..." << endl;
   kill_current();
   usleep(500);
@@ -634,23 +662,6 @@ http_thread(void*) {
     socklen_t len;
     char rbuf[4096];
 
-    // XML-answer
-    const char xbuf1[] =
-      "HTTP/1.1 200 OK\r\n"
-      "Server: NetDJ\r\n"
-      "Connection: close\r\n"
-      "Content-Type: text/xml\r\n"
-      "\r\n"
-      "<?xml version=\"1.0\"?>\n"
-      "<netdj id=\"netdj\" xmlns:html=\"http://www.w3.org/1999/xhtml\"\n"
-      "                    xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n";
-
-    const char xbuf2[] =
-      "</netdj>\n";
-
-    string xbuf;
-
-
     // HTML-answer
     const char hbuf1[] =
       "HTTP/1.1 200 OK\r\n"
@@ -719,30 +730,26 @@ http_thread(void*) {
 
     string hbuf;
 
+    // text/xml packet
+    HTTPResponse HTTPxml(200, "text/xml");
+    HTTPxml.SetHeader("Connection", "Close");
+    string xbuf;
+    
+    // text/ascii packet
+    HTTPResponse HTTPtext(200, "text/ascii");
+    HTTPtext.SetHeader("Connection", "Close");
 
-    // TEXT-answer
-    const char tbuf[] =
-      "HTTP/1.1 200 OK\r\n"
-      "Server: NetDJ\r\n"
-      "Connection: close\r\n"
-      "Content-Type: text/ascii\r\n"
-      "\r\n";
+    // Redirection packet
+    HTTPResponse HTTPredirect(302, "");
+    HTTPredirect.SetHeader("Connection", "Close");
+    HTTPredirect.SetHeader("Location", "/");
+    HTTPredirect.CreatePacket();
 
-    // COMMAND-answer
-    const char cbuf[] =
-      "HTTP/1.1 302 Found\r\n"
-      "Connection: close\r\n"
-      "Server: NetDJ\r\n"
-      "Location:/\r\n"
-      "\r\n";
-
-    const char abuf[] =
-      "HTTP/1.1 401 Authorization Required\r\n"
-      "Server: NetDJ\r\n"
-      "WWW-Authenticate: Basic realm=\"NetDJ\"\r\n"
-      "Connection: close\r\n"
-      "Content-Type: text/html; charset=iso-8859-1\r\n"
-      "\r\n"
+    // Authorization packet
+    HTTPResponse HTTPauth(401, "text/html; charset=iso-8859-1");
+    HTTPauth.SetHeader("Connection", "Close");
+    HTTPauth.SetHeader("WWW-Authenticate", "Basic realm=\"NetDJ\"");
+    HTTPauth.SetBody(
       "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
       "<HTML>\n"
       "  <HEAD>\n"
@@ -751,7 +758,8 @@ http_thread(void*) {
       "  <BODY>\n"
       "    Authorization required!\n"
       "  </BODY>\n"
-      "</HTML>\n";
+      "</HTML>\n");
+    HTTPauth.CreatePacket();
 
     File songfile;
     string o_hsongname, o_xsongname;
@@ -765,9 +773,9 @@ http_thread(void*) {
     char tmplint[20];
     struct pollfd pf;
     pf.events = POLLIN;
-    int z;
+    int songsgot, songno;
     unsigned char ch;
-    ID3Tag *id3tag = NULL;
+    const ID3Tag* id3tag = NULL;
     HTTPRequest req;
     string auth;
 
@@ -827,28 +835,33 @@ http_thread(void*) {
 		      ((*(com->func)) ((char*) NULL));
 		    }
 		    // Send redirect to '/'
-		    send(newsock, cbuf, sizeof(cbuf), 0);
+		    send(newsock, HTTPredirect.Packet().c_str(), HTTPredirect.Packet().size(), 0);
 		  } else {
 		    // Wrong password, send authorization request
-		    send(newsock, abuf, sizeof(abuf), 0);
+		    send(newsock, HTTPauth.Packet().c_str(), HTTPauth.Packet().size(), 0);
 		  }
 		} else {
 		  // Didn't send credentials, send authorization request
-		  send(newsock, abuf, sizeof(abuf), 0);
+		  send(newsock, HTTPauth.Packet().c_str(), HTTPauth.Packet().size(), 0);
 		}
 	      } else if (req.GetURIName() == "/index.txt") {
 		///////////////////
 		// Send TEXT answer
 		//////////////////
-		send(newsock, tbuf, sizeof(tbuf) - 1, 0);
-		send(newsock, cfilename.c_str(), cfilename.size(), 0);
+		HTTPtext.SetBody(cfilename);
+		HTTPtext.CreatePacket();
+		send(newsock, HTTPtext.Packet().c_str(), HTTPtext.Packet().size(), 0);
 		
 	      } else if (req.GetURIName() == "/index.xml") {
 		//////////////////
 		// Send XML answer
 		//////////////////
 		if (o_xsongname != songfile.GetName()) {
-		  xbuf = xbuf1;
+		  xbuf = 
+		    "<?xml version=\"1.0\"?>\n"
+		    "<netdj id=\"netdj\" xmlns:html=\"http://www.w3.org/1999/xhtml\"\n"
+		    "                  xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n";
+
 		  xbuf += "  <currentsong>\n";
 		  xbuf += "    <unid>";
 		  sprintf(tmpint, "%d", songfile.GetId());
@@ -867,47 +880,55 @@ http_thread(void*) {
 		  xbuf += "     <year>" + id3tag->GetYear() + "</year>\n";
 		  xbuf += "     <style>" + id3tag->GetStyle() + "</style>\n";
 		  xbuf += "  </currentsong>\n";
-		  songs.clear();
-		  lists[1]->GetEntries(songs, 10);
-		  z = 0;
-		  for (vector<File>::iterator it = songs.begin();
-		       it != songs.end();
-		       ++it) {
-		    xbuf += "  <song id=\"";
-		    sprintf(tmpint, "%d", ++z);
-		    xbuf += tmpint;
-		    xbuf += "\">\n";
-		    xbuf += "    <unid>";
-		    sprintf(tmpint, "%d", it->GetId());
-		    xbuf += tmpint;
-		    xbuf += "</unid>\n";
-		    xbuf += "    <size>";
-		    sprintf(tmplint, "%ld", it->GetSize());
-		    xbuf += tmplint;
-		    xbuf += "</size>\n";
-		    xbuf += "    <description>" + it->GetFilenameNoType() + "</description>\n";
-		    it->GetID3Info(id3tag);
-		    xbuf += "     <artist>" + id3tag->GetArtist() + "</artist>\n";
-		    xbuf += "     <album>" + id3tag->GetAlbum() + "</album>\n";
-		    xbuf += "     <title>" + id3tag->GetTitle() + "</title>\n";
-		    xbuf += "     <comment>" + id3tag->GetNote() + "</comment>\n";
-		    xbuf += "     <year>" + id3tag->GetYear() + "</year>\n";
-		    xbuf += "     <style>" + id3tag->GetStyle() + "</style>\n";
-		    xbuf += "  </song>\n";
-		  }
+		  songsgot = songno = 0;
+		  for (unsigned int listno = 0; listno < listnum; ++listno) {
+		    songs.clear();
+		    songsgot += lists[listno]->GetEntries(songs, 10 - songsgot);
+		    for (vector<File>::iterator it = songs.begin();
+			 it != songs.end();
+			 ++it) {
+		      xbuf += "  <song id=\"";
+		      sprintf(tmpint, "%d", ++songno);
+		      xbuf += tmpint;
+		      xbuf += "\">\n";
+		      xbuf += "    <unid>";
+		      sprintf(tmpint, "%d", it->GetId());
+		      xbuf += tmpint;
+		      xbuf += "</unid>\n";
+		      xbuf += "    <listid>" + lists[listno]->GetShortname() + "</listid>\n";
+		      xbuf += "    <size>";
+		      sprintf(tmplint, "%ld", it->GetSize());
+		      xbuf += tmplint;
+		      xbuf += "</size>\n";
+		      xbuf += "    <description>" + it->GetFilenameNoType() + "</description>\n";
+		      it->GetID3Info(id3tag);
+		      xbuf += "    <artist>" + id3tag->GetArtist() + "</artist>\n";
+		      xbuf += "    <album>" + id3tag->GetAlbum() + "</album>\n";
+		      xbuf += "    <title>" + id3tag->GetTitle() + "</title>\n";
+		      xbuf += "    <comment>" + id3tag->GetNote() + "</comment>\n";
+		      xbuf += "    <year>" + id3tag->GetYear() + "</year>\n";
+		      xbuf += "    <style>" + id3tag->GetStyle() + "</style>\n";
+		      xbuf += "  </song>\n";
+		    }
+		    if (songsgot >= 10) {
+		      break;
+		    }
+		  } // iterate through lists
 		  for (unsigned int i = 0; i < listnum; ++i) {
 		    dir = lists[i];
 		    xbuf += "  <list>\n";
 		    sprintf(tmpint, "%d", dir->GetSize());
-		    xbuf += "     <size>";
+		    xbuf += "    <size>";
 		    xbuf += tmpint;
 		    xbuf += "</size>\n";
-		    xbuf += "     <id>" + *(dir->GetShortname()) + "</id>\n";
-		    xbuf += "     <description>" + *(dir->GetDescription()) + "</description>\n";
+		    xbuf += "    <id>" + dir->GetShortname() + "</id>\n";
+		    xbuf += "    <description>" + dir->GetDescription() + "</description>\n";
 		    xbuf += "  </list>\n";
 		  }
-		  xbuf += xbuf2;
+		  xbuf += "</netdj>\n";
 		  o_xsongname = songfile.GetName();
+		  HTTPxml.SetBody(xbuf);
+		  HTTPxml.CreatePacket();
 		}
 		// Replace illegal characters
 		for (string::iterator it = xbuf.begin();
@@ -919,7 +940,7 @@ http_thread(void*) {
 		    *it = ' ';
 		  }
 		}
-		send(newsock, xbuf.c_str(), xbuf.size(), 0);
+		send(newsock, HTTPxml.Packet().c_str(), HTTPxml.Packet().size(), 0);
 	      } else {
 		///////////////////
 		// Send HTML answer
@@ -943,9 +964,9 @@ http_thread(void*) {
 		    sprintf(tmpint, "%d", dir->GetSize());
 		    hbuf += tmpint;
 		    hbuf += "</TD><TD>";
-		    hbuf += *(dir->GetShortname());
+		    hbuf += dir->GetShortname();
 		    hbuf += "</TD><TD>";
-		    hbuf += *(dir->GetDescription());
+		    hbuf += dir->GetDescription();
 		    hbuf += "</TD></TR>\n";
 		  }
 		  hbuf += hbuf5;
@@ -973,21 +994,11 @@ int
 main(int argc, char* argv[]) {
   cout << "Welcome to NetDJ v" << VERSION << endl;
 
-  // Construct dotfile-path
-  char* home = getenv("HOME");
-  string dotfile;
-  if (home) {
-    dotfile = home;
-    if (dotfile[dotfile.size() - 1] != '/') {
-      dotfile += '/';
-    }
-  }
-
   // Read configuration
-  config.ReadFile(dotfile + CONF_DOTFILENAME);
+  config.ReadFile();
 
   // Read users
-  acc.ReadFile(dotfile + CONF_USERFILENAME);
+  acc.ReadFile();
 
   // Load saved state from disk
   loadstate();

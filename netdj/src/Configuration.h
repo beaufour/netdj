@@ -1,4 +1,4 @@
-/*
+/* -*- c++ -*-
  *  Configuration.h
  * 
  *  Allan Beaufour Larsen <allan@beaufour.dk>
@@ -16,11 +16,18 @@ class Configuration {
 private:
   map<string, string> conflist;
 
+  string Get(const string&) const;
+
 public:
-  void ReadFile(string);
-  string GetString(string);
-  int GetInteger(string);
-  bool GetBool(string);
+  void ReadFile();
+
+  string GetString(const string&) const;
+  int GetInteger(const string&) const;
+  bool GetBool(const string&) const;
+
+  void SetString(const string&, const string&);
+  void SetBool(const string&, bool);
+  void SetInteger(const string&, int);
 };
 
 #endif

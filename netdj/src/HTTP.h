@@ -14,27 +14,44 @@
 #include <string>
 #include "Regex.h"
 
+
+//////////////////////////////////////////////////
+// HTTP                                         //
+//////////////////////////////////////////////////
 class HTTP {
 private:
   map<string, string> headers;
   string body;
   static Regex headerreg;
+  string packet;
 
   int ParseHeaders(const string&, int);
 
 protected:
   virtual int ParseCommand(const string&, int) = 0;
+  virtual void ClearCommand() = 0;
+  virtual void CreateCommand(string&) = 0;
 
 public:
-  HTTP() {};
+  HTTP();
   virtual ~HTTP() {};
 
   bool Parse(const string&, const bool = false);
   bool GetHeader(const string&, string&) const;
   void SetHeader(const string&, const string&);
+
+  void CreatePacket();
+  const string& Packet() const;
+  void SetBody(const string&);
+
+  void Clear();
+  void ClearBody();
 };
 
 
+//////////////////////////////////////////////////
+// HTTPRequest                                  //
+//////////////////////////////////////////////////
 class HTTPRequest : public HTTP {
 private:
   string command;
@@ -48,6 +65,8 @@ private:
   static Regex paramreg;
 
   int ParseCommand(const string&, int);
+  void ClearCommand();
+  void CreateCommand(string&);
 
 public:
   HTTPRequest() : HTTP() {};
@@ -62,6 +81,9 @@ public:
 };
 
 
+//////////////////////////////////////////////////
+// HTTPResponse                                 //
+//////////////////////////////////////////////////
 class HTTPResponse : public HTTP {
 private:
   string version;
@@ -71,6 +93,9 @@ private:
   static Regex comreg;
 
   int ParseCommand(const string&, int);
+  void ClearCommand();
+  void CreateCommand(string&);
+
 public:
   HTTPResponse() : HTTP(), status(0) {};
   HTTPResponse(int, const string& = "");
