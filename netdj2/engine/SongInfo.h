@@ -12,6 +12,7 @@
 
 #include <string>
 #include <sys/types.h>
+#include <qdom.h>
 
 #include "StdException.h"
 
@@ -117,6 +118,14 @@ public:
    * @return       Year
    */
   u_int32_t GetYear();
+
+  /**
+   * Create XML structure for object.
+   *
+   * @param doc     The DomDocument to use as root
+   * @return        The XML structure
+   */
+  QDomElement asXML(QDomDocument& doc);
 };
 
 #endif

@@ -113,6 +113,12 @@ PlayerThread::run() {
 	  cout << "Year:         " << info->GetYear() << endl;
 	  cout << "Track:        " << info->GetTrack() << endl;
 	}
+
+	QDomDocument doc("NetDJ");
+	QDomElement infoxml = info->asXML(doc);
+	doc.appendChild(infoxml);
+	QString xmlstr = doc.toString();
+	cout << "** SongInfo XML:" << endl << xmlstr << endl;
       }
       catch (NoSongInfo& h) {
 	cout << "No header info" << endl;

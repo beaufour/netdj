@@ -59,3 +59,10 @@ u_int32_t
 SongInfo::GetYear() {
   return Year;
 }
+
+QDomElement
+SongInfo::asXML(QDomDocument& doc) {
+  QDomElement info = doc.createElement("SongInfo");
+
+  return info;
+}
