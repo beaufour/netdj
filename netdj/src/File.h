@@ -24,31 +24,31 @@ class File {
  protected:
   int id;
   std::string name;
-  struct stat stat_buf;
   bool validid3;
   ID3Tag id3;
+  mutable struct stat stat_buf;
+  mutable bool stat_valid;
 
-  bool update_stat();
+  bool update_stat() const;
+  void check_stat() const;
 
  public:
-  File ()
-    : name(""), validid3(false) { update_stat(); };
-  File (std::string _name)
-    : name(_name), validid3(false) { update_stat(); };
+  File ();
+  File (std::string _name);
 
-  int GetId() const { return id; };
-  void SetId(int _id) { id = _id; };
+  int GetId() const;
+  void SetId(int _id);
 
-  bool Exists() { return update_stat(); };
-  time_t GetMtime() const { return stat_buf.st_mtime; };
-  time_t GetCtime() const { return stat_buf.st_ctime; };
-  off_t GetSize() const { return stat_buf.st_size; };
+  bool Exists();
+  time_t GetMtime() const;
+  time_t GetCtime() const;
+  off_t GetSize() const;
 
-  std::string GetOwner() const;
+  std::string GetOwner();
 
   // Name operations
   bool SetName(const std::string);
-  std::string GetName() const { return name; };
+  std::string GetName() const;
   std::string GetDirname() const;
   std::string GetFilename() const;
   std::string GetFilenameNoType() const;
@@ -60,9 +60,7 @@ class File {
   bool Rename(const std::string&);
   bool Symlink(const std::string&) const;
   
-  bool operator< (const File& f2) const {
-    return GetCtime() < f2.GetCtime();
-  }
+  bool operator< (const File& f2) const;
 };
 
 #endif

@@ -21,13 +21,63 @@
 using namespace std;
 
 bool
-File::update_stat() {
+File::update_stat() const {
   if (name.size() != 0 && stat(name.c_str(), &stat_buf) == 0 && !S_ISDIR(stat_buf.st_mode)) {
-    return true;
+    stat_valid = true;
   } else {
     memset(&stat_buf, 0, sizeof(stat_buf));
-    return false;
+    stat_valid = false;
   };
+  return stat_valid;
+};
+
+void
+File::check_stat() const {
+  if (!stat_valid) {
+    update_stat();
+  }
+}
+
+File::File ()
+  : name(""), validid3(false) {
+};
+
+
+File::File (std::string _name)
+    : name(_name), validid3(false) {
+};
+
+int
+File::GetId() const {
+  return id;
+};
+
+void
+File::SetId(int _id) {
+  id = _id;
+};
+
+bool
+File::Exists() {
+  return update_stat();
+};
+
+time_t
+File::GetMtime() const {
+  check_stat();
+  return stat_buf.st_mtime;
+};
+
+time_t
+File::GetCtime() const {
+  check_stat();
+  return stat_buf.st_ctime;
+};
+
+off_t
+File::GetSize() const {
+  check_stat();
+  return stat_buf.st_size;
 };
 
 bool
@@ -35,6 +85,11 @@ File::SetName(const string _name) {
   name = _name;
   return update_stat();
 }
+
+string
+File::GetName() const {
+  return name;
+};
 
 string
 File::GetDirname() const {
@@ -83,13 +138,19 @@ File::Symlink(const string &linkname) const {
 }
 
 string
-File::GetOwner() const {
+File::GetOwner() {
   struct passwd *pw;
 
+  check_stat();
   pw = getpwuid(stat_buf.st_uid);
   if (pw) {
     return string(pw->pw_name);
   } else {
     return string("");
   }
+}
+
+bool
+File::operator< (const File& f2) const {
+    return GetCtime() < f2.GetCtime();
 }
