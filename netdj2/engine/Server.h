@@ -20,14 +20,22 @@ class ServerSocket;
 class PlayerThread;
 
 /**
+ * Maximum bytes allowed in a request
+ * @todo Move this somewhere else!!
+ */
+
+const unsigned int MAX_REQUEST_SIZE = 8192;
+
+/**
  * Exception thrown by Server.
  */
-class ServerError : public StdException {
+class ServerError : public StdException
+{
 public:
   /**
    * Constructor.
    *
-   * @param err     The errormessage
+   * @param aErr              The errormessage
    */
   ServerError(const std::string aErr);
 };
@@ -35,8 +43,10 @@ public:
 /**
  * The server.
  */
-class Server : public QObject {
+class Server : public QObject
+{
   Q_OBJECT
+
 private:
   /* The current server socket */
   ServerSocket* mServerSocket;
@@ -68,7 +78,11 @@ private slots:
   /** Called when connection is terminated */
   void ClientClosed();
   
-  /** Called when a new client connects */
+  /**
+   * Called when a new client connects
+   *
+   * @param aSocket           The network socket for the client
+   */
   void NewClient(QSocket* aSocket);
 };
 

@@ -28,22 +28,28 @@ protected:
    */
   QDateTime mLastTimeStamp;
 
+  /** Whether to delete files from file system after playing them */
+  bool mDeleteAfterPlay;
+
 public:
   /**
    * Constructor.
    * 
-   * @param id      The identifier
-   * @param descr   The description
-   * @param dir     The directory containing songs
-   * @param isq     Is the songlist a queue?
+   * @param aId               The identifier
+   * @param aDescr            The description
+   * @param aDir              The directory containing songs
+   * @param aIsQ              Is the songlist a queue?
+   * @param aDelete           Delete files after play?
    */
   Collection_Songlist_Dir(const std::string aId, const std::string aDescr,
-			  const std::string aDir, const bool aIsQ);
+			  const std::string aDir, const bool aIsQ,
+			  const bool aDelete = false);
 
   /** Destructor */
   ~Collection_Songlist_Dir();
 
   void Update();
+  bool GetDeleteAfterPlay() const;
 };
 
 #endif

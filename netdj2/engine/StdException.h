@@ -18,10 +18,17 @@
  */
 class StdException : public std::exception {
 protected:
+  /** The description of the exception that happened  */
   std::string mDescription;
+
+  /** The name of this type of exception */
+  std::string mType;
+
 public:
-  StdException(std::string aDescr);
+  StdException(std::string aDescr, std::string aType = "StdException");
   ~StdException() throw();
+
+  const std::string GetType() const;
 
   virtual const char* what() const throw();
 };

@@ -11,7 +11,7 @@
 using namespace std;
 
 NoSongInfo::NoSongInfo(string aStr)
-  : StdException(aStr)
+  : StdException(aStr, "NoSongInfo")
 {
 }
 

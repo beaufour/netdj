@@ -18,6 +18,7 @@
 #include "Song.h"
 
 class Collections;
+class Collection;
 
 /**
  * The thread handling the actual playing of files through the icecast
@@ -45,7 +46,7 @@ private:
   Song mCurrentSong;
 
   /** The collection the currently playing song is from */
-  std::string mCurrentCollection;
+  const Collection* mCurrentCollection;
 
   /** Get next song to play */
   bool GetNextSong();

@@ -10,8 +10,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Collection_Songlist_File.h"
-#include "Collection_Songlist_Dir.h"
+#include "Collection.h"
 #include "Collections.h"
 #include "Shout.h"
 #include "Song.h"
@@ -35,7 +34,7 @@ bool
 PlayerThread::GetNextSong() {
   QMutexLocker lock(&mSongMutex);
 
-  return mCols->GetNextSong(mCurrentSong, mCurrentCollection);
+  return mCols->GetNextSong(mCurrentSong, &mCurrentCollection);
 }
 
 void
@@ -43,7 +42,7 @@ PlayerThread::GetCurrentSong(Song& aSong, string& aColId) const {
   QMutexLocker lock(&mSongMutex);
 
   aSong = mCurrentSong;
-  aColId = mCurrentCollection;
+  aColId = mCurrentCollection->GetIdentifier();
 }
 
 void
@@ -94,7 +93,7 @@ PlayerThread::run() {
       cout << "UNID :      " << mCurrentSong.GetUNID() << endl;
       cout << "Type :      " << mCurrentSong.GetSongType() << endl;
       cout << "Filename :  " << mCurrentSong.GetFilename() << endl;
-      cout << "Collection: " << mCurrentCollection << endl;
+      cout << "Collection: " << mCurrentCollection->GetIdentifier() << endl;
       
       if (mCurrentSong.GetSongType() != SongType_MP3) {
 	cout << "INVALID SONGTYPE!" << endl;
@@ -142,7 +141,7 @@ PlayerThread::run() {
 
 
       /* Delete file, if collection is request-queue */
-      if (mCurrentCollection == "request") {
+      if (mCurrentCollection->GetDeleteAfterPlay()) {
 	/** \todo Delete file! */
 	cout << "TODO: delete file" << endl;
       }
@@ -156,11 +155,8 @@ PlayerThread::run() {
       }
     } // Main loop
   }
-  catch (ShoutException& e) {
-    cout << "[ShoutException] " << e.what() << endl;
-  }
   catch (StdException &e) {
-    cout << "[StdException] " << e.what() << endl;
+    cout << "[" << e.GetType() << "] " << e.what() << endl;
   }
   catch (exception& e) {
     cout << "[std::exception] " << e.what() << endl;

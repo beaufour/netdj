@@ -15,18 +15,28 @@ using namespace std;
 Collection_Songlist_Dir::Collection_Songlist_Dir(const string aId,
 						 const string aDescr,
 						 const string aDir,
-						 const bool aIsQ)
-  : Collection_Songlist(aId, aDescr, aIsQ), mDirectory(aDir)
+						 const bool aIsQ,
+						 const bool aDelete)
+  : Collection_Songlist(aId, aDescr, aIsQ),
+    mDirectory(aDir),
+    mDeleteAfterPlay(aDelete)
 {
   Update();
 }
 
-Collection_Songlist_Dir::~Collection_Songlist_Dir() {
+Collection_Songlist_Dir::~Collection_Songlist_Dir()
+{
+}
 
+bool
+Collection_Songlist_Dir::GetDeleteAfterPlay() const
+{
+  return mDeleteAfterPlay;
 }
 
 void
-Collection_Songlist_Dir::Update() {
+Collection_Songlist_Dir::Update()
+{
   /* Temporary storage for new list */
   deque<Song> newlist;
 

@@ -11,7 +11,7 @@
 using namespace std;
 
 EmptyCollection::EmptyCollection(const std::string aStr)
-  : StdException(aStr)
+  : StdException(aStr, "EmptyCollection")
 {
 }
 

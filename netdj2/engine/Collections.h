@@ -48,7 +48,7 @@ public:
   /**
    * Add a new Collection.
    *
-   * @param col     The new Collection to add.
+   * @param aCol              The new Collection to add.
    *
    */
   void AddCollection(Collection* aCol);
@@ -56,11 +56,11 @@ public:
   /**
    * Get the next song to play.
    *
-   * @param song    The next song.
-   * @param colid   Id of the collection the song is retrieved from
-   * @return        Song succesfully retrieved?
+   * @param aSong             The next song.
+   * @param aCol              The collection the song is retrieved from
+   * @return                  Song succesfully retrieved?
    */
-  bool GetNextSong(Song& song, std::string& aColId);
+  bool GetNextSong(Song& aSong, const Collection** aCol);
 };
 
 #endif

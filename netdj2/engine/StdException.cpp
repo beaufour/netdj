@@ -10,14 +10,21 @@
 
 using namespace std;
 
-StdException::StdException(string aDescr)
-  : mDescription(aDescr)
+StdException::StdException(string aDescr, string aType)
+  : mDescription(aDescr), mType(aType)
 {
 }
 
 StdException::~StdException() throw()
 {
 }
+
+const string
+StdException::GetType() const
+{
+  return mType;
+}
+
 
 const char*
 StdException::what() const throw() {

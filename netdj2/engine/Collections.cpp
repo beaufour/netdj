@@ -10,11 +10,12 @@
 
 using namespace std;
 
-Collections::Collections() {
-
+Collections::Collections()
+{
 }
 
-Collections::~Collections() {
+Collections::~Collections()
+{
   Collection* col;
 
   while (mColList.size()) {
@@ -25,19 +26,23 @@ Collections::~Collections() {
 }
 
 void
-Collections::AddCollection(Collection* aCol) {
+Collections::AddCollection(Collection* aCol)
+{
   mColList.push_back(aCol);
 }
 
 bool
-Collections::GetNextSong(Song& song, std::string& aColId) {
+Collections::GetNextSong(Song& aSong, const Collection** aCol)
+{
+  Q_ASSERT(aCol);
+  
   vector<Collection*>::iterator curcol;
   for (curcol = mColList.begin();
        curcol != mColList.end();
        ++curcol) {
     try {
       (*curcol)->Update();
-      song = (*curcol)->GetNextSong();
+      aSong = (*curcol)->GetNextSong();
       break;
     }
     catch (EmptyCollection &e) {
@@ -47,7 +52,7 @@ Collections::GetNextSong(Song& song, std::string& aColId) {
   if (curcol == mColList.end()) {
     return false;
   } else {
-    aColId = (*curcol)->GetIdentifier();
+    *aCol = *curcol;
     return true;
   }
 }
