@@ -196,7 +196,7 @@ public:
   bool RenameCurrent(const string& newpath, const bool del) {
     bool res;
     lock();
-    if ((res = !currfile.Rename(newpath))) {
+    if ((res = currfile.Rename(newpath))) {
       currdelete = del;
     };
     unlock();
