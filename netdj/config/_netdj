@@ -10,11 +10,21 @@ PLAYER_START = false
 # Deleted played cache-files
 DELETE_PLAYED = false
 
+
 ########################################
 # STREAMER
 ########################################
 # Stream music instead of playing
 STREAM = true
+# Stream server IP
+STREAM_IP = 127.0.0.1
+# Stream server port
+STREAM_PORT = 8000
+# Stream server mountpoint
+STREAM_MOUNT = netdj
+# Stream server password
+STREAM_PASSWD = secret
+
 
 ########################################
 # DIRECTORIES
@@ -23,6 +33,7 @@ STREAM = true
 CACHE_DIR = /home/beaufour/gnut-cache
 # Share location (full path!)
 SHARE_DIR = /home/beaufour/mp3
+
 
 ########################################
 # HTTP CONFIGURATION
