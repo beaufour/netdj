@@ -2,6 +2,7 @@ Remember:
 - Fix comments
 - Get STL and std::string out of the code...
 - Check all todo's
+- Check buglist on sf.net
 
 Showstoppers:
 - LogService should only run in Server context...
