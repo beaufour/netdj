@@ -44,6 +44,8 @@ PlayerThread::Skip() {
 void
 PlayerThread::run() {
   try {
+    emit SigStart();
+    
     cout << "-----=====> Setup libshout" << endl;
     Shout shout(NETDJ_CONF.GetString("STREAM_NAME"),
 		NETDJ_CONF.GetString("STREAM_GENRE"),
@@ -156,5 +158,7 @@ PlayerThread::run() {
   catch (...) {
     cout << "Unknown exception!!" << endl;
     }
+
   cout << "Player thread stopped!" << endl;
+  emit SigStop();
 }

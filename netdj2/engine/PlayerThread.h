@@ -66,6 +66,12 @@ signals:
    */
   void SigSongPlaying(const Song& aSong, const Collection* aCol);
 
+  /** Emitted when the player starts */
+  void SigStart();
+  
+  /** Emitted when the player stops */
+  void SigStop();
+  
 public slots:
   /** Skip current song */
   void Skip();

@@ -131,6 +131,8 @@ Server::NewClient(QSocket* aSocket)
   connect(aSocket, SIGNAL(readyRead()), this, SLOT(ReadClient()));
   connect(aSocket, SIGNAL(connectionClosed()), this, SLOT(ClientClosed()));
   connect(aSocket, SIGNAL(delayedCloseFinished()), this, SLOT(ClientClosed()));
+
+  emit SigClientNew();
 }
 
 /**
@@ -205,6 +207,8 @@ Server::ClientClosed()
 
   // Disconnect
   socket->disconnect();
+
+  emit SigClientClose();
 
   // Remove from client list
   mClients.remove(socket);

@@ -48,6 +48,8 @@ public:
  *
  * Handles all commands from users.
  *
+ * @todo Implement StartNetwork and StopNetwork, including signals.
+ *
  * @todo Implement Digest authentication (http://rfc.sunsite.dk/rfc/rfc2617.html)
  */
 class Server : public QObject
@@ -154,6 +156,12 @@ signals:
   
   /** Emitted on receiving a 'skip' command */
   void SigSkip();
+
+  /** Emitted when a new client connects */
+  void SigClientNew();
+  
+  /** Emitted when a client connection is closed */
+  void SigClientClose();  
   
 private slots:
   /** Called when data is ready to be read from client */

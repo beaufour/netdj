@@ -20,6 +20,7 @@
 #include "Collection_Songlist_File.h"
 #include "Collection_Songlist_Dir.h"
 #include "Configuration.h"
+#include "LogService.h"
 #include "PlayerThread.h"
 #include "Server.h"
 
@@ -64,7 +65,8 @@ main(int argc, char* argv[])
     return -1;
   }
 
-  cout << flush;
+  /* Create logger service */
+  LogService logger(&app);
 
   cout << "Initializing song collections" << endl;
   Collections cols;
@@ -79,12 +81,25 @@ main(int argc, char* argv[])
   PlayerThread* playerthread = new PlayerThread(&cols, 0, &app);
   Q_CHECK_PTR(playerthread);
 
+  // Connect logger
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)), &logger, SLOT(LogSongPlaying(const Song&, const Collection*)));
+  QObject::connect(playerthread, SIGNAL(SigStart()), &logger, SLOT(LogPlayerStart()));
+  QObject::connect(playerthread, SIGNAL(SigStop()), &logger, SLOT(LogPlayerStop()));
+
   cout << "Initializing server" << endl;
   Server* server = new Server(7676, 5, &app);
   Q_CHECK_PTR(server);
-  
-  // Connect signal and slots
+
+  // Connect logger
+  QObject::connect(server, SIGNAL(SigQuit()), &logger, SLOT(LogQuit()));
+  QObject::connect(server, SIGNAL(SigSkip()), &logger, SLOT(LogSkip()));
+  QObject::connect(server, SIGNAL(SigClientNew()), &logger, SLOT(LogClientNew()));
+  QObject::connect(server, SIGNAL(SigClientClose()), &logger, SLOT(LogClientClose()));
+
+  // Connect quit signal to application
   QObject::connect(server, SIGNAL(SigQuit()), qApp, SLOT(quit()));
+
+  // Connect playerthread and server
   QObject::connect(server, SIGNAL(SigSkip()), playerthread, SLOT(Skip()));
   QObject::connect(playerthread, SIGNAL(SigSongPlaying(const Song&, const Collection*)), server, SLOT(SongPlaying(const Song&, const Collection*)));
   
