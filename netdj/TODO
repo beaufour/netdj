@@ -7,7 +7,6 @@ ENGINE:
 * Save history of played songs
   - a playlist history
   - check history before playing song (avoid too frequent repeats)
-* FIX: Request doesn't work
 
 
 APPLET:
@@ -55,7 +54,6 @@ GNUT:
 
 BIG ISSUES
 ----------
-* Stream the sound to clients
 * Do better seperation of UI and commands
 * Prioritize playlistchoosing (fx. 60% from share, 40% cache)
 * An idea: Full seperation of engine, player and UI so it's three different
