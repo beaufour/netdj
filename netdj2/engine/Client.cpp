@@ -40,14 +40,14 @@ Client::GetID() const
   return mID;
 }
 
-int
+unsigned int
 Client::GetLogLevel() const
 {
   return mLogLevel;
 }
 
 void
-Client::SetLogLevel(int aLevel)
+Client::SetLogLevel(unsigned int aLevel)
 {
   mLogLevel = aLevel;
 }

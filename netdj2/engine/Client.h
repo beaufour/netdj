@@ -24,7 +24,7 @@ namespace NetDJ
     static int mIDCount;
     int mID;
     QSocket* mSocket;
-    int mLogLevel;
+    unsigned int mLogLevel;
     
   public:
     /**
@@ -49,14 +49,14 @@ namespace NetDJ
      *
      * @return                  Log level
      */
-    int GetLogLevel() const;
+    unsigned int GetLogLevel() const;
     
     /**
      * Set log level
      *
      * @param aLevel            Log level
      */
-    void SetLogLevel(int aLevel);
+    void SetLogLevel(unsigned int aLevel);
     
     /**
      * Get the unique client number.

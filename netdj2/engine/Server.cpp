@@ -260,7 +260,16 @@ Server::GetSong()
 void
 Server::NewLogEntry(const QDomElement* aEntry, const unsigned int aLevel)
 {
-  // @todo Implement log handling in Server
+  ///
+  /// @todo Implement log handling in Server
+  QPtrDictIterator<Client> it(mClients);
+  for (; it.current(); ++it) {
+    if (it.current()->GetLogLevel() >= aLevel) {      
+      QTextStream os(it.current()->GetSocket());
+      os.setEncoding(QTextStream::UnicodeUTF8);
+      os << *aEntry;
+    }
+  }
 }
 
 
@@ -458,7 +467,7 @@ Server::CmdLog(QTextStream& aStream)
   QObject* sender = const_cast<QObject*>(QObject::sender());
   QSocket* socket = static_cast<QSocket*>(sender);
 
-  mClients[socket]->SetLogLevel(1);
+  mClients[socket]->SetLogLevel(999);
 
   aStream << HTTP_200
           << HTTP_XML

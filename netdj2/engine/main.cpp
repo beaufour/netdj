@@ -99,7 +99,7 @@ mainloop(QApplication* aApp)
   PlayerThread* playerthread = new PlayerThread(&cols, 0, aApp);
   Q_CHECK_PTR(playerthread);
 
-  // Connect gLogger
+  // Connect player to gLogger
   QObject::connect(playerthread,  SIGNAL(SigMessage(const QString&, const unsigned int)),
                    &gLogger,      SLOT(LogMessage(const QString&, const unsigned int)));
   QObject::connect(playerthread,  SIGNAL(SigException(const QString&, const QString&)),
@@ -115,7 +115,7 @@ mainloop(QApplication* aApp)
   Server* server = new Server(&cols, gConfig.GetInteger("SERVER_PORT"), 5, aApp);
   Q_CHECK_PTR(server);
 
-  // Connect gLogger
+  // Connect server to gLogger
   QObject::connect(server,   SIGNAL(SigMessage(const QString&, const unsigned int)),
                    &gLogger, SLOT(LogMessage(const QString&, const unsigned int)));
   QObject::connect(server,   SIGNAL(SigException(const QString&, const QString&)),
@@ -139,6 +139,11 @@ mainloop(QApplication* aApp)
   QObject::connect(playerthread, SIGNAL(SigSongPlaying(const ISong*, const ICollection*)),
                    server,       SLOT(SongPlaying(const ISong*, const ICollection*)));
   
+
+  // Connect gLogger to server
+  QObject::connect(&gLogger, SIGNAL(NewLogEntry(const QDomElement*, const unsigned int)),
+                   server,   SLOT(NewLogEntry(const QDomElement*, const unsigned int)));
+
 
   // Starting playerthread
   playerthread->start(QThread::HighPriority);
