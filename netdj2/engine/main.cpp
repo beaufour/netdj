@@ -32,12 +32,28 @@ myMessageOutput(QtMsgType type, const char *msg ) {
   }
 }
 
+///////////// DEBUG
+#include "SongInfo_File_mp3.h"
+#include <qdom.h>
+
 int
 main(int argc, char* argv[]) {
-  QApplication app( argc, argv );
   /* Use verbose terminate handler, prints out name of exception,
      etc. */
   std::set_terminate (__gnu_cxx::__verbose_terminate_handler);
+
+  SongInfo_File_mp3 tst("/home/beaufour/LimeWire/Shared/Tube & Berger - Straight Ahead.mp3");
+
+  QDomDocument doc("NetDJ");
+  QDomElement songinfo = doc.createElement("Song");
+  songinfo.setAttribute("UNID", 123456789);
+  tst.asXML(doc, songinfo);
+  doc.appendChild(songinfo);
+  cout << doc.toString() << endl;
+
+  return 0;
+
+  QApplication app( argc, argv );
 
   /* Seed random number generator */
   srand(time(0));

@@ -34,7 +34,8 @@ public:
 /**
  * Base class for song information
  *
- * Handles all information about the song: Title, artist, etc.
+ * Handles all information about the song: Title, artist, etc. Should
+ * be implemented by classes that fill in the values.
  */
 class SongInfo {
 protected:
@@ -59,6 +60,12 @@ protected:
   /** Song release year */
   u_int32_t Year;
 
+  /** Song size (in bytes) */
+  u_int32_t Size;
+
+  /** Song owner */
+  std::string Owner;
+
 public:
   /**
    * Constructor.
@@ -75,57 +82,71 @@ public:
    *
    * @return        Description
    */
-  std::string GetDescription();
+  std::string GetDescription() const;
 
   /**
    * Get song artist
    *
    * @return        Artist
    */
-  std::string GetArtist();
+  std::string GetArtist() const;
 
   /**
    * Get song album
    *
    * @return        Album
    */
-  std::string GetAlbum();
+  std::string GetAlbum() const;
 
   /**
    * Get song title
    *
    * @return        Title
    */
-  std::string GetTitle();
+  std::string GetTitle() const;
 
   /**
    * Get song genre
    *
    * @return       Genre 
    */
-  std::string GetGenre();
+  std::string GetGenre() const;
 
   /**
    * Get song track number
    *
    * @return       Track
    */
-  u_int32_t GetTrack();
+  u_int32_t GetTrack() const;
 
   /**
    * Get song release year
    *
    * @return       Year
    */
-  u_int32_t GetYear();
+  u_int32_t GetYear() const;
+
+  /**
+   * Get song size (in bytes)
+   *
+   * @return       Size
+   */
+  u_int32_t GetSize() const;
+
+  /**
+   * Get song owner
+   *
+   * @return       Owner
+   */
+  std::string GetOwner() const;
 
   /**
    * Create XML structure for object.
    *
-   * @param doc     The DomDocument to use as root
-   * @return        The XML structure
+   * @param doc     The DomDocument to use
+   * @param root    The DomElement to use as root
    */
-  QDomElement asXML(QDomDocument& doc);
+  void asXML(QDomDocument& doc, QDomElement& root) const;
 };
 
 #endif

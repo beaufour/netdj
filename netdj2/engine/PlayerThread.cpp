@@ -14,7 +14,6 @@
 #include "Collection_Songlist_Dir.h"
 #include "Song.h"
 #include "StdException.h"
-#include "SongInfo_mp3.h"
 #include "Shout.h"
 
 using namespace std;
@@ -112,26 +111,15 @@ PlayerThread::run() {
 	  cout << "Genre:        " << info->GetGenre() << endl;
 	  cout << "Year:         " << info->GetYear() << endl;
 	  cout << "Track:        " << info->GetTrack() << endl;
+	  cout << "Size:         " << info->GetSize() << endl;
+	  cout << "Owner:        " << info->GetOwner() << endl;
 	}
-
-	QDomDocument doc("NetDJ");
-	QDomElement infoxml = info->asXML(doc);
-	doc.appendChild(infoxml);
-	QString xmlstr = doc.toString();
-	cout << "** SongInfo XML:" << endl << xmlstr << endl;
+	
       }
       catch (NoSongInfo& h) {
 	cout << "No header info" << endl;
       }
-      
-      auto_ptr<QFileInfo> finfo(song.GetFileInfo());
-      if (finfo.get()) {
-	cout << "** File info " << endl;
-	cout << "isFile :     " << finfo->isFile() << endl;
-	cout << "Owner  :     " << finfo->owner() << endl;
-	cout << "Size   :     " << finfo->size() << endl;
-      }
-      
+
       cout << "-----=====> Send song to icecast" << endl;
       QFile file(song.GetFilename());
       if (!file.open(IO_ReadOnly)) {

@@ -7,7 +7,7 @@
  */
 
 #include "Song.h"
-#include "SongInfo_mp3.h"
+#include "SongInfo_File_mp3.h"
 
 #include <ctype.h>
 #include <cstring>
@@ -65,7 +65,7 @@ Song::GetSongInfo() const {
 
   switch (GetSongType()) {
   case SongType_MP3:
-    si = new SongInfo_mp3(Filename);
+    si = new SongInfo_File_mp3(Filename);
     break;
 
   default:
@@ -73,9 +73,4 @@ Song::GetSongInfo() const {
   }
 
   return si;
-}
-
-QFileInfo*
-Song::GetFileInfo() const {
-  return new QFileInfo(Filename);
 }

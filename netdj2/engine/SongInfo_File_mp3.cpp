@@ -1,6 +1,6 @@
 /**
- * \file SongInfo_mp3.cpp
- * Class SongInfo_mp3.
+ * \file SongInfo_File_mp3.cpp
+ * Class SongInfo_File_mp3.
  *
  * $Id$
  *
@@ -11,18 +11,18 @@
 #include <id3/misc_support.h>
 #include <qfileinfo.h>
 
-#include "SongInfo_mp3.h"
+#include "SongInfo_File_mp3.h"
 
 using namespace std;
 
 // libmad for timing information?
 
-SongInfo_mp3::SongInfo_mp3(const string fname)
-  : SongInfo()
+SongInfo_File_mp3::SongInfo_File_mp3(const string fname)
+  : SongInfo_File(fname)
 {
   /* Initialize */
   ID3_Tag myTag;
-  myTag.Link(fname.c_str(), ID3TT_ALL);
+  myTag.Link(Filename.c_str(), ID3TT_ALL);
 
   const Mp3_Headerinfo* mp3info = myTag.GetMp3HeaderInfo();
   if (!mp3info) {
@@ -91,10 +91,14 @@ SongInfo_mp3::SongInfo_mp3(const string fname)
     }
   }
 
-  /* Set description to file basename */
-  Description = QFileInfo(fname).baseName().ascii();
+  if (Title != "" && Artist != "") {
+    Description = Artist + " - " + Title;
+  } else {
+    /* Set description to file basename */
+    Description = QFileInfo(Filename).baseName().ascii();
+  }
 }
 
 
-SongInfo_mp3::~SongInfo_mp3() {
+SongInfo_File_mp3::~SongInfo_File_mp3() {
 }

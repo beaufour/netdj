@@ -25,10 +25,17 @@ typedef enum {
 
 
 /**
- * Base class for songs (on file).
+ * Main class for songs.
  *
- * Handles all information about the song, the file, and information
- * about the file.
+ * As collections can contain thousands of songs, this class should be
+ * kept to the absolutely minimum. All retrieval and storage of
+ * informations about Title, Artist, etc. should be done by other
+ * classes.
+ *
+ * 
+ *
+ * \note Is specialized for songs on file. Could/should be generalized
+ * so remote/DB-based files can be handled to.
  */
 class Song {
 private:
@@ -79,18 +86,11 @@ public:
   SongType GetSongType() const;
 
   /**
-   * Get information about the song.
+   * Get detailed information about the song.
    *
    * @return        New SongInfo structure
    */
   SongInfo* GetSongInfo() const;
-
-  /**
-   * Get information about the file.
-   *
-   * @return        New QFileInfo structure
-   */
-  QFileInfo* GetFileInfo() const;
 };
 
 #endif
