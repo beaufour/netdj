@@ -206,11 +206,20 @@ player_thread(void*) {
 
   shout_init_connection(&conn);
   
-  conn.ip = "127.0.0.1";
-  conn.port = 8000;
-  conn.mount = "netdj";
-  conn.password = "oopsididit"; 
-  conn.name = "NetDJ rocks!";
+  // Setup stream
+  char stream_ip[16];
+  char stream_mount[256];
+  char stream_passwd[256];
+
+  strncpy(stream_ip, config.GetString("STREAM_IP").c_str(), sizeof(stream_ip));
+  strncpy(stream_mount, config.GetString("STREAM_MOUNT").c_str(), sizeof(stream_mount));
+  strncpy(stream_passwd, config.GetString("STREAM_PASSWD").c_str(), sizeof(stream_passwd));
+
+  conn.ip = stream_ip;
+  conn.port = config.GetInteger("STREAM_PORT");
+  conn.mount = stream_mount;
+  conn.password = stream_passwd;
+  conn.name = "NetDJ";
   conn.genre = "Mixed";
   conn.description = "NetDJ streaming channel";
 
@@ -262,6 +271,7 @@ player_thread(void*) {
 	  }
 	} else {
 	  musicfile = fopen(fobj.GetName().c_str(), "r");
+	  shout_update_metadata(&conn, fobj.GetFilename().c_str());
 	  while (!stop_player && !next_song) {
 	    read = fread(buff, 1, 4096, musicfile);
 	    if (read > 0) {
