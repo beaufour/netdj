@@ -15,6 +15,7 @@ ENGINE:
 * Take generic player-command and args from config file
 * Do generic full_path-function (with either pwd or home as added path)     
 * Enable exchange about listeners, etc. with streaming server
+  --> Would enable it to stop playing songs, when noone is listening....
 
 
 ADMIN INTERFACE
@@ -72,5 +73,9 @@ BIG ISSUES
    maybe trigger caching...)
 * Wild idea: Enable "news-hour", ie. every full our stream the news
   from you local netradio...
+* "Work" the MP3-files before broadcasting them
+  - re-encode to a constant predefined bitrate
+  - equalize to get an even sound level for all songs played
+  - clean up filename / ID3
 
 CVS: $Id$
