@@ -14,6 +14,7 @@
 #include "AccessConf.h"
 #include "Directory.h"
 #include "File.h"
+#include "ID3Tag.h"
 
 // Provides cout and manipulation of same
 #include <iostream>
@@ -343,7 +344,7 @@ com_help(char* arg) {
 
 int
 com_info(char* arg) {
-  id3tag_t id3tag;
+  ID3Tag *id3tag = NULL;
   time_t filetime;
   string songname;
   File fobj;
@@ -356,10 +357,10 @@ com_info(char* arg) {
          << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
          << ctime(&filetime) << endl;
     if (fobj.GetID3Info(id3tag)) {
-      cout << "    Artist:  " << id3tag.artist << endl;
-      cout << "    Album:   " << id3tag.album << endl;
-      cout << "    Title:   " << id3tag.songname << endl;
-      cout << "    Comment: " << id3tag.note << endl;
+      cout << "    Artist:  " << id3tag->GetArtist() << endl;
+      cout << "    Album:   " << id3tag->GetAlbum() << endl;
+      cout << "    Title:   " << id3tag->GetTitle() << endl;
+      cout << "    Comment: " << id3tag->GetNote() << endl;
     }
   }
   return 0;
@@ -674,7 +675,7 @@ http_thread(void*) {
     pf.events = POLLIN;
     int z;
     unsigned char ch;
-    id3tag_t id3tag;
+    ID3Tag *id3tag = NULL;
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
@@ -804,26 +805,25 @@ http_thread(void*) {
 		  xbuf += tmplint;
 		  xbuf += "</size>\n";
 		  xbuf += "    <description>" + it->GetFilename() + "</description>\n";
-		  if (it->GetID3Info(id3tag)) {
-		    xbuf += "     <artist>";
-		    xbuf += id3tag.artist;
-		    xbuf += "</artist>\n";
-		    xbuf += "     <album>";
-		    xbuf += id3tag.album;
-		    xbuf += "</album>\n";
-		    xbuf += "     <title>";
-		    xbuf += id3tag.songname;
-		    xbuf += "</title>\n";
-		    xbuf += "     <comment>";
-		    xbuf += id3tag.note;
-		    xbuf += "</comment>\n";
-		    xbuf += "     <year>";
-		    xbuf += id3tag.year;
-		    xbuf += "</year>\n";
-		    xbuf += "     <genre>";
-		    xbuf += find_style(id3tag.style);
-		    xbuf += "</genre>\n";
-		  }
+		  it->GetID3Info(id3tag);
+		  xbuf += "     <artist>";
+		  xbuf += id3tag->GetArtist();
+		  xbuf += "</artist>\n";
+		  xbuf += "     <album>";
+		  xbuf += id3tag->GetAlbum();
+		  xbuf += "</album>\n";
+		  xbuf += "     <title>";
+		  xbuf += id3tag->GetTitle();
+		  xbuf += "</title>\n";
+		  xbuf += "     <comment>";
+		  xbuf += id3tag->GetNote();
+		  xbuf += "</comment>\n";
+		  xbuf += "     <year>";
+		  xbuf += id3tag->GetYear();
+		  xbuf += "</year>\n";
+		  xbuf += "     <style>";
+		  xbuf += id3tag->GetStyle();
+		  xbuf += "</style>\n";
 		  xbuf += "  </song>\n";
 		}
 		for (unsigned int i = 0; i < listnum; ++i) {

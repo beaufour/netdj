@@ -56,9 +56,6 @@ const char CONF_USERFILENAME[] = ".netdj_users";
 /* Define if your readline library has `add_history' */
 #undef HAVE_READLINE_HISTORY
 
-/* Define if you have id3lib */
-#undef HAVE_ID3LIB
-
 /* Define if you have icp_func defined */
 #undef HAVE_ICPFUNC
 

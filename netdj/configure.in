@@ -49,10 +49,7 @@ fi
 
 dnl Checks for header files.
 AC_CHECK_HEADERS(errno.h,,[AC_MSG_ERROR("Needs errno.h!")])
-AC_CHECK_HEADERS(regex.h,,[AC_MSG_ERROR("Needs errno.h!")])
-AC_CHECK_HEADERS(id3/misc_support.h,
-		 [AC_DEFINE(HAVE_ID3LIB)
-		  LIBS="$LIBS -lid3 -lz"])
+AC_CHECK_HEADERS(regex.h,,[AC_MSG_ERROR("Needs regex.h!")])
 AC_HEADER_STDC
 
 AC_OUTPUT([

@@ -1,15 +1,16 @@
 READLINE_LIB =
 HISTORY_LIB =
 
-bin_PROGRAMS = dj
+bin_PROGRAMS = netdj
 
-dj_LDADD = $(READLINE_LIB) $(HISTORY_LIB)
+netdj_LDADD = $(READLINE_LIB) $(HISTORY_LIB)
 
-dj_SOURCES = 	main.cc \
+netdj_SOURCES = main.cc \
 		util.cc util.o \
 		Regex.cc Regex.h \
 		Configuration.cc Configuration.h \
 		Directory.cc Directory.h \
 		AccessConf.cc AccessConf.h \
 		Lockable.cc Lockable.h \
-		File.cc File.h
+		File.cc File.h \
+		ID3Tag.cc ID3Tag.h

@@ -9,6 +9,7 @@
 #ifndef  __ID3TAG_H__
 #define __ID3TAG_H__
 
+#include <string>
 #include <cstdio>
 
 class ID3Tag {
@@ -20,10 +21,12 @@ private:
   string note;
   string style;
 
-public:
-  ID3Tag();
+  string find_style(int);
 
-  InitFromFile(const string);
+public:
+  ID3Tag() {};
+
+  bool InitFromFile(const string);
   
   string GetTitle() const { return title; };
   string GetArtist() const { return artist; };

@@ -17,7 +17,6 @@ Need to have:
 Nice to have:
 -------------
 * GNU readline (well, I give no guarantees without this, but it compiles)
-* ID3LIB
 
 Compile:
 --------

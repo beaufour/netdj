@@ -35,10 +35,11 @@ File::GetFilename() const {
 };
 
 bool
-File::GetID3Info(id3tag_t &_id3) {
+File::GetID3Info(ID3Tag* &_id3) {
   if (!validid3) {
-
+    validid3 = true;
+    id3.InitFromFile(name);
   }
-  _id3 = id3;
+  _id3 = &id3;
   return validid3;
 }

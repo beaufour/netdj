@@ -21,18 +21,7 @@
 // Provides basename
 #include <libgen.h>
 
-// Provides fopen, fread and fclose
-#include <cstdio>
-
-typedef struct id3tag_t {
-	char		magic[3];
-	char		songname[30];
-	char		artist[30];
-	char		album[30];
-	char		year[4];
-	char		note[30];
-	unsigned char	style;
-} id3tag_t;
+#include "ID3Tag.h"
 
 class File {
  protected:
@@ -40,7 +29,7 @@ class File {
   string name;
   struct stat stat_buf;
   bool validid3;
-  id3tag_t id3;
+  ID3Tag id3;
 
   bool update_stat();
 
@@ -63,7 +52,7 @@ class File {
   string GetDirname() const;
   string GetFilename() const;
 
-  bool GetID3Info(id3tag_t&);
+  bool GetID3Info(ID3Tag*&);
   
   bool operator< (const File& f2) const {
     return GetCtime() < f2.GetCtime();
