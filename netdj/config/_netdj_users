@@ -1,2 +1,2 @@
-# List of users as <userid>:<password>
-allan:slartibarfast
+# List of users as <userid>:<level>:<password>
+allan:1000:slartibarfast

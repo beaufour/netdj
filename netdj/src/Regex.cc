@@ -13,22 +13,24 @@ Regex::Regex(const string &regstr, int cflags = 0) {
 
 void
 Regex::Compile(const string &regstr, int cflags = 0) {
-  regcomp(&preg, regstr.c_str(), cflags);
+  regcomp(&preg, regstr.c_str(),  cflags ? cflags : REG_EXTENDED);
 }
 
-bool
+int
 Regex::Match(const string &str, vector<string> &res, int eflags = 0) {
   const int MAX_MATCH = 20;
+  int i;
   regmatch_t pmatch[MAX_MATCH];
 
   if (regexec(&preg, str.c_str(), MAX_MATCH, pmatch, eflags) == 0) {
-    for (int i = 1; i < MAX_MATCH; ++i) {
-      if (pmatch[i].rm_so != -1) {
-	res.push_back(str.substr(pmatch[i].rm_so, pmatch[i].rm_eo));
+    for (i = 1; i < MAX_MATCH; ++i) {
+      if (pmatch[i].rm_so == -1) {
+	break;
       }
+      res.push_back(str.substr(pmatch[i].rm_so, pmatch[i].rm_eo - pmatch[i].rm_so));
     }
-    return true;
+    return pmatch[0].rm_eo;
   } else {
-    return false;
+    return 0;
   }
 }

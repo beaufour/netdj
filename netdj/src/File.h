@@ -44,12 +44,18 @@ class File {
   time_t GetCtime() const { return stat_buf.st_ctime; };
   off_t GetSize() const { return stat_buf.st_size; };
 
+  // Name operations
   bool SetName(const string);
   string GetName() const { return name; };
   string GetDirname() const;
   string GetFilename() const;
+  string GetFilenameNoType() const;
 
-  bool GetID3Info(ID3Tag*&);
+  bool GetID3Info(ID3Tag const*&);
+
+  // Disk operations
+  bool Delete();
+  bool Rename(const string&);
   
   bool operator< (const File& f2) const {
     return GetCtime() < f2.GetCtime();

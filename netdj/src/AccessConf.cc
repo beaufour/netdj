@@ -8,12 +8,16 @@
 
 #include "AccessConf.h"
 
+#include "Regex.h"
+
 void
 AccessConf::ReadFile(const string& fname) {
-  Regex reg("\\([^:]*\\):\\(.*\\)");
+  // userid:userlevel:password
+  Regex reg("^([^:]+):([[:digit:]]+):(.+)$");
   ifstream conf(fname.c_str());
   vector<string> splitline;
   char line[255];
+  User user;
 
   cout << "Reading user entries: " << endl;
   
@@ -21,25 +25,30 @@ AccessConf::ReadFile(const string& fname) {
   while (conf.getline(line, sizeof(line))) {
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {
-      cout << "  " << splitline[0] << " = ****** " << endl;
-      users[splitline[0]] = splitline[1];
+      cout << "  " << splitline[0] << ", " << splitline[1] << endl;
+      user.SetInfo(atoi(splitline[1].c_str()), splitline[2]);
+      users[splitline[0]] = user;
     }
   }
   unlock();
 }
 
 bool
-AccessConf::IsAccessAllowed(const string& str, string* userstr = NULL) {
+AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr = NULL) {
   bool res = false;
-  Regex reg("\\([^:]*\\):\\(.*\\)");
+  Regex reg("([^:]+):(.+)");
   vector<string> splitline;
+  map<string, User>::iterator user;
 
   lock();
   if (reg.Match(str, splitline)) {
     if (userstr) {
       *userstr = splitline[0];
     }
-    res = users[splitline[0]] == splitline[1];
+    if ((user = users.find(splitline[0])) != users.end()) {
+      res = ((user->second.GetPassword() == splitline[1])
+	     && (user->second.GetLevel() >= acclevel));
+    }
   }
   unlock();
 

@@ -13,17 +13,35 @@
 #include <string>
 #include <fstream>
 #include "Lockable.h"
-#include "Regex.h"
 
 class AccessConf : public Lockable {
  private:
-  map<string, string> users;
+  class User {
+  private:
+    int level;
+    string password;
+
+  public:
+    User() : level(0) {};
+    User(int _level, string _password)
+      : level(_level), password(_password) {};
+
+    void SetInfo(const int _level, const string _password) {
+      level = _level;
+      password = _password;
+    }
+
+    string GetPassword() const {return password;};
+    int GetLevel() const {return level;};
+  };
+
+  map<string, User> users;
 
  public:
   AccessConf() : Lockable() {};
 
   void ReadFile(const string&);
-  bool IsAccessAllowed(const string&, string* = NULL);
+  bool IsAccessAllowed(const string&, int, string* = NULL);
 };
 
 #endif

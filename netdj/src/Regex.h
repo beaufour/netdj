@@ -22,7 +22,7 @@ public:
   Regex(const string&, int = 0);
 
   void Compile(const string&, int = 0);
-  bool Match(const string&, vector<string>&, int = 0);
+  int Match(const string&, vector<string>&, int = 0);
 };
 
 #endif

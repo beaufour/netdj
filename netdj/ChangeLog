@@ -1,3 +1,47 @@
+2002-02-15 Friday 09:13   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* FILTER (1.4): Refined ... maybe I should use it one day :) 
+
+2002-02-15 Friday 09:12   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/: Configuration.cc (1.5), Configuration.h (1.2), File.cc
+	(1.4), File.h (1.4), util.cc (1.5), util.h (1.5): Rearranged
+	includes for faster compile.  
+
+2002-02-07 Thursday 20:03   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/: AccessConf.cc (1.2), AccessConf.h (1.2), main.cc (1.20): 
+	Output usernamd and command to admin console when command is
+	requested through HTTP.  
+
+2002-02-06 Wednesday 21:47   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* TODO (1.6): Updated...  
+
+2002-02-06 Wednesday 21:46   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* aclocal.m4 (1.5): Should never have been in the CVS-tree ...
+	acLOCAL, wonder what that means? :) 
+
+2002-02-06 Wednesday 21:45   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* src/main.cc (1.19): Added sending of metadata to stream server.  
+
+2002-02-06 Wednesday 21:44   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* config/_netdj (1.4), src/Configuration.cc (1.4): Added stream
+	server configuration til configuration file.  
+
+2002-02-06 Wednesday 21:42   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* config/.cvsignore (1.2), src/.cvsignore (1.2), util/.cvsignore
+	(1.2): Updated ignored files.  
+
+2002-02-06 Wednesday 11:15   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* Makefile.am (1.3), ChangeLog (1.6): Added gnut-patch to
+	distribution.  
+
 2002-02-06 Wednesday 11:00   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* ChangeLog (1.5), acconfig.h (1.1), aclocal.m4 (1.4), autogen.sh

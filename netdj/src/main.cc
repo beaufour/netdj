@@ -15,6 +15,7 @@
 #include "Directory.h"
 #include "File.h"
 #include "ID3Tag.h"
+#include "HTTP.h"
 
 // HACK to correct c++ "bug" in shout.h
 #define namespace nspace
@@ -53,7 +54,7 @@ extern "C" {
 #include <pthread.h>
 #include <signal.h>
 
-// Provides wait, fork and unlink
+// Provides wait, fork
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -144,40 +145,53 @@ loadstate() {
 class TCurrentSong : public Lockable {
 private:
   bool   currdelete;
-  string currsong;
+  File currfile;
+  File prevfile;
   bool   prevdelete;
-  string prevsong;
+
+  void InternalSet(const File& fil, const bool del) {
+    lock();
+    if (config.GetBool("DELETE_PLAYED") && prevdelete) {
+      if (!prevfile.Delete()) {
+	cout << "Couldn't delete '" << prevfile.GetName() << "'!" << endl;
+	screen_flush();
+      }
+    }
+    prevfile = currfile;
+    prevdelete = currdelete;
+    
+    currfile = fil;
+    currdelete = del;
+    unlock();
+  }
+
 
 public:
   TCurrentSong() : Lockable() {};
 
-  void Get(string& str) {
+  void Get(File& fil) {
     lock();
-    str = currsong;
+    fil = currfile;
     unlock();
   }
   
-  void Set(const string& str, const bool del) {
-    lock();
-    if (config.GetBool("DELETE_PLAYED") && prevdelete && prevsong.size()) {
-      if (unlink(prevsong.c_str())) {
-	cout << "Couldn't delete '" << prevsong << "'!" << endl;
-	screen_flush();
-      }
-    }
-    prevsong = currsong;
-    prevdelete = currdelete;
-    
-    currsong = str;
-    currdelete = del;
-    unlock();
+  void Set(const File& fil, const bool del) {
+    InternalSet(fil, del);
   }
 
-  void ModifyCurrent(const string& str, const bool del) {
+  void Clear() {
+    InternalSet(File(), false);
+  }
+
+  bool RenameCurrent(const string& newpath, const bool del) {
+    bool res = false;
     lock();
-    currsong = str;
-    currdelete = del;
+    if (currfile.Rename(newpath)) {
+      res = true;
+      currdelete = del;
+    };
     unlock();
+  return res;
   };
 };
 
@@ -238,12 +252,12 @@ player_thread(void*) {
     }
     if (i == listnum) {
       cout << endl << "  Hmmm, no files to play..." << endl;
-      currentsong.Set("", false);
+      currentsong.Clear();
       screen_flush();
       sleep(30);
     } else {
       if (fobj.Exists()) {
-	currentsong.Set(fobj.GetName(), i == 1 ? true : false);
+	currentsong.Set(fobj, i == 1 ? true : false);
 	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << *(lists[i]->GetShortname()) << "]" << endl;
 	screen_flush();
@@ -297,7 +311,7 @@ player_thread(void*) {
   }
 
   // Clear currentsong and end thread
-  currentsong.Set("", false); 
+  currentsong.Clear();
   pthread_exit(NULL);
 }
 
@@ -317,7 +331,6 @@ void kill_current() {
 typedef void (*COMFUNC)(char*);
 
 int com_add(char*);
-int com_del(char*);
 int com_help(char*);
 int com_info(char*);
 int com_list(char*);
@@ -348,7 +361,6 @@ typedef struct {
 
 COMMAND commands[] = {
   {"add",      com_add,      false, "Add song to list"},
-  {"del",      com_del,      false, "Delete (!!!) current song from disk"},
   {"help",     com_help,     false, "This listing"},
   {"info",     com_info,     false, "Get information about the current song"},
   {"list",     com_list,     false, "Show next 10 entries in LIST"},
@@ -364,10 +376,20 @@ COMMAND commands[] = {
   { (char*) NULL, (rl_icpfunc_t*) NULL, false, (char*) NULL}
 };
 
+bool check_web(char*& arg) {
+  if (arg && *arg && arg[0] == '}') {
+    arg++;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 int
 com_add(char* arg) {
   string tmp;
-  if (*arg) {
+  check_web(arg);
+  if (arg && *arg) {
     if (arg[0] != '/') {
       tmp = getenv("PWD");
       if (tmp[tmp.size() - 1] != '/') {
@@ -386,19 +408,6 @@ com_add(char* arg) {
 }
 
 int
-com_del(char* arg) {
-  string songname;
-  currentsong.Get(songname);
-  if (remove(songname.c_str()) == -1) {
-    cout << "  Error: " << strerror(errno) << endl;
-  } else {
-    cout << "  OK, it's gone!" << endl;
-    kill_current();
-  }
-  return 0;
-};
-
-int
 com_help(char* arg) {
   for (int i = 0; commands[i].name; ++i)
     cout << "  " << setw(10) << commands[i].name
@@ -411,33 +420,31 @@ com_help(char* arg) {
 
 int
 com_info(char* arg) {
-  ID3Tag *id3tag = NULL;
+  ID3Tag const *id3tag = NULL;
   time_t filetime;
-  string songname;
   File fobj;
 
-  currentsong.Get(songname);
-  if (fobj.SetName(songname)) {
-    filetime = fobj.GetMtime();
-    cout << "  " << songname << endl;
-    cout << "    " << setprecision(2)
-         << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
-         << ctime(&filetime) << endl;
-    if (fobj.GetID3Info(id3tag)) {
-      cout << "    Artist:  " << id3tag->GetArtist() << endl;
-      cout << "    Album:   " << id3tag->GetAlbum() << endl;
-      cout << "    Title:   " << id3tag->GetTitle() << endl;
-      cout << "    Year:    " << id3tag->GetYear() << endl;
-      cout << "    Style:   " << id3tag->GetStyle() << endl;
-      cout << "    Comment: " << id3tag->GetNote() << endl;
-    }
+  currentsong.Get(fobj);
+  filetime = fobj.GetMtime();
+  cout << "  " << fobj.GetName() << endl;
+  cout << "    " << setprecision(2)
+       << ((float) fobj.GetSize() / (1024 * 1024)) << " MB - "
+       << ctime(&filetime) << endl;
+  if (fobj.GetID3Info(id3tag)) {
+    cout << "    Artist:  " << id3tag->GetArtist() << endl;
+    cout << "    Album:   " << id3tag->GetAlbum() << endl;
+    cout << "    Title:   " << id3tag->GetTitle() << endl;
+    cout << "    Year:    " << id3tag->GetYear() << endl;
+    cout << "    Style:   " << id3tag->GetStyle() << endl;
+    cout << "    Comment: " << id3tag->GetNote() << endl;
   }
   return 0;
 };
 
 int
 com_list(char* arg) {
-  unsigned int l = atoi(arg);
+  check_web(arg);
+  unsigned int l = arg ? atoi(arg) : 0;
   vector<File> songs;
 
   if (l >= 0 && l < listnum) {
@@ -469,19 +476,17 @@ int
 com_move(char* arg) {
   string songname;
   string newpath;
-  currentsong.Get(songname);
-  File songfile(songname);
+  File songfile;
+  currentsong.Get(songfile);
 
   if (songfile.Exists()) {
     newpath = *(share.GetDirname());
     newpath += songfile.GetFilename();
     
-    cout << "  Moving '" << songname << "' to '"
+    cout << "  Moving '" << songfile.GetName() << "' to '"
 	 << newpath << "'" << endl;
-    if (rename(songname.c_str(), newpath.c_str()) == -1) {
-      cout << "  Error: " << strerror(errno) << endl;
-    } else {
-      currentsong.ModifyCurrent(newpath, false);
+    if (currentsong.RenameCurrent(newpath, false)) {
+      cout << "  Error! " << endl;
     }
   } else {
     cout << "  Error: File doesn't exist..." << endl;
@@ -491,6 +496,9 @@ com_move(char* arg) {
 
 int
 com_next(char* arg) {
+  if (check_web(arg)) {
+
+  };
   cout << "  Skipping current song..." << endl;
   kill_current();
   usleep(500);
@@ -526,7 +534,7 @@ com_webstart(char* arg) {
 
 
 COMMAND*
-find_command(char* name, bool admin) {
+find_command(const char* name, bool admin) {
   for (int i = 0; commands[i].name; ++i)
     if (strcmp(name, commands[i].name) == 0 && (commands[i].userfunc || admin))
       return (&commands[i]);
@@ -731,12 +739,12 @@ http_thread(void*) {
       "  </BODY>\n"
       "</HTML>\n";
 
-    string songname, o_hsongname, o_xsongname;
+    File songfile;
+    string o_hsongname, o_xsongname;
     string cfilename;
     string tmpstr;
     string cmdbyuser;
     vector<File> songs;
-    char *spos, *apos;
     COMMAND *com;
     Directory* dir;
     char tmpint[10];
@@ -746,23 +754,25 @@ http_thread(void*) {
     int z;
     unsigned char ch;
     ID3Tag *id3tag = NULL;
+    HTTPRequest req;
+    string auth;
 
     // I know, a hack - but this file name isn't that plausible is it?
     o_xsongname = o_hsongname = "///---///";
 
     cout << endl << "  HTTPThread: Accepting new connections" << endl;
     screen_flush();
-
     while (1 < 2) {
+      len = sizeof(struct sockaddr_in);
       newsock = accept(http_sock,  (struct sockaddr *) &newsin, &len);
       if (newsock != -1) {
 	//	cout << endl << "  HTTPThread: Got connectionrequest" << endl;
 	//	screen_flush();
-
-	currentsong.Get(songname);
-	// Get filename (without .-ending)
-	cfilename = File(songname.substr(0, songname.find_last_of('.'))).GetFilename();
-
+	
+	currentsong.Get(songfile);
+	// Get filename (without ending type)
+	cfilename = songfile.GetFilenameNoType();
+	
 	// Receive something from the client ...
 	pf.fd = newsock;
 	if (poll(&pf, 1, 1000) > 0) {
@@ -776,195 +786,166 @@ http_thread(void*) {
 	  screen_flush();
 #endif
 	  
-	  if (!http_locked && (spos = strstr(rbuf, "GET /cgi-bin/"))) {
+	  if (!http_locked) {
+	    if (req.Parse(rbuf) && req.GetCommand() == "GET") {
+	      // Commands
+	      if (req.GetURIName().substr(0, 9) == "/cgi-bin/") {
 #ifdef _DEBUG_HTTP
-	    cout  << endl<< "  HTTPThread: COMMAND: " << spos << endl;
-	    screen_flush();
+		cout  << endl<< "  HTTPThread: COMMAND: " << req.GetURI() << endl;
+		screen_flush();
 #endif
-	    
-	    // Check authorization
-	    if ((apos = strstr(rbuf, "Authorization: Basic "))) {
-	      apos += 21;
-	      *strchr(apos, '\n') = '\0';
-	      tmpstr = base64_decode(apos);
+		
+		// Check authorization
+		if (req.GetHeader("Authorization", auth) && auth.substr(0, 6) == "Basic ") {
+		  tmpstr = base64_decode(auth.substr(6).c_str());
 #ifdef _DEBUG_HTTP
-	      cout << "  HTTPThread: Authorization: " << tmpstr << endl;
-	      screen_flush();
+		  cout << "  HTTPThread: '" << auth.substr(6) << "'" << endl;
+		  cout << "  HTTPThread: Authorization: " << tmpstr << endl;
+		  screen_flush();
 #endif
-	      if (acc.IsAccessAllowed(tmpstr, &cmdbyuser)) {
-		// Seperate command from rest of request
-		*strchr(spos + 13, ' ') = '\0';
-		com = find_command(spos + 13, false);
-		if (com) {
-		  cout << endl << "  HTTP-CMD: '" << cmdbyuser
-		       << "' requested '"
-		       << (spos + 13) << "'" << endl;
-		  ((*(com->func)) ((char*) NULL));
+		  if (acc.IsAccessAllowed(tmpstr, Level_PowerUser, &cmdbyuser)) {
+		    // Seperate command from rest of request
+		    com = find_command(req.GetURIName().substr(9).c_str(), false);
+		    if (com) {
+		      cout << endl << "  HTTP-CMD: '" << cmdbyuser
+			   << "' requested '"
+			   << req.GetURIName().substr(9) << "'" << endl;
+		      ((*(com->func)) ((char*) NULL));
+		    }
+		    // Send redirect to '/'
+		    send(newsock, cbuf, sizeof(cbuf), 0);
+		  } else {
+		    // Wrong password, send authorization request
+		    send(newsock, abuf, sizeof(abuf), 0);
+		  }
+		} else {
+		  // Didn't send credentials, send authorization request
+		  send(newsock, abuf, sizeof(abuf), 0);
 		}
-		// Send redirect to '/'
-		send(newsock, cbuf, sizeof(cbuf), 0);
-	      } else {
-		// Wrong password, send authorization request
-		send(newsock, abuf, sizeof(abuf), 0);
-	      }
-	    } else {
-	      // Didn't send credentials, send authorization request
-	      send(newsock, abuf, sizeof(abuf), 0);
-	    }
-	  } else if ((spos = strstr(rbuf, "GET /"))) {
-#ifdef _DEBUG_HTTP
-	    cout  << endl<< "  HTTPThread: Send INDEX" << endl;
-	    screen_flush();
-#endif
-	    if (strncmp(spos + 5, "index.txt", 9) == 0) {
-	      ///////////////////
-	      // Send TEXT answer
-	      //////////////////
-	      send(newsock, tbuf, sizeof(tbuf) - 1, 0);
-	      send(newsock, cfilename.c_str(), cfilename.size(), 0);
-
-	    } else if (strncmp(spos + 5, "index.xml", 9) == 0) {
-	      //////////////////
-	      // Send XML answer
-	      //////////////////
-	      if (o_xsongname != songname) {
-		xbuf = xbuf1;
-		xbuf += "  <currentsong>\n";
-		xbuf += "     <description>" + cfilename + "</description>\n";
-#ifdef HAVE_ID3LIB  
-		tag.Link(songname.c_str());
-		xbuf += "     <artist>";
-		if ((id3frame = tag.Find(ID3FID_LEADARTIST)) ||
-		    (id3frame = tag.Find(ID3FID_BAND))       ||
-		    (id3frame = tag.Find(ID3FID_CONDUCTOR))  ||
-		    (id3frame = tag.Find(ID3FID_COMPOSER))) {
-		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		}
-		xbuf += "</artist>\n";
-		xbuf += "     <album>";
-		if ((id3frame = tag.Find(ID3FID_ALBUM))) {
-		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		};
-		xbuf += "</album>\n";
-		xbuf += "     <title>";
-		if ((id3frame = tag.Find(ID3FID_TITLE))) {
-		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		};
-		xbuf += "</title>\n";
-		xbuf += "     <comment>";
-		if ((id3frame = tag.Find(ID3FID_COMMENT))) {
-		  xbuf += id3frame->GetField(ID3FN_TEXT)->GetRawText();
-		};	
-		xbuf += "</comment>\n";
-		tag.Clear();
-#endif
-		xbuf += "  </currentsong>\n";
-		songs.clear();
-		lists[1]->GetEntries(songs, 10);
-		z = 0;
-		for (vector<File>::iterator it = songs.begin();
-		     it != songs.end();
-		     ++it) {
-		  xbuf += "  <song id=\"";
-		  sprintf(tmpint, "%d", ++z);
-		  xbuf += tmpint;
-		  xbuf += "\">\n";
+	      } else if (req.GetURIName() == "/index.txt") {
+		///////////////////
+		// Send TEXT answer
+		//////////////////
+		send(newsock, tbuf, sizeof(tbuf) - 1, 0);
+		send(newsock, cfilename.c_str(), cfilename.size(), 0);
+		
+	      } else if (req.GetURIName() == "/index.xml") {
+		//////////////////
+		// Send XML answer
+		//////////////////
+		if (o_xsongname != songfile.GetName()) {
+		  xbuf = xbuf1;
+		  xbuf += "  <currentsong>\n";
 		  xbuf += "    <unid>";
-		  sprintf(tmpint, "%d", it->GetId());
+		  sprintf(tmpint, "%d", songfile.GetId());
 		  xbuf += tmpint;
 		  xbuf += "</unid>\n";
 		  xbuf += "    <size>";
-		  sprintf(tmplint, "%ld", it->GetSize());
+		  sprintf(tmplint, "%ld", songfile.GetSize());
 		  xbuf += tmplint;
 		  xbuf += "</size>\n";
-		  xbuf += "    <description>" + it->GetFilename() + "</description>\n";
-		  it->GetID3Info(id3tag);
-		  xbuf += "     <artist>";
-		  xbuf += id3tag->GetArtist();
-		  xbuf += "</artist>\n";
-		  xbuf += "     <album>";
-		  xbuf += id3tag->GetAlbum();
-		  xbuf += "</album>\n";
-		  xbuf += "     <title>";
-		  xbuf += id3tag->GetTitle();
-		  xbuf += "</title>\n";
-		  xbuf += "     <comment>";
-		  xbuf += id3tag->GetNote();
-		  xbuf += "</comment>\n";
-		  xbuf += "     <year>";
-		  xbuf += id3tag->GetYear();
-		  xbuf += "</year>\n";
-		  xbuf += "     <style>";
-		  xbuf += id3tag->GetStyle();
-		  xbuf += "</style>\n";
-		  xbuf += "  </song>\n";
+		  xbuf += "    <description>" + songfile.GetFilenameNoType() + "</description>\n";
+		  songfile.GetID3Info(id3tag);
+		  xbuf += "     <artist>" +  id3tag->GetArtist() + "</artist>\n";
+		  xbuf += "     <album>" + id3tag->GetAlbum() + "</album>\n";
+		  xbuf += "     <title>" + id3tag->GetTitle() + "</title>\n";
+		  xbuf += "     <comment>" + id3tag->GetNote() + "</comment>\n";
+		  xbuf += "     <year>" + id3tag->GetYear() + "</year>\n";
+		  xbuf += "     <style>" + id3tag->GetStyle() + "</style>\n";
+		  xbuf += "  </currentsong>\n";
+		  songs.clear();
+		  lists[1]->GetEntries(songs, 10);
+		  z = 0;
+		  for (vector<File>::iterator it = songs.begin();
+		       it != songs.end();
+		       ++it) {
+		    xbuf += "  <song id=\"";
+		    sprintf(tmpint, "%d", ++z);
+		    xbuf += tmpint;
+		    xbuf += "\">\n";
+		    xbuf += "    <unid>";
+		    sprintf(tmpint, "%d", it->GetId());
+		    xbuf += tmpint;
+		    xbuf += "</unid>\n";
+		    xbuf += "    <size>";
+		    sprintf(tmplint, "%ld", it->GetSize());
+		    xbuf += tmplint;
+		    xbuf += "</size>\n";
+		    xbuf += "    <description>" + it->GetFilenameNoType() + "</description>\n";
+		    it->GetID3Info(id3tag);
+		    xbuf += "     <artist>" + id3tag->GetArtist() + "</artist>\n";
+		    xbuf += "     <album>" + id3tag->GetAlbum() + "</album>\n";
+		    xbuf += "     <title>" + id3tag->GetTitle() + "</title>\n";
+		    xbuf += "     <comment>" + id3tag->GetNote() + "</comment>\n";
+		    xbuf += "     <year>" + id3tag->GetYear() + "</year>\n";
+		    xbuf += "     <style>" + id3tag->GetStyle() + "</style>\n";
+		    xbuf += "  </song>\n";
+		  }
+		  for (unsigned int i = 0; i < listnum; ++i) {
+		    dir = lists[i];
+		    xbuf += "  <list>\n";
+		    sprintf(tmpint, "%d", dir->GetSize());
+		    xbuf += "     <size>";
+		    xbuf += tmpint;
+		    xbuf += "</size>\n";
+		    xbuf += "     <id>" + *(dir->GetShortname()) + "</id>\n";
+		    xbuf += "     <description>" + *(dir->GetDescription()) + "</description>\n";
+		    xbuf += "  </list>\n";
+		  }
+		  xbuf += xbuf2;
+		  o_xsongname = songfile.GetName();
 		}
-		for (unsigned int i = 0; i < listnum; ++i) {
-		  dir = lists[i];
-		  xbuf += "  <list>\n";
-		  sprintf(tmpint, "%d", dir->GetSize());
-		  xbuf += "     <size>";
-		  xbuf += tmpint;
-		  xbuf += "</size>\n";
-		  xbuf += "     <id>" + *(dir->GetShortname()) + "</id>\n";
-		  xbuf += "     <description>" + *(dir->GetDescription()) + "</description>\n";
-		  xbuf += "  </list>\n";
-		}
-		xbuf += xbuf2;
-		o_xsongname = songname;
-	      }
-	      // Replace illegal characters
-  	      for (string::iterator it = xbuf.begin();
-  		   it != xbuf.end();
-  		   ++it) {
-		ch = (unsigned char) *it;
-  		if (ch == '&' || ch == '`' ||
-		    (ch > 127 || ch < 32 && ch != '\n' && ch != '\r')) {
-  		  *it = ' ';
-  		}
-  	      }
-	      send(newsock, xbuf.c_str(), xbuf.size(), 0);
-
-	    } else {
-	      ///////////////////
-	      // Send HTML answer
-	      ///////////////////
-	      if (o_hsongname != songname) {
-		hbuf = hbuf1 + cfilename + hbuf2;
-		songs.clear();
-		lists[1]->GetEntries(songs, 10);
-		for (vector<File>::iterator it = songs.begin();
-		     it != songs.end();
+		// Replace illegal characters
+		for (string::iterator it = xbuf.begin();
+		     it != xbuf.end();
 		     ++it) {
-		  hbuf += "    " + it->GetFilename() + "<BR>\n";
+		  ch = (unsigned char) *it;
+		  if (ch == '&' || ch == '`' ||
+		      (ch > 127 || ch < 32 && ch != '\n' && ch != '\r')) {
+		    *it = ' ';
+		  }
 		}
-		hbuf += hbuf3;
-		for (unsigned int i = 0; i < listnum; ++i) {
-		  dir = lists[i];
-		  hbuf += "      <TR><TD>";
-		  sprintf(tmpint, "%d", dir->GetSize());
-		  hbuf += tmpint;
-		  hbuf += "</TD><TD>";
-		  hbuf += *(dir->GetShortname());
-		  hbuf += "</TD><TD>";
-		  hbuf += *(dir->GetDescription());
-		  hbuf += "</TD></TR>\n";
+		send(newsock, xbuf.c_str(), xbuf.size(), 0);
+	      } else {
+		///////////////////
+		// Send HTML answer
+		///////////////////
+		if (o_hsongname != songfile.GetName()) {
+		  hbuf = hbuf1 + cfilename + hbuf2;
+		  songs.clear();
+		  lists[1]->GetEntries(songs, 10);
+		  for (vector<File>::iterator it = songs.begin();
+		       it != songs.end();
+		       ++it) {
+		    hbuf += "    " + it->GetFilenameNoType() + "<BR>\n";
+		  }
+		  hbuf += hbuf3;
+		  for (unsigned int i = 0; i < listnum; ++i) {
+		    dir = lists[i];
+		    hbuf += "      <TR><TD>";
+		    sprintf(tmpint, "%d", dir->GetSize());
+		    hbuf += tmpint;
+		    hbuf += "</TD><TD>";
+		    hbuf += *(dir->GetShortname());
+		    hbuf += "</TD><TD>";
+		    hbuf += *(dir->GetDescription());
+		    hbuf += "</TD></TR>\n";
+		  }
+		  hbuf += hbuf4;
+		  o_hsongname = songfile.GetName();
 		}
-		hbuf += hbuf4;
-		o_hsongname = songname;
+		send(newsock, hbuf.c_str(), hbuf.size(), 0);
 	      }
-	      send(newsock, hbuf.c_str(), hbuf.size(), 0);
-	    }
-	  }
+	    } // req.Parse()
+	  } // !http_locked
 	}
 	close(newsock);
       }
     }
   }
-    
-  pthread_exit(NULL);
-  // An extremely weird bug in the pthread_cleanup_push macro needs
-  // an extra }
+    pthread_exit(NULL);
+    // An extremely weird bug in the pthread_cleanup_push macro needs
+    // an extra }
   }
 }
 

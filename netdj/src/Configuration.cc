@@ -30,7 +30,7 @@ const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 
 void
 Configuration::ReadFile(string fname) {
-  Regex reg("\\([^ ]*\\) *= *\\([^ ]*\\)");
+  Regex reg("([^ ]+) *= *([^ ]+)");
   ifstream conf(fname.c_str());
   char line[255];
   vector<string> splitline;
@@ -40,7 +40,7 @@ Configuration::ReadFile(string fname) {
     conflist[CONF[i]] = CONF[i+1];
   }
 
-  cout << "Reading configuration entries:" << endl;
+  cout << "Reading configuration entries from '" << fname << "':" << endl;
   while (conf.getline(line, sizeof(line))) {
     splitline.clear();
     if (line[0] != '#' && reg.Match(line, splitline)) {

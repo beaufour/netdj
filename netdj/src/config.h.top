@@ -1,3 +1,12 @@
+/* Defines the filename of configuration files */
 const char CONF_DOTFILENAME[] = ".netdj";
 const char CONF_STATEFILENAME[] = ".netdj_state";
 const char CONF_USERFILENAME[] = ".netdj_users";
+
+/* Definition of userlevels */
+enum UserLevel {
+  Level_Null  = 0,
+  Level_User  = 50,
+  Level_PowerUser = 200,
+  Level_Admin = 1000
+};
