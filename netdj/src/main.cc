@@ -17,8 +17,8 @@
 #include "ID3Tag.h"
 #include "HTTP.h"
 
-// HACK to correct c++ "bug" in shout.h
 #ifdef HAVE_LIBSHOUT
+// HACK to correct c++ "bug" in shout.h
 #  define namespace nspace
 #  include <shout/shout.h>
 #endif
@@ -64,31 +64,41 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#undef HAVE_ID3LIB
+// Provides signal
+#include <csignal>
 
-void
-screen_flush() {
-  // Seems like there are problems with this and old readline libraries...
-#ifdef USE_READLINE_XX
-  rl_forced_update_display();
-#else
-  cout << endl << "NetDJ> " << flush;
-#endif
-}
-
+////////////////////////////////////////
+// GLOBALS
+// Directories
 Directory request("request", "Requested songs");
 Directory cache  ("cache",   "Cache-dir");
 Directory share  ("share",   "Share-dir", false);
 const unsigned int listnum = 3;
 Directory *lists[] = {&request, &cache, &share};
 
+// Configs
 Configuration config;
 AccessConf acc(&config);
-bool http_locked;
 
+// HTTP-thread
+bool http_locked;
 void* http_thread(void*);
 pthread_t http_t;
 
+
+////////////////////////////////////////
+// SCREEN_FLUSH
+void
+screen_flush() {
+  // Seems like there are problems with this and old readline libraries...
+#ifdef USE_READLINE_XX
+  rl_forced_update_display();
+#else
+  //  if (!config.GetBool("DAEMON_MODE")) {
+  //   cout << endl << "NetDJ> " << flush;
+  // }
+#endif
+}
 
 ////////////////////////////////////////
 // SAVE/LOAD state
@@ -1039,84 +1049,19 @@ http_thread(void*) {
       }
     }
   }
-    pthread_exit(NULL);
-    // An extremely weird bug in the pthread_cleanup_push macro needs
-    // an extra }
+  pthread_exit(NULL);
+  // An extremely weird bug in the pthread_cleanup_push macro needs
+  // an extra }
+  // The define is there to lure Emacs' indentation of the code...
+#define XXLURE_INDENT {
   }
 }
 
 
 ////////////////////////////////////////
-// MAIN
+// QUIT
 int
-main(int argc, char* argv[]) {
-  cout << "Welcome to NetDJ v" << VERSION << endl;
-
-  // Read configuration
-  config.ReadFile();
-
-  // Read users
-  acc.ReadFile();
-
-  // Load saved state from disk
-  loadstate();
-
-  // Init rand()
-  srand(time(NULL));
-
-  // Init playlists
-  cache.SetDirname(config.GetString("CACHE_DIR"));
-  share.SetDirname(config.GetString("SHARE_DIR"));
-  request.SetDirname(config.GetString("REQUEST_DIR"));
-
-  // Start player-thread
-  if (config.GetBool("PLAYER_START")) {
-    pthread_create(&player_t, NULL, &player_thread, NULL);
-  };
-
-  http_locked = config.GetBool("WEB_LOCKED");
-
-  // Start http-thread
-  if (config.GetBool("HTTP_START")) {
-    com_webstart(NULL);
-  };
-
-  // Give the threads a chance to start before starting UI
-  usleep(500);
-
-  string songname;
-  bool done = false;
-#ifdef USE_READLINE
-  char* line = (char*) NULL;
-#else
-  char line[255];
-#endif
-
-  // UI-loop
-  do {
-#ifdef USE_READLINE
-    if (line) {
-      free(line);
-    }
-    line = readline("NetDJ> ");
-#else
-    cout << "NetDJ> " << flush;
-    cin.getline(line, sizeof(line));
-#endif
-    if (line && *line ) {
-#ifdef USE_READLINE
-#   ifdef HAVE_READLINE_HISTORY
-      add_history(line);
-#  endif
-#endif
-      if (strncmp(line, "quit", 4) == 0) {
-	done = true;
-      } else {
-	execute_line(line);
-      }
-    }
-  } while (!done);
-
+quit() {
   // Save state to disk
   savestate();
 
@@ -1124,8 +1069,84 @@ main(int argc, char* argv[]) {
   stop_player = true;
   kill_current();
   pthread_cancel(player_t);
+
   cout << "Stopping HTTP" << endl;
   pthread_cancel(http_t);
+ 
+  return 0;
+}
+
+
+////////////////////////////////////////
+// SIGNAL-HANDLING
+void
+sig_handler(int signum) {
+  cout << "Caught signal " << signum << ", exiting." << endl;
+  quit();
+  exit(0);
+}
+
+
+////////////////////////////////////////
+// MAIN
+int
+main(int argc, char* argv[]) {
+  int pid = fork();
+  if (pid == -1) {
+    cout << "Hmmm, couldn't fork into the background?!" << endl;
+    cout << "  " << strerror(errno) << endl;
+    exit (-1);
+  } else if (!pid) {
+    // Daemon
+    setpgid(0, 0);
+    freopen("/dev/null", "r", stdin);
+    freopen("/var/log/netdj", "w", stdout);
+    freopen("/dev/null", "w", stderr);
+    cout << "NetDJ v" << VERSION << " starting up." << endl;
+    
+    // Read configuration
+    config.ReadFile();
+    
+    // Read users
+    acc.ReadFile();
+    
+    // Load saved state from disk
+    loadstate();
+    
+    // Init rand()
+    srand(time(NULL));
+    
+    // Init playlists
+    cache.SetDirname(config.GetString("CACHE_DIR"));
+    share.SetDirname(config.GetString("SHARE_DIR"));
+    request.SetDirname(config.GetString("REQUEST_DIR"));
+    
+    // Start player-thread
+    if (config.GetBool("PLAYER_START")) {
+      pthread_create(&player_t, NULL, &player_thread, NULL);
+    };
+    
+    http_locked = config.GetBool("WEB_LOCKED");
+    
+    // Start http-thread
+    if (config.GetBool("HTTP_START")) {
+      com_webstart(NULL);
+    };
+    
+    // Install signal-handler
+    signal(SIGHUP, sig_handler);
+    signal(SIGINT, sig_handler);
+    signal(SIGTERM, sig_handler);
+
+    // main loop
+    while (1) {
+      // Magic CORBA-thingy should enter here... :)
+      sleep(999);
+    }
+    
+  } else {
+    cout << "Spawned daemon (pid " << pid << ")" << endl;
+  }
 
   return 0;
 }

@@ -1,7 +1,13 @@
-Comming up:
+Coming up:
 * Seperation of NetDJ-core (engine) and client functions.
   - all non-server tasks (next number, add request, etc.) should be
     done via XML-interface. Start and stop should be removed from same
+
+FIXME:
+* system or user-installation differences
+  - state in /var/state or ~/.netdj/state
+  - log in /var/log/ or ?
+  - playlog in /var/log? og ~/.netdj/playlog
 
 
 Missing

@@ -15,7 +15,7 @@
 #include "Regex.h"
 #include "config.h"
 
-const unsigned int CONFSIZE = 16 * 2;
+const unsigned int CONFSIZE = 20 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "PLAYER", "/usr/bin/mpg123",
 			      "CACHE_DIR", "/usr/share/mp3/cache",
@@ -31,7 +31,11 @@ const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
                               "STREAM_IP", "127.0.0.1",
                               "STREAM_PORT", "8000",
                               "STREAM_MOUNT", "netdj",
-                              "STREAM_PASSWD", ""};
+                              "STREAM_PASSWD", "",
+			      "DAEMON_MODE", "false",
+			      "DAEMON_CHANGEUSER", "false",
+			      "DAEMON_UID", "",
+			      "DAEMON_GID", ""};
 
 void
 Configuration::ReadFile() {
