@@ -101,6 +101,7 @@ SongInfoBase::AsXML(QDomDocument* aDocument) const
   }
 
   QDomElement* info = new QDomElement();
+  Q_CHECK_PTR(info);
   *info = aDocument->importNode(mInfoNode, true).toElement();
 
   return info;
@@ -117,24 +118,26 @@ SongInfoBase::CreateXML() const
   mDocument.appendChild(mInfoNode);
 
   // Handle mediatype
-  QDomElement elem = mDocument.createElement("mediatype");
-  QDomText text;
+  QString mediaStr;
   switch (mMediaType) {
     case MediaType_MP3:
-      text = mDocument.createTextNode("MP3");
+      mediaStr = "MP3";
       break;
       
     case MediaType_OGG:
-      text = mDocument.createTextNode("OGG");
+      mediaStr ="OGG";
       break;
-      
+
     default:
-      text = mDocument.createTextNode("unknown");
       break;
-      
   }  
-  elem.appendChild(text);
-  mInfoNode.appendChild(elem);
+  if (!mediaStr.isEmpty()) {
+    QDomText text = mDocument.createTextNode(mediaStr);
+    QDomElement elem = mDocument.createElement("mediatype");
+    elem.appendChild(text);
+    mInfoNode.appendChild(elem);
+  }
+  
 
   // Handle string types
   const int s_num = 6;

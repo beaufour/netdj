@@ -11,9 +11,9 @@
 
 #include "StdException.h"
 
-#include <qapplication.h>
-#include <fstream>
-#include <cstdlib>
+#include <qtextstream.h>
+#include <qfile.h>
+#include <qfileinfo.h>
 
 using namespace std;
 using namespace NetDJ;
@@ -33,31 +33,37 @@ Collection_Songlist_File::~Collection_Songlist_File() {
 
 void
 Collection_Songlist_File::Update() {
+  /* Check whether file has changed */
+  QFile file(mFilename);
+  QFileInfo finfo(file);
+  if (finfo.lastModified() <= mFiledate) {
+    return;
+  }
+
+  mFiledate = finfo.lastModified();
+  
   /* Temporary storage for new list */
   deque<ISong*> newlist;
 
-  /* Open file */
-  ifstream flist(mFilename.c_str());
-  if (!flist) {
-    throw StdException("Could not open file '" + mFilename + "'!");
-  }
-
-  /* Read file */
-  char line[4096];
-  while (flist) {
-    flist.getline(line, sizeof(line));
-    // Ignore empty lines
-    if (line[0] == 0) {
-      continue;
-    }
-    try {
-      newlist.push_back(new SongFile(line, GetUNID()));
-    }
-    catch (...) {
-      qWarning("Could not add '%s' to collection '%s'!", line, GetIdentifier().c_str());
+  if (!finfo.isFile() || !finfo.isReadable() || !file.open(IO_ReadOnly)) {
+    throw StdException("Could not open file '" + mFilename + "' for reading!");
+  } else {
+    QTextStream is (&file);
+    QString line;
+    while (!is.atEnd()) {
+      line = is.readLine();
+      if (line.isEmpty() || line[0] == '#') {
+	continue;
+      }
+      try {
+	newlist.push_back(new SongFile(line, GetNewUNID()));
+      }
+      catch (...) {
+	qWarning("Could not add '%s' to collection '%s'!", line.latin1(), GetIdentifier().c_str());
+      }
     }
   }
-
+  
   /* Swap content */
   QMutexLocker locker(&mMutex);
   mSonglist.swap(newlist);

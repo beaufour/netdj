@@ -53,9 +53,9 @@ namespace NetDJ
     
     /** Destructor */
     ~Collection_Songlist_Dir();
-    
+
+    // ICollection
     void Update();
-    bool GetDeleteAfterPlay() const;
   };
 }
 

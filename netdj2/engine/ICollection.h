@@ -57,15 +57,6 @@ namespace NetDJ
     
     
     /**
-     * Get whether songs from this collection should be deleted from the
-     * filesystem after being played.
-     *
-     * @return        Delete after play?
-     */
-    virtual bool GetDeleteAfterPlay() const = 0;
-    
-    
-    /**
      * Get number of songs in collection
      *
      * @return        The number of songs

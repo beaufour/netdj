@@ -34,6 +34,9 @@ namespace NetDJ
     
     /** Unique ID (application-wise) */
     u_int32_t mUNID;
+
+    /** Should song be deleted from filesystem after being played? */
+    bool mDeleteAfterPlay;
     
   public:
     /**
@@ -61,10 +64,19 @@ namespace NetDJ
      */
     SongFile& operator=(const SongFile& aSong2);
 
+    /**
+     * Set mDeleteAfterPlay.
+     *
+     * @param aVal            The value
+     */
+    void SetDeleteAfterPlay(bool aVal);
+    
     // ISong
     u_int32_t GetUNID() const;
     const ISongInfo* GetSongInfo() const;    
-    QString GetFileName() const;
+    QString GetFilename() const;
+    bool GetDeleteAfterPlay() const;
+
 
     // IXMLOutput
     QDomElement* AsXML(QDomDocument* aDocument) const;

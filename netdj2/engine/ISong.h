@@ -52,6 +52,13 @@ namespace NetDJ
      * @return        The filename
      */
     virtual QString GetFilename() const = 0;
+
+    /**
+     * Should file be deleted _from filesystem_ after being played?
+     *
+     * I guess this will only be used for the request queue.
+     */
+    virtual bool GetDeleteAfterPlay() const = 0;
   };
 }
 

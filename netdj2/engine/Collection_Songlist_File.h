@@ -12,6 +12,8 @@
 
 #include "Collection_Songlist.h"
 
+#include <qdatetime.h>
+
 namespace NetDJ
 {
 
@@ -23,6 +25,9 @@ namespace NetDJ
   protected:
     /** Filename with the file list */
     std::string mFilename;
+
+    /** Date of file at last read */
+    QDateTime mFiledate;
     
   public:
     /**

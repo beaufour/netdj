@@ -8,6 +8,7 @@
 #include "PlayerThread.h"
 
 #include <qfile.h>
+#include <qfileinfo.h>
 
 #include "config.h"
 #include "Collections.h"
@@ -74,39 +75,23 @@ PlayerThread::run() {
 	sleep(10);
 	continue;
       }
+
+      QFile file(currentSong->GetFilename());
+      QFileInfo finfo (file);
+
+      if (!finfo.exists() ||
+	  !finfo.isReadable() ||
+	  !finfo.isFile() ||
+	  !file.open(IO_ReadOnly)
+	) {
+	emit SigMessage("Something is wrong with the file: " + currentSong->GetFilename(), 10);
+	continue;
+      }
+
       emit SigSongPlaying(currentSong, currentCollection);
 
       // @todo check song type
       emit SigMessage("Check song type!", 10);
-
-      /*
-      try {
-	const SongInfo* info = currentSong.GetSongInfo();
-	if (info) {
-	  cout << "** Song content info" << endl;
-	  cout << "Description:  " << info->GetDescription() << endl;
-	  cout << "Album:        " << info->GetAlbum() << endl;
-	  cout << "Title:        " << info->GetTitle() << endl;
-	  cout << "Artist:       " << info->GetArtist() << endl;
-	  cout << "Genre:        " << info->GetGenre() << endl;
-	  cout << "Year:         " << info->GetYear() << endl;
-	  cout << "Track:        " << info->GetTrack() << endl;
-	  cout << "Length:       " << (info->GetLength()/60)
-	       << ":" << (info->GetLength() - (info->GetLength()/60) * 60)<< endl;
-	  cout << "Size:         " << info->GetSize() << endl;
-	  cout << "Owner:        " << info->GetOwner() << endl;
-	}
-	
-      }
-      catch (NoSongInfo& h) {
-	cout << "No header info" << endl;
-      }
-      */
-
-      QFile file(currentSong->GetFilename());
-      if (!file.open(IO_ReadOnly)) {
-	continue;
-      }
       
       /* Send song */
       // @todo use song info!
@@ -120,11 +105,10 @@ PlayerThread::run() {
       /* Close file */
       file.close();
 
-
-      /* Delete file, if collection is request-queue */
-      if (currentCollection->GetDeleteAfterPlay()) {
-	/** @todo Delete file! */
-	emit SigMessage("TODO: delete file", 0);
+      /* Delete file? */
+      if (currentSong->GetDeleteAfterPlay() &&
+	  ! QFile::remove(currentSong->GetFilename())) {
+	emit SigMessage("Could not delete file: " + currentSong->GetFilename(), 20);
       }
 
       if (mStopPlayer) {

@@ -24,9 +24,12 @@ SongInfoFile::SongInfoFile(const QString& aFilename)
   // Get file information
   QFileInfo qinfo(aFilename);
 
+  if (!qinfo.isReadable()) {
+    return;
+  }
+
   mOwner = qinfo.owner();
   mSize = qinfo.size();
-
 
   // Get tag information with TagLib
   TagLib::FileRef tfile(aFilename);

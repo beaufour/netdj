@@ -104,10 +104,16 @@ main(int argc, char* argv[])
 
   gLogger.LogMessage("Initializing song collections", 10);
   Collections cols;
-  ICollection* newcol = new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true);
+  ICollection* newcol = new Collection_Songlist_Dir("request",
+                                                    "Requests",
+                                                    gConfig.GetString("REQUEST_DIR"),
+                                                    true,
+                                                    true);
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
-  newcol = new Collection_Songlist_File("share", "Shares", "mp3.list");
+  newcol = new Collection_Songlist_File("share",
+                                        "Shares",
+                                        "mp3.list");
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
   
@@ -120,8 +126,8 @@ main(int argc, char* argv[])
                    &gLogger,      SLOT(LogMessage(const QString&, const unsigned int)));
   QObject::connect(playerthread,  SIGNAL(SigException(const QString&, const QString&)),
                    &gLogger,      SLOT(LogException(const QString&, const QString&)));
-  QObject::connect(playerthread,  SIGNAL(SigSongPlaying(const ISong*, const Collection*)),
-                   &gLogger,      SLOT(LogSongPlaying(const ISong*, const Collection*)));
+  QObject::connect(playerthread,  SIGNAL(SigSongPlaying(const ISong*, const ICollection*)),
+                   &gLogger,      SLOT(LogSongPlaying(const ISong*, const ICollection*)));
   QObject::connect(playerthread,  SIGNAL(SigStart()),
                    &gLogger,      SLOT(LogPlayerStart()));
   QObject::connect(playerthread,  SIGNAL(SigStop()),
@@ -152,8 +158,8 @@ main(int argc, char* argv[])
   // Connect playerthread and server
   QObject::connect(server,       SIGNAL(SigSkip(const QString&)),
                    playerthread, SLOT(Skip()));
-  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const ISong*, const Collection*)),
-                   server,       SLOT(SongPlaying(const ISong*, const Collection*)));
+  QObject::connect(playerthread, SIGNAL(SigSongPlaying(const ISong*, const ICollection*)),
+                   server,       SLOT(SongPlaying(const ISong*, const ICollection*)));
   
 
   // Starting playerthread

@@ -13,6 +13,11 @@
 #include <qdir.h>
 #include <qptrlist.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <fcntl.h>
+
 using namespace std;
 using namespace NetDJ;
 
@@ -30,12 +35,6 @@ Collection_Songlist_Dir::Collection_Songlist_Dir(const string aId,
 
 Collection_Songlist_Dir::~Collection_Songlist_Dir()
 {
-}
-
-bool
-Collection_Songlist_Dir::GetDeleteAfterPlay() const
-{
-  return mDeleteAfterPlay;
 }
 
 void
@@ -56,18 +55,32 @@ Collection_Songlist_Dir::Update()
   QFileInfoListIterator it(*list);
   QFileInfo* fi;
 
-  /** \bug Something is wrong with the timestamp handling!! */
-
+  SongFile* newsong;
+  QDateTime fDate;
   while ((fi = it.current()) != 0 ) {
     try {
-      if (mIsQueue) {
-	if (fi->lastModified() >= mLastTimeStamp) {
-	  QMutexLocker locker(&mMutex);
-	  mSonglist.push_back(new SongFile(fi->filePath(), GetUNID()));
-	  mLastTimeStamp = fi->lastModified();
+      if (fi->isSymLink()) {
+	// If it is a symlink we have to lstat it...
+	struct stat buffer;
+	int status = lstat(fi->filePath().latin1(), &buffer);
+	if (status == -1) {
+	  continue; 
 	}
-      } else { /* Not a queue */
-	newlist.push_back(new SongFile(fi->filePath(), GetUNID()));
+	fDate.setTime_t(buffer.st_ctime);
+      } else {
+	fDate = fi->lastModified();
+      }
+      if (fDate >= mLastTimeStamp || !mIsQueue) {
+	QMutexLocker locker(&mMutex);
+	newsong = new SongFile(fi->filePath(), GetNewUNID());
+	Q_CHECK_PTR(newsong);
+	newsong->SetDeleteAfterPlay(mDeleteAfterPlay);
+	mLastTimeStamp = fDate;
+	if (mIsQueue) {
+	  mSonglist.push_back(newsong);
+	} else {
+	  newlist.push_back(newsong);
+	}
       }
       ++it;
     }
@@ -80,10 +93,10 @@ Collection_Songlist_Dir::Update()
    * Add a second to timestamp, or last file(s) will show up in next
    * iteration.
    *
-   * \note Can I do something smarter than add one second to the
+   * @note Can I do something smarter than add one second to the
    * timestamp?
    */
-  mLastTimeStamp.addSecs(1);
+  mLastTimeStamp = mLastTimeStamp.addSecs(1);
   
   /* Swap content */
   if (!mIsQueue) {

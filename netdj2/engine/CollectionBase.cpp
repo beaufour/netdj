@@ -46,23 +46,18 @@ CollectionBase::GetDescription() const
 }
 
 u_int32_t
-CollectionBase::GetUNID()
+CollectionBase::GetNewUNID()
 {  
   return ++mNextUNID;
 }
-
-bool
-CollectionBase::GetDeleteAfterPlay() const
-{
-  return false;
-}
-
 
 QDomElement*
 CollectionBase::AsXML(QDomDocument* aDocument) const
 {
   /* Main node */
   QDomElement* col = new QDomElement();
+  Q_CHECK_PTR(col);
+  
   *col = aDocument->createElement("collection");
   col->setAttribute("id", GetIdentifier());
 

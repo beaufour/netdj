@@ -34,7 +34,7 @@ namespace NetDJ
     std::string mDescription;
 
     /** Get a UNID */
-    u_int32_t GetUNID();
+    u_int32_t GetNewUNID();
 
   public:
     CollectionBase(const std::string aId, const std::string aDescr);
@@ -43,7 +43,6 @@ namespace NetDJ
     // ICollection
     std::string GetIdentifier() const;
     std::string GetDescription() const;
-    bool GetDeleteAfterPlay() const;
 
     // IXMLOutput
     QDomElement* AsXML(QDomDocument* aDocument) const;

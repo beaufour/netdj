@@ -10,6 +10,7 @@
 #include "LogService.h"
 
 #include <qdom.h>
+#include <qdatetime.h>
 
 #include "ISong.h"
 #include "ICollection.h"
@@ -29,6 +30,7 @@ LogService::Emit(QDomElement& aEntry, const int aLevel)
   QMutexLocker lock(&mEmitMutex);
 
   aEntry.setAttribute("id", ++mLogCount);
+  aEntry.setAttribute("timestamp", QDateTime::currentDateTime().toString(Qt::ISODate));
   emit NewLogEntry(&aEntry, aLevel);
 }
 

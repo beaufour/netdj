@@ -92,7 +92,9 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
   QString Filename = gConfig.GetString("CONFIG_DIR");
   Filename += Filename.isEmpty() ? "" : "/";
   Filename += gConfig.GetString("USER_LIST_FILE");
+
   mAccessChecker = new SimpleAccessChecker(Filename);
+  Q_CHECK_PTR(mAccessChecker);  
   if (!mAccessChecker->Init()) {
     throw ServerError("Could not initialize Access Checker");
   }
@@ -100,7 +102,6 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
   // Setup server socket
   mServerSocket = new ServerSocket(aPort, aBackLog, this, "ServerSocket");
   Q_CHECK_PTR(mServerSocket);
-  
   if (!mServerSocket->ok()) {
     throw ServerError("Could not listen to port!");
   }
@@ -223,6 +224,7 @@ Server::SongPlaying(const ISong* aSong, const ICollection* aCol)
   QDomElement* songXML = aSong->AsXML(&mSongDocument);
   songXML->setAttribute("collection", aCol->GetIdentifier());  
   mSongDocument.appendChild(*songXML);
+  delete songXML;
 }
 
 QDomDocument*

@@ -27,7 +27,9 @@ SongFile::~SongFile()
 }
 
 SongFile::SongFile(const SongFile& aSong2)
-  : ISong(), mFilename(aSong2.mFilename), mSongInfo(0), mUNID(aSong2.mUNID)
+  : ISong(), mFilename(aSong2.mFilename),
+    mSongInfo(0), mUNID(aSong2.mUNID),
+    mDeleteAfterPlay(false)
 {
 }
 
@@ -58,15 +60,29 @@ SongFile::GetSongInfo() const
 }
 
 QString
-SongFile::GetFileName() const
+SongFile::GetFilename() const
 {
   return mFilename;
+}
+
+bool
+SongFile::GetDeleteAfterPlay() const
+{
+  return mDeleteAfterPlay;
+}
+
+void
+SongFile::SetDeleteAfterPlay(bool aVal)
+{
+  mDeleteAfterPlay = aVal;
 }
 
 QDomElement*
 SongFile::AsXML(QDomDocument* aDocument) const
 {
   QDomElement* song = new QDomElement();
+  Q_CHECK_PTR(song);
+  
   *song = aDocument->createElement("song");
   song->setAttribute("unid", GetUNID());
 

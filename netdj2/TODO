@@ -1,8 +1,10 @@
 Remember:
 - Fix comments
 - Get STL and std::string out of the code...
+- Find all qDebug, qWarning, etc. and convert to signals
 - Check all todo's
 - Check buglist on sf.net
+- Check all calls to 'new'! Q_PTR...
 
 Showstoppers:
 - LogService should only run in Server context...
