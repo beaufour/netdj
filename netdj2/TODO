@@ -22,16 +22,9 @@ Showstoppers:
      - that would need a MainLoop class that translates the event to a signal
 - Get rid of SigException?
 - Add EntryType = INFO, WARN, CRIT to log entries
-- Add timestamp to log entries
-- Parse command line parameters (popt?)
-- Fork into background
 - Default log file placement
 - Network logging
-- Refactor SongInfo to TagLib usage and future DB support
 - Make sure that SongInfo is not always cached!
-
-BUGS:
-- Periodic segfault. Possibly weird characters in filenames/ID3
 
 Major enhancements:
 * Database support

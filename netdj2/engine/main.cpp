@@ -62,13 +62,14 @@ myMessageOutput(QtMsgType aType, const char *aMsg)
 {
   switch (aType) {
     case QtDebugMsg:
-      fprintf(stderr, "Debug: %s\n", aMsg);
+      gLogger.LogMessage(QString("[DEBUG]:") + aMsg, 200);
       break;
     case QtWarningMsg:
-      fprintf(stderr, "Warning: %s\n", aMsg);
+      gLogger.LogMessage(QString("[WARNING]:") + aMsg, 30);
       break;
     case QtFatalMsg:
-      fprintf(stderr, "Fatal: %s\n", aMsg);
+      gLogger.LogMessage(QString("FATAL ERROR: ") + aMsg, 0);
+      cerr << "FATAL ERROR: " <<  aMsg << endl;
       abort();                    // deliberately core dump
   }
 }
