@@ -194,10 +194,9 @@ public:
   }
 
   bool RenameCurrent(const string& newpath, const bool del) {
-    bool res = false;
+    bool res;
     lock();
-    if (currfile.Rename(newpath)) {
-      res = true;
+    if ((res = !currfile.Rename(newpath))) {
       currdelete = del;
     };
     unlock();
@@ -336,7 +335,8 @@ player_thread(void*) {
 #endif
 	}
 	if (logfile.is_open()) {
-	  logfile << "\"" << fobj.GetFilenameNoType() << "\","
+	  logfile << time(NULL) << ","
+		  << "\"" << fobj.GetFilenameNoType() << "\","
 		  << ((stop_player || next_song) ? 1 : 0) << ",\""
 		  << lists[i]->GetShortname() << "\""
 		  << endl;
