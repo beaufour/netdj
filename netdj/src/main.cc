@@ -18,8 +18,10 @@
 #include "HTTP.h"
 
 // HACK to correct c++ "bug" in shout.h
-#define namespace nspace
-#include <shout/shout.h>
+#ifdef HAVE_LIBSHOUT
+#  define namespace nspace
+#  include <shout/shout.h>
+#endif
 
 // Provides cout and manipulation of same
 #include <iostream>
@@ -221,6 +223,7 @@ player_thread(void*) {
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
   // Init shoutcast stuff
+#ifdef HAVE_LIBSHOUT
   shout_conn_t conn;
   unsigned char buff[4096];
   long read;
@@ -247,10 +250,18 @@ player_thread(void*) {
 
   if (config.GetBool("STREAM") && !shout_connect(&conn)) {
     cout << endl << "  Couldn't connect to server!" << endl;
+#else
+  // Sanitycheck, when libshout isn't in binary
+  if (config.GetBool("STREAM")) {
+    cout << endl
+	 << "  Shoutcast-support isn't included in this binary!" << endl
+	 << "  Set STREAM=false in configuration to use player instead" << endl;
+#endif
     screen_flush();
     stop_player = true;
   }
-
+  
+  
   // Open logfile
   ofstream logfile;
   if (config.GetBool("PLAYER_LOG")) {
@@ -304,6 +315,7 @@ player_thread(void*) {
 	  } else {
 	    wait(NULL);
 	  }
+#ifdef HAVE_LIBSHOUT
 	} else {
 	  musicfile = fopen(fobj.GetName().c_str(), "r");
 	  shout_update_metadata(&conn, fobj.GetFilename().c_str());
@@ -321,6 +333,7 @@ player_thread(void*) {
 	    shout_sleep(&conn);
 	  }
 	  fclose(musicfile);
+#endif
 	}
 	if (logfile.is_open()) {
 	  logfile << "\"" << fobj.GetFilenameNoType() << "\","
@@ -332,11 +345,13 @@ player_thread(void*) {
     }
   }
 
+#ifdef HAVE_LIBSHOUT
   // Disconnect from streaming server
   if (config.GetBool("STREAM")) {
     shout_update_metadata(&conn, NULL);
     shout_disconnect(&conn);
   }
+#endif
 
   // Close logfile
   if (logfile.is_open()) {

@@ -4,6 +4,9 @@
 /* Define if you have icp_func defined */
 #undef HAVE_ICPFUNC
 
+/* Define if you have libshout installed */
+#undef HAVE_LIBSHOUT
+
 /* Define if your readline library has `add_history' */
 #undef HAVE_READLINE_HISTORY
 

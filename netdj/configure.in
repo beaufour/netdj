@@ -62,6 +62,9 @@ if test "$USE_READLINE" = "yes"; then
   fi
 fi
 
+dnl Check for libraries
+AC_CHECK_LIB(shout, shout_update_metadata)
+
 dnl Checks for header files.
 AC_CHECK_HEADERS(errno.h,,[AC_MSG_ERROR("Needs errno.h!")])
 AC_CHECK_HEADERS(regex.h,,[AC_MSG_ERROR("Needs regex.h!")])

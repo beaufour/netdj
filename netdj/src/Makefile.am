@@ -1,7 +1,6 @@
 CXXFLAGS = @CXXFLAGS@ -D_REENTRANT -D_THREAD_SAFE
 
 bin_PROGRAMS = netdj
-netdj_LDADD =  -lshout
 netdj_SOURCES = main.cc \
 		util.cc util.h \
 		Regex.cc Regex.h \
