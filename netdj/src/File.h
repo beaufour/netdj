@@ -56,6 +56,7 @@ class File {
   // Disk operations
   bool Delete();
   bool Rename(const string&);
+  bool Symlink(const string&) const;
   
   bool operator< (const File& f2) const {
     return GetCtime() < f2.GetCtime();

@@ -35,6 +35,8 @@ STREAM_PASSWD = secret
 CACHE_DIR = /home/beaufour/gnut-cache
 # Share location (full path!)
 SHARE_DIR = /home/beaufour/mp3
+# Share location (full path!)
+REQUEST_DIR = /home/beaufour/request
 
 
 ########################################

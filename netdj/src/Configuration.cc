@@ -15,11 +15,12 @@
 #include "Regex.h"
 #include "config.h"
 
-const unsigned int CONFSIZE = 15 * 2;
+const unsigned int CONFSIZE = 16 * 2;
 const char *CONF[CONFSIZE] = {"HTTP_PORT", "7676",
 			      "PLAYER", "/usr/bin/mpg123",
 			      "CACHE_DIR", "/usr/share/mp3/cache",
 			      "SHARE_DIR", "/usr/share/mp3/share",
+			      "REQUEST_DIR", "/usr/share/mp3/request",
 			      "WEB_LOCKED", "false",
 			      "HTTP_START", "false",
 			      "HTTP_REDIRECT", "",

@@ -16,7 +16,7 @@
 
 bool
 File::update_stat() {
-  if (name.size() != 0 && stat(name.c_str(), &stat_buf) == 0 && S_ISREG(stat_buf.st_mode)) {
+  if (name.size() != 0 && stat(name.c_str(), &stat_buf) == 0 && !S_ISDIR(stat_buf.st_mode)) {
     return true;
   } else {
     memset(&stat_buf, 0, sizeof(stat_buf));
@@ -69,4 +69,9 @@ File::Rename(const string& newpath) {
   } else {
     return false;
   }
+}
+
+bool
+File::Symlink(const string &linkname) const {
+  return !symlink(name.c_str(), linkname.c_str());
 }

@@ -288,7 +288,7 @@ player_thread(void*) {
       sleep(30);
     } else {
       if (fobj.Exists()) {
-	currentsong.Set(fobj, i == 1 ? true : false);
+	currentsong.Set(fobj, i == 2 ? false : true);
 	cout << endl << "  Playing '" << fobj.GetFilename()
 	     << "' [" << lists[i]->GetShortname() << "]" << endl;
 	screen_flush();
@@ -427,19 +427,9 @@ COMMAND commands[] = {
   { (char*) NULL, (rl_icpfunc_t*) NULL, false, (char*) NULL}
 };
 
-bool check_web(char*& arg) {
-  if (arg && *arg && arg[0] == '}') {
-    arg++;
-    return true;
-  } else {
-    return false;
-  }
-}
-
 int
 com_add(char* arg) {
   string tmp;
-  check_web(arg);
   if (arg && *arg) {
     if (arg[0] != '/') {
       tmp = getenv("PWD");
@@ -450,8 +440,13 @@ com_add(char* arg) {
     } else {
       tmp = arg;
     }
-    cout << "  Adding '" << tmp << "' to request-list" << endl;
-    request.AddSong(tmp);
+    File fobj(tmp);
+
+    if (fobj.Symlink(request.GetDirname() + arg)) {
+      cout << "  Added '" << tmp << "' to request-list" << endl;
+    } else {
+      cout << "  Couldn't add '" << tmp << "' to request-list" << endl;
+    }
   } else {
     cout << "  Usage: add <filename>" << endl;
   };
@@ -494,7 +489,6 @@ com_info(char* arg) {
 
 int
 com_list(char* arg) {
-  check_web(arg);
   unsigned int l = arg ? atoi(arg) : 0;
   vector<File> songs;
 
@@ -1058,6 +1052,7 @@ main(int argc, char* argv[]) {
   // Init playlists
   cache.SetDirname(config.GetString("CACHE_DIR"));
   share.SetDirname(config.GetString("SHARE_DIR"));
+  request.SetDirname(config.GetString("REQUEST_DIR"));
 
   // Start player-thread
   if (config.GetBool("PLAYER_START")) {
