@@ -24,6 +24,7 @@ AccessConf::ReadFile() {
     fullname = NETDJ_ETCDIR;
     fullname += "/";
     fullname +=  CONF_USERFILENAME;
+    conf.clear();
     conf.open(fullname.c_str());
   }
 
