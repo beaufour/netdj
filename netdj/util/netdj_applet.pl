@@ -16,7 +16,7 @@ my %CONFIG;
 my $config_file = "$ENV{HOME}/.netdj_applet";
 open(CONFFILE, $config_file) || die "Can't open $config_file: $!\n";
 while (<CONFFILE>) {
-    chop;
+    chomp;
     if ((!m/^#.*/) && m/([^ ]+) *= *([^ ]+)/) {
 	$CONFIG{$1} = $2;
     }
@@ -113,13 +113,17 @@ sub cmd_update {
 	    while (s/\´//) {};
 	    my $status = XMLin($_);
 	    
-	    my $tool = "";
-	    for (my $i = 1; $i < 11; ++$i) {
-		$tool .= "$status->{song}[$i]{description}\n";
-	    }
-	    
-	    my $current = $status->{song}[0]{description};
+	    # Current song
+	    my $current = $status->{currentsong}->{description};
 	    $label->set_text($current);
+    
+	    # Songlist
+	    my $tool = "";
+	    my $songs = $status->{song};
+	    for my $s (@$songs) {
+		$tool .= $s->{description}."\n";
+	    }
+
 	    $applet->set_tooltip($tool);
 	}
     }
