@@ -17,6 +17,7 @@
 #include <qptrdict.h>
 
 #include "Client.h"
+#include "LogService.h"
 #include "StdException.h"
 
 class QDomElement;
@@ -189,10 +190,7 @@ namespace NetDJ
     void SigClientClose();  
     
     /** Emits a general information message */
-    void SigMessage(const QString& aMsg, const unsigned int aLevel);
-    
-    /** Emits an exception */
-    void SigException(const QString& aName, const QString& aMsg);
+    void SigMessage(const QString& aMsg, const unsigned int aLevel, LogService::EntryClass_t aClass);
     
   private slots:
     /** Called when data is ready to be read from client */

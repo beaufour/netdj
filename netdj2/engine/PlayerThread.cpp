@@ -70,7 +70,7 @@ PlayerThread::run() {
     while (true) {
       /* Check whether we have found a song */
       if (!mCols->GetNextSong(&currentSong, &currentCollection)) {
-	emit SigMessage("I have no files to play...", 10);
+	emit SigMessage("I have no files to play...", 10, LogService::ENTRY_WARN);
 	/** @todo Can we do something better than just waiting 10 secs? */
 	sleep(10);
 	continue;
@@ -84,14 +84,14 @@ PlayerThread::run() {
 	  !finfo.isFile() ||
 	  !file.open(IO_ReadOnly)
 	) {
-	emit SigMessage("Something is wrong with the file: " + currentSong->GetFilename(), 10);
+	emit SigMessage("Something is wrong with the file: " + currentSong->GetFilename(), 10, LogService::ENTRY_WARN);
 	continue;
       }
 
       emit SigSongPlaying(currentSong, currentCollection);
 
       // @todo check song type
-      emit SigMessage("Check song type!", 10);
+      emit SigMessage("Check song type!", 10, LogService::ENTRY_CRIT);
       
       /* Send song */
       // @todo use song info!
@@ -108,7 +108,7 @@ PlayerThread::run() {
       /* Delete file? */
       if (currentSong->GetDeleteAfterPlay() &&
 	  ! QFile::remove(currentSong->GetFilename())) {
-	emit SigMessage("Could not delete file: " + currentSong->GetFilename(), 20);
+	emit SigMessage("Could not delete file: " + currentSong->GetFilename(), 20, LogService::ENTRY_WARN);
       }
 
       if (mStopPlayer) {
@@ -120,13 +120,13 @@ PlayerThread::run() {
     } // Main loop
   }
   catch (StdException &e) {
-    emit SigException(e.GetType(), e.what());
+    emit SigMessage(QString("EXCEPTION: [") + e.GetType() + "] " + e.what(), 0, LogService::ENTRY_CRIT);
   }
   catch (exception& e) {
-    emit SigException("[std::exception] ", e.what());
+    emit SigMessage(QString("EXCEPTION: [std::exception] ") + e.what(), 0, LogService::ENTRY_CRIT);
   }
   catch (...) {
-    emit SigException("(unknown)", "(unknown)");
+    emit SigMessage(QString("EXCEPTION: (unknown)"), 0, LogService::ENTRY_CRIT);
   }
 
   emit SigStop();

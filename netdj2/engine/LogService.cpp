@@ -34,11 +34,27 @@ LogService::LogService(QObject* aParent)
 }
 
 void
-LogService::Emit(QDomElement& aEntry, const int aLevel)
+LogService::Emit(QDomElement& aEntry, const int aLevel, EntryClass_t aClass)
 {
 
   aEntry.setAttribute("id", ++mLogCount);
   aEntry.setAttribute("timestamp", QDateTime::currentDateTime().toString(Qt::ISODate));
+  aEntry.setAttribute("level", aLevel);
+  QString class_str;
+  switch (aClass) {
+    case ENTRY_CRIT:
+      class_str = "critical";
+      break;
+      
+    case ENTRY_WARN:
+      class_str = "warning";
+      break;
+      
+    case ENTRY_INFO:
+      class_str = "info";
+      break;      
+  }
+  aEntry.setAttribute("class", class_str);
 
   QMutexLocker lock(&mEmitMutex);
   if ((int) QThread::currentThread() == mOwnerThread) {
@@ -66,21 +82,20 @@ LogService::event(QEvent *aEvent)
 }
 
 void
-LogService::CreateEntry(QDomElement& aEntry, const int aLevel, const QString aName)
+LogService::CreateEntry(QDomElement& aEntry, const QString aName)
 {
   aEntry = mDocument.createElement("entry");
 
   aEntry.setAttribute("sender", sender() ? sender()->name() : "(none)");
   aEntry.setAttribute("name", aName);
-  aEntry.setAttribute("level", aLevel);
 }
 
 void
-LogService::SimpleEntry(const int aLevel, const QString aName)
+LogService::SimpleEntry(const int aLevel, const QString aName, EntryClass_t aClass)
 {
   QDomElement e;
-  CreateEntry(e, aLevel, aName);
-  Emit(e, aLevel);
+  CreateEntry(e, aName);
+  Emit(e, aLevel, aClass);
 }
 
 
@@ -88,82 +103,70 @@ void
 LogService::LogSongPlaying(const ISong* aSong, const ICollection* aCol)
 {
   QDomElement e;
-  CreateEntry(e, 10, "SongPlaying");
+  CreateEntry(e, "SongPlaying");
 
   QDomElement* song = aSong->AsXML(&mDocument);
   song->setAttribute("collection", aCol->GetIdentifier());
   e.appendChild(*song);
   delete song;
   
-  Emit(e, 10);
+  Emit(e, 10, ENTRY_INFO);
 }
 
 void
 LogService::LogQuit(const QString& aUsername)
 {
   QDomElement e;
-  CreateEntry(e, 0, "Shutdown");
+  CreateEntry(e, "Shutdown");
   QDomElement uNode = mDocument.createElement("user");
   e.appendChild(uNode);
   QDomText uName = mDocument.createTextNode(aUsername);
   uNode.appendChild(uName);
-  Emit(e, 0);
+  Emit(e, 0, ENTRY_CRIT);
 }
   
 void
 LogService::LogSkip(const QString& aUsername)
 {
   QDomElement e;
-  CreateEntry(e, 20, "Skip");
+  CreateEntry(e, "Skip");
   QDomElement uNode = mDocument.createElement("user");
   e.appendChild(uNode);
   QDomText uName = mDocument.createTextNode(aUsername);
   uNode.appendChild(uName);
-  Emit(e, 20);
+  Emit(e, 20, ENTRY_INFO);
 }
 
 void
 LogService::LogClientNew()
 {
-  SimpleEntry(100, "ClientNew");
+  SimpleEntry(100, "ClientNew", ENTRY_INFO);
 }  
 
 void
 LogService::LogClientClose()
 {
-  SimpleEntry(100, "ClientClose");
+  SimpleEntry(100, "ClientClose", ENTRY_INFO);
 }
 
 void
 LogService::LogPlayerStart()
 {
-  SimpleEntry(30, "PlayerStart");
+  SimpleEntry(30, "PlayerStart", ENTRY_INFO);
 }
 
 void
 LogService::LogPlayerStop()
 {
-  SimpleEntry(30, "PlayerStop");
+  SimpleEntry(30, "PlayerStop", ENTRY_CRIT);
 }
 
 void
-LogService::LogMessage(const QString& aMsg, const unsigned int aLevel)
+LogService::LogMessage(const QString& aMsg, const unsigned int aLevel, EntryClass_t aClass)
 {
   QDomElement e;
-  CreateEntry(e, aLevel, "Message");
+  CreateEntry(e, "Message");
   QDomText msg = mDocument.createTextNode(aMsg);
   e.appendChild(msg);
-  Emit(e, aLevel);
+  Emit(e, aLevel, aClass);
 }
-
-void
-LogService::LogException(const QString& aName, const QString& aMsg)
-{
-  QDomElement e;
-  CreateEntry(e, 0, "Exception");
-  e.setAttribute("class", aName);
-  QDomText msg = mDocument.createTextNode(aMsg);
-  e.appendChild(msg);
-  Emit(e, 0);
-}
-

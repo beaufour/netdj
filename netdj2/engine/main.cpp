@@ -53,7 +53,7 @@ void sig_handler(int signal)
 {
   QString signum;
   signum.setNum(signal);
-  gLogger.LogMessage("Received signal " + signum + ", quitting", 0);
+  gLogger.LogMessage("Received signal " + signum + ", quitting", 0, LogService::ENTRY_CRIT);
   mainApp->quit();
 }
 
@@ -62,13 +62,13 @@ myMessageOutput(QtMsgType aType, const char *aMsg)
 {
   switch (aType) {
     case QtDebugMsg:
-      gLogger.LogMessage(QString("[DEBUG]:") + aMsg, 200);
+      gLogger.LogMessage(QString("[DEBUG]:") + aMsg, 200, LogService::ENTRY_INFO);
       break;
     case QtWarningMsg:
-      gLogger.LogMessage(QString("[WARNING]:") + aMsg, 30);
+      gLogger.LogMessage(aMsg, 30, LogService::ENTRY_WARN);
       break;
     case QtFatalMsg:
-      gLogger.LogMessage(QString("FATAL ERROR: ") + aMsg, 0);
+      gLogger.LogMessage(aMsg, 0, LogService::ENTRY_CRIT);
       cerr << "FATAL ERROR: " <<  aMsg << endl;
       abort();                    // deliberately core dump
   }
@@ -80,7 +80,7 @@ mainloop(QApplication* aApp)
   /* Create logger service */
   FileLogger flog(&gLogger, "-", 999, aApp);
 
-  gLogger.LogMessage("Initializing song collections", 10);
+  gLogger.LogMessage("Initializing song collections", 10, LogService::ENTRY_INFO);
   Collections cols;
   ICollection* newcol = new Collection_Songlist_Dir("request",
                                                     "Requests",
@@ -95,15 +95,13 @@ mainloop(QApplication* aApp)
   Q_CHECK_PTR(newcol);
   cols.AddCollection(newcol);
   
-  gLogger.LogMessage("Initializing player", 10);
+  gLogger.LogMessage("Initializing player", 10, LogService::ENTRY_INFO);
   PlayerThread* playerthread = new PlayerThread(&cols, 0, aApp);
   Q_CHECK_PTR(playerthread);
 
   // Connect player to gLogger
-  QObject::connect(playerthread,  SIGNAL(SigMessage(const QString&, const unsigned int)),
-                   &gLogger,      SLOT(LogMessage(const QString&, const unsigned int)));
-  QObject::connect(playerthread,  SIGNAL(SigException(const QString&, const QString&)),
-                   &gLogger,      SLOT(LogException(const QString&, const QString&)));
+  QObject::connect(playerthread,  SIGNAL(SigMessage(const QString&, const unsigned int, LogService::EntryClass_t)),
+                   &gLogger,      SLOT(LogMessage(const QString&, const unsigned int, LogService::EntryClass_t)));
   QObject::connect(playerthread,  SIGNAL(SigSongPlaying(const ISong*, const ICollection*)),
                    &gLogger,      SLOT(LogSongPlaying(const ISong*, const ICollection*)));
   QObject::connect(playerthread,  SIGNAL(SigStart()),
@@ -111,15 +109,13 @@ mainloop(QApplication* aApp)
   QObject::connect(playerthread,  SIGNAL(SigStop()),
                    &gLogger,      SLOT(LogPlayerStop()));
 
-  gLogger.LogMessage("Initializing server", 10);
+  gLogger.LogMessage("Initializing server", 10, LogService::ENTRY_INFO);
   Server* server = new Server(&cols, gConfig.GetInteger("SERVER_PORT"), 5, aApp);
   Q_CHECK_PTR(server);
 
   // Connect server to gLogger
-  QObject::connect(server,   SIGNAL(SigMessage(const QString&, const unsigned int)),
-                   &gLogger, SLOT(LogMessage(const QString&, const unsigned int)));
-  QObject::connect(server,   SIGNAL(SigException(const QString&, const QString&)),
-                   &gLogger, SLOT(LogException(const QString&, const QString&)));
+  QObject::connect(server,   SIGNAL(SigMessage(const QString&, const unsigned int, LogService::EntryClass_t)),
+                   &gLogger, SLOT(LogMessage(const QString&, const unsigned int, LogService::EntryClass_t)));
   QObject::connect(server,   SIGNAL(SigQuit(const QString&)),
                    &gLogger, SLOT(LogQuit(const QString&)));
   QObject::connect(server,   SIGNAL(SigSkip(const QString&)),

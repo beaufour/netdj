@@ -50,6 +50,14 @@ namespace NetDJ
   {
     Q_OBJECT
 
+  public:
+    /** The different entry classes */
+    enum EntryClass_t {
+      ENTRY_CRIT,
+      ENTRY_WARN,
+      ENTRY_INFO
+    };
+
   private:
     /** The number of log entries */
     unsigned int mLogCount;
@@ -70,13 +78,13 @@ namespace NetDJ
     QPtrList<QDomElement> mEntryQueue;
 
     /** Create a new entry */
-    void CreateEntry(QDomElement& aEntry, const int aLevel, const QString aName);
+    void CreateEntry(QDomElement& aEntry, const QString aName);
 
     /** Emit a simple entry */
-    void SimpleEntry(const int aLevel, const QString aName);
+    void SimpleEntry(const int aLevel, const QString aName, EntryClass_t aClass);
 
     /** Emits the NewLogEntry signal _serialized_ */
-    void Emit(QDomElement& e, const int aLevel);
+    void Emit(QDomElement& e, const int aLevel, EntryClass_t aClass);
     
   public:
     /** Constructor */
@@ -113,10 +121,7 @@ namespace NetDJ
     void LogClientClose();
     
     /** A generic message */
-    void LogMessage(const QString& aMsg, const unsigned int aLevel);
-    
-    /** A generic exception */
-    void LogException(const QString& aName, const QString& aMsg);
+    void LogMessage(const QString& aMsg, const unsigned int aLevel, LogService::EntryClass_t aClass);
     
   signals:
     /**

@@ -14,6 +14,7 @@
 #include <qobject.h>
 
 #include "Client.h"
+#include "LogService.h"
 
 namespace NetDJ
 {
@@ -75,11 +76,8 @@ namespace NetDJ
     void SigStop();
     
     /** Emits a general information message */
-    void SigMessage(const QString& aMsg, const unsigned int aLevel);
+    void SigMessage(const QString& aMsg, const unsigned int aLevel, LogService::EntryClass_t aClass);
 
-    /** Emits an exception */
-    void SigException(const QString& aName, const QString& aMsg);
-    
   public slots:
     /** Skip current song */
     void Skip();

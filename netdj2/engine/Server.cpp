@@ -326,7 +326,7 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
   }
   command_t cmd = gCommands[i];
   if (cmd.mType == CMD_NULL) {
-    emit SigMessage("Invalid command: " + cmdstr, 70);
+    emit SigMessage("Invalid command: " + cmdstr, 70, LogService::ENTRY_WARN);
     throw CMDInvalid();
   }
 
@@ -334,7 +334,7 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
   QString uName;
   if (!CheckAuthorization(cmd.mAuthLevel, aHeader.value("Authorization"), uName)) {
     if (!uName.isEmpty()) {
-      emit SigMessage("Unauthorized command: '" + cmdstr + "', user='" + uName + "'", 50);
+      emit SigMessage("Unauthorized command: '" + cmdstr + "', user='" + uName + "'", 50, LogService::ENTRY_WARN);
     }
     
     throw CMDUnauthorized();
@@ -342,7 +342,7 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 
   // If/when commands with structures are needed header needs to be unpacked.
 
-  emit SigMessage("Command: '" + cmdstr + (uName.isEmpty() ? "" : "', user='" + uName + "'"), 150);
+  emit SigMessage("Command: '" + cmdstr + (uName.isEmpty() ? "" : "', user='" + uName + "'"), 150, LogService::ENTRY_INFO);
   bool closeCon = true;
   // Call command
   switch (cmd.mType) {
@@ -452,7 +452,7 @@ Server::CmdRequests(QTextStream& aStream)
     
     delete xml;
   } else {
-    emit SigMessage("Could not retrieve request collection!", 10);
+    emit SigMessage("Could not retrieve request collection!", 10, LogService::ENTRY_CRIT);
 
     aStream << HTTP_500
             << HTTP_HTML

@@ -9,8 +9,8 @@ Remember:
 - Check all calls to 'new'! Q_PTR...
 
 Showstoppers:
-- Get rid of SigException? Yes, use message and the types:
-- Add EntryType = INFO, WARN, CRIT to log entries
+- client lib.
+  - solves FileLogger
 - Default log file placement
 - Make sure that SongInfo is not always cached!
 - Use QSettings for configuration?
