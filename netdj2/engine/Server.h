@@ -18,7 +18,7 @@
 #include "StdException.h"
 
 class ServerSocket;
-class PlayerThread;
+class IAccessChecker;
 
 /**
  * Maximum bytes allowed in a request
@@ -52,12 +52,15 @@ class Server : public QObject
   Q_OBJECT
 
 private:
-  /* The current server socket */
+  /** The current server socket */
   ServerSocket* mServerSocket;
 
-  /* List of currently connected clients */
+  /** List of currently connected clients */
   QPtrDict<Client> mClients;
 
+  /** The access checker used */
+  IAccessChecker* mAccessChecker;
+  
 public:
   /**
    * Constructor.
@@ -68,6 +71,9 @@ public:
    */
   Server(int aPort, int aBackLog, QObject* aParent = 0);
 
+  /** Destructor */
+  ~Server();
+  
 private:
   /**
    * Handles commands from clients.

@@ -13,6 +13,8 @@
 #include <qsocket.h>
 #include <qurl.h>
 
+#include "config.h"
+#include "AccessChecker.h"
 #include "Server.h"
 #include "ServerSocket.h"
 #include "Song.h"
@@ -86,6 +88,15 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
   // Automatically delete contained pointers on delete
   mClients.setAutoDelete(true);
 
+  /** @todo Set this somewhere */
+  QString Filename = NETDJ_CONF.GetString("CONFIG_DIR");
+  Filename += Filename.isEmpty() ? "" : "/";
+  Filename += NETDJ_CONF.GetString("USER_LIST_FILE");
+  mAccessChecker = new SimpleAccessChecker(Filename);
+  if (!mAccessChecker->Init()) {
+    throw ServerError("Could not initialize Access Checker");
+  }
+
   // Setup server socket
   mServerSocket = new ServerSocket(aPort, aBackLog, this, "ServerSocket");
   Q_CHECK_PTR(mServerSocket);
@@ -94,6 +105,16 @@ Server::Server(int aPort, int aBackLog, QObject* aParent)
     throw ServerError("Could not listen to port!");
   }
   connect(mServerSocket, SIGNAL(newClient(QSocket*)), this, SLOT(NewClient(QSocket*)));
+}
+
+Server::~Server()
+{
+  if (mServerSocket) {
+    delete mServerSocket;
+  }
+  if (mAccessChecker) {
+    delete mAccessChecker;
+  }
 }
 
 void
@@ -109,12 +130,6 @@ Server::NewClient(QSocket* aSocket)
   connect(aSocket, SIGNAL(readyRead()), this, SLOT(ReadClient()));
   connect(aSocket, SIGNAL(connectionClosed()), this, SLOT(ClientClosed()));
 }
-
-
-
-// DEBUG DEBUG DEBUG
-#include <iostream>
-
 
 /**
  * Exception thrown by HandleCommand() when it encounters an invalid command.
@@ -148,14 +163,8 @@ Server::ReadClient()
     input += socket->readLine();
   }
 
-  cout << "Got request from client, size = " << input.length() << endl;
-  
   QHttpRequestHeader header(input);
-  cout << "Header: " << endl;
-  cout << "\t Method:  " << header.method() << endl;
-  cout << "\t Path:    " << header.path() << endl;
-  cout << "\t Version: " << header.majorVersion() << "." << header.minorVersion() << endl;
-  
+
   QTextStream os(socket);
   os.setEncoding(QTextStream::UnicodeUTF8);
   if (header.method() == "GET") {
@@ -295,8 +304,6 @@ Server::HandleCommand(QTextStream& aStream, const QHttpRequestHeader& aHeader)
 {
   // Analyze command
   const QUrl url(QUrl("http://127.0.0.1/"), aHeader.path());
-  cout << "\t Path:    " << url.path() << endl;
-  cout << "\t Query:   " << url.query() << endl;
 
   QString cmdstr = url.path();
   // Shortcuts for help for ease and backward compatibility
@@ -353,7 +360,7 @@ Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
   if (aLevel == 0) {
     return true;
   } else {
-    if (!aAuthString.length() || !aAuthString.startsWith("Basic ")) {
+    if (aAuthString.isEmpty() || !aAuthString.startsWith("Basic ")) {
       return false;
     }
     QString auth = base64_decode(aAuthString.mid(6).ascii());
@@ -361,12 +368,6 @@ Server::CheckAuthorization(unsigned int aLevel, QString aAuthString)
     QString user = auth.section(':', 0, 0);
     QString pass = auth.section(':', 1, 1);
     
-    cout << "CREDS: User=" << user << ", Pass=" << pass << endl;
-
-    if (user == "allan" && pass == "smadder") {
-      return true;
-    } else {
-      return false;
-    }
+    return mAccessChecker->HasAccess(user, pass, aLevel);
   }
 }

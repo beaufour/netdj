@@ -15,11 +15,15 @@
 
 #include <qapplication.h>
 
-#include "PlayerThread.h"
-#include "Server.h"
+#include "config.h"
 #include "Collections.h"
 #include "Collection_Songlist_File.h"
 #include "Collection_Songlist_Dir.h"
+#include "Configuration.h"
+#include "PlayerThread.h"
+#include "Server.h"
+
+Configuration NETDJ_CONF;
 
 using namespace std;
 
@@ -52,8 +56,16 @@ main(int argc, char* argv[])
   srand(time(0));
   
   /* Install Qt message handler */
-  qInstallMsgHandler( myMessageOutput );
-  
+  qInstallMsgHandler(myMessageOutput);
+
+  cout << "Reading configuration" << endl;
+  if (!NETDJ_CONF.Init()) {
+    cerr << "FATAL ERROR! Could not get configuration!\n" << endl;
+    return -1;
+  }
+
+  cout << flush;
+
   cout << "Initializing song collections" << endl;
   Collections cols;
   Collection* newcol = new Collection_Songlist_Dir("request", "Requests", "/tmp/netdj_request/", true);

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 
+#include "config.h"
 #include "Collection.h"
 #include "Collections.h"
 #include "Shout.h"
@@ -59,15 +60,17 @@ void
 PlayerThread::run() {
   try {
     cout << "-----=====> Setup libshout" << endl;
-    Shout shout("NetDJ", "Mixed", "NetDJ streaming channel");
-    shout.SetPublic(false);
+    Shout shout(NETDJ_CONF.GetString("STREAM_NAME"),
+		NETDJ_CONF.GetString("STREAM_GENRE"),
+		NETDJ_CONF.GetString("STREAM_DESCR"));
+    shout.SetPublic(NETDJ_CONF.GetBool("STREAM_PUBLIC"));
+    shout.SetUser(NETDJ_CONF.GetString("STREAM_USER"));
+    shout.SetHost(NETDJ_CONF.GetString("STREAM_HOST"));
+    shout.SetPort(NETDJ_CONF.GetInteger("STREAM_PORT"));
+    shout.SetPassword(NETDJ_CONF.GetString("STREAM_PASSWD"));
+    shout.SetMount(NETDJ_CONF.GetString("STREAM_MOUNT"));
     shout.SetFormat(SHOUT_FORMAT_MP3);
-    shout.SetUser("source");
     shout.SetProtocol(SHOUT_PROTOCOL_HTTP);
-    shout.SetHost("beaufourpc");
-    shout.SetPort(8000);
-    shout.SetPassword("florence");
-    shout.SetMount("netdj");
     
     cout << "-----=====> Connect to icecast" << endl;
     shout.Connect();

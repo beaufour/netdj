@@ -14,7 +14,7 @@ HEADERS	+= 	Song.h SongInfo.h SongInfo_File.h SongInfo_File_mp3.h \
 		Collection_Songlist_File.h Collection_Songlist_Dir.h \
 		Collections.h Client.h ServerSocket.h \
 		StdException.h Shout.h PlayerThread.h Server.h \
-		util.h
+		Configuration.h AccessChecker.h util.h config.h
 
 SOURCES	+= 	main.cpp \
 		Song.cpp SongInfo.cpp SongInfo_File.cpp SongInfo_File_mp3.cpp \
@@ -22,4 +22,4 @@ SOURCES	+= 	main.cpp \
 		Collection_Songlist_File.cpp Collection_Songlist_Dir.h \
 		Collections.cpp Client.cpp ServerSocket.cpp \
 		StdException.cpp Shout.cpp PlayerThread.cpp Server.cpp \
-		util.cpp
+		Configuration.cpp AccessChecker.cpp util.cpp
