@@ -1,7 +1,7 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /**
  * \file AccessChecker.h
- * Interface IAccessChecker and class SimpleAccessChecker.
+ * Class SimpleAccessChecker.
  *
  * $Id$
  *
@@ -13,37 +13,13 @@
 #include <qstring.h>
 #include <qmap.h>
 
+#include "IAccessChecker.h"
+
 namespace NetDJ
 {
 
   /**
-   * Access control interface.
-   */
-  class IAccessChecker
-  {
-  public:
-    /**
-     * Initializes class, must be called before class is used.
-     *
-     * @return                  Initialization succesfull?
-     */
-    virtual bool Init() = 0;
-    
-    /**
-     * Check access for a given level for a given user.
-     *
-     * @param aUsername         The name of the user
-     * @param aPassword         The password for the user
-     * @param aLevel            The level to check for
-     * @return                  Has user access?
-     */
-    virtual bool HasAccess(const QString& aUsername,
-                           const QString& aPassword,
-                           const unsigned int aLevel) = 0;
-  };
-
-  /**
-   * Implementation of a simple access control mechanism.
+   * Implementation of IAccessChecker, a simple access control mechanism.
    *
    * Reads a file with userid:passwd:level, and uses this information to
    * authenticate with.

@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <string>
-#include "Collection.h"
+#include "ICollection.h"
 #include "Song.h"
 
 namespace NetDJ
@@ -35,7 +35,7 @@ namespace NetDJ
   class Collections {
   private:
     /** The list of Collections */
-    std::vector<Collection*> mColList;
+    std::vector<ICollection*> mColList;
     
   public:
     /** Constructor. */
@@ -54,7 +54,7 @@ namespace NetDJ
      * @param aCol              The new Collection to add.
      *
      */
-    void AddCollection(Collection* aCol);
+    void AddCollection(ICollection* aCol);
     
     /**
      * Get the next song to play.
@@ -63,7 +63,7 @@ namespace NetDJ
      * @param aCol              The collection the song is retrieved from
      * @return                  Song succesfully retrieved?
      */
-    bool GetNextSong(Song& aSong, const Collection** aCol);
+    bool GetNextSong(Song& aSong, const ICollection** aCol);
   };
 }
 

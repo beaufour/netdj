@@ -1,14 +1,14 @@
 // -*- c++ -*-
 /**
- * \file Collection.h
- * Class Collection.
+ * \file ICollection.h
+ * Interface ICollection.
  *
  * $Id$
  *
  */
 
-#ifndef __COLLECTION_H__
-#define __COLLECTION_H__
+#ifndef __ICOLLECTION_H__
+#define __ICOLLECTION_H__
 
 #include <string>
 #include "Song.h"
@@ -19,7 +19,7 @@ namespace NetDJ
 {
 
   /**
-   * Exception thrown by GetNextSong if Collection is empty.
+   * Exception thrown by GetNextSong if ICollection is empty.
    */
   class EmptyCollection : public StdException {
   public:
@@ -38,7 +38,7 @@ namespace NetDJ
    * - Retrieve song at specific position
    * - Retrieve list of all songs?
    */
-  class Collection : public XMLOutput {
+  class ICollection : public XMLOutput {
   public:
     /**
      * Get the identifier for the collection.

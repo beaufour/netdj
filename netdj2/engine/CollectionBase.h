@@ -12,7 +12,7 @@
 
 #include <string>
 
-#include "Collection.h"
+#include "ICollection.h"
 #include "Song.h"
 #include "StdException.h"
 #include "XMLOutput.h"
