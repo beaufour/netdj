@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 use strict;
 my $THRES = 10 * 60; # seconds
-my $DIR = "/home/beaufour/netdj/cache";
+my $DIR = "/var/cache/netdj";
 my $WD = "                          ";
 my $LASTCHECK = 0;
-my $MINDOWNLOAD = 7*1024*1024;
+my $MINDOWNLOAD = 4*1024*1024;
 
 print "Gnut watchdog v0.3\n";
 print "------------------\n";
