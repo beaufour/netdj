@@ -44,7 +44,7 @@ class AccessConf : public Lockable {
   AccessConf(Configuration *c) : Lockable(), Conf(c) {};
 
   void ReadFile();
-  bool IsAccessAllowed(const string&, int, string* = NULL);
+  bool IsAccessAllowed(const string&, int, string* = NULL) const;
 };
 
 #endif

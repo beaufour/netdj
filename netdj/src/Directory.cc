@@ -148,7 +148,7 @@ Directory::GetSize() {
 }
 
 int
-Directory::GetEntries(vector<File> &vect, unsigned int max) {
+Directory::GetEntries(vector<File> &vect, unsigned int max) const {
   unsigned int i = 0;
   lock();
   if (playlist) {

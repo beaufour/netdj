@@ -47,11 +47,11 @@ AccessConf::ReadFile() {
 }
 
 bool
-AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr = NULL) {
+AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr = NULL) const {
   bool res = false;
   Regex reg("([^:]+):(.+)");
   vector<string> splitline;
-  map<string, User>::iterator user;
+  map<string, User>::const_iterator user;
 
   lock();
   if (reg.Match(str, splitline)) {

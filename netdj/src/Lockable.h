@@ -13,10 +13,10 @@
 
 class Lockable {
 protected:
-  pthread_mutex_t mutex;
+  mutable pthread_mutex_t mutex;
 
-  void lock();
-  void unlock();
+  void lock() const;
+  void unlock() const;
 
 public:
   Lockable();

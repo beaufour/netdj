@@ -54,7 +54,7 @@ public:
   bool GetSong(File&);
   void AddSong(const string&);
   int GetSize();
-  int GetEntries(vector<File>&, unsigned int);
+  int GetEntries(vector<File>&, unsigned int) const;
 
   const string& GetShortname() const;
   const string& GetDescription() const;

@@ -19,13 +19,13 @@ Lockable::~Lockable() {
 
 
 void
-Lockable::lock() {
+Lockable::lock() const {
   pthread_mutex_lock(&mutex);
 };
 
 
 void
-Lockable::unlock() {
+Lockable::unlock() const {
   pthread_mutex_unlock(&mutex);
 };
 

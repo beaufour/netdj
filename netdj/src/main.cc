@@ -179,7 +179,7 @@ private:
 public:
   TCurrentSong() : Lockable() {};
 
-  void Get(File& fil) {
+  void Get(File& fil) const {
     lock();
     fil = currfile;
     unlock();

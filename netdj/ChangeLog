@@ -1,3 +1,8 @@
+2002-02-22 Friday 14:49   Allan Beaufour Larsen <allan@beaufour.dk>
+
+	* Makefile.am (1.6): Not much reason in having entries regarding
+	ChangeLog in the ChangeLog :) 
+
 2002-02-22 Friday 14:47   Allan Beaufour Larsen <allan@beaufour.dk>
 
 	* util/crongnut.pl (1.2): Fixed startup-bug.  
