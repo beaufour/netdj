@@ -9,29 +9,60 @@
 
 #include "LogService.h"
 
+#include <qapp.h>
 #include <qdom.h>
 #include <qdatetime.h>
+#include <qthread.h>
 
 #include "ISong.h"
 #include "ICollection.h"
 
 using namespace NetDJ;
 
+/**
+ * @note QThread::currentThread is only for internal Qt use, but as long as Qt
+ * is running on Linux and using Posix threads, it should work I guess. But it
+ * is not optimal. I need a way of determining the id of the current thread....
+ */
 LogService::LogService(QObject* aParent)
   : QObject(aParent, "LogService"),
     mLogCount(0),
-    mDocument("log")
+    mDocument("log"),
+    mOwnerThread((int) QThread::currentThread())
 {
+  mEntryQueue.setAutoDelete(true);
 }
 
 void
 LogService::Emit(QDomElement& aEntry, const int aLevel)
 {
-  QMutexLocker lock(&mEmitMutex);
 
   aEntry.setAttribute("id", ++mLogCount);
   aEntry.setAttribute("timestamp", QDateTime::currentDateTime().toString(Qt::ISODate));
-  emit NewLogEntry(&aEntry, aLevel);
+
+  QMutexLocker lock(&mEmitMutex);
+  if ((int) QThread::currentThread() == mOwnerThread) {
+    emit NewLogEntry(&aEntry, aLevel);
+  } else {
+    mEntryQueue.append(new QDomElement(aEntry));
+    QApplication::postEvent(this, new QEvent(QEvent::User));
+  }
+}
+
+bool
+LogService::event(QEvent *aEvent)
+{
+  bool rv = false;
+  if (aEvent && aEvent->type() == QEvent::User) { 
+    QDomElement* entry;
+    for (entry = mEntryQueue.first(); entry; entry = mEntryQueue.next()) {
+      emit NewLogEntry(entry, entry->attribute("level", "0").toInt());
+    }
+    
+    mEntryQueue.clear();
+    rv = true;
+  }
+  return rv;
 }
 
 void

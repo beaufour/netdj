@@ -13,6 +13,7 @@
 #include <qdom.h>
 #include <qmutex.h>
 #include <qobject.h>
+#include <qptrlist.h>
 
 namespace NetDJ 
 {
@@ -36,6 +37,11 @@ namespace NetDJ
    * - timestamp
    * - level
    *
+   * The service only emits signals in the parent context, if other threads
+   * post signals on this service they are queued, and an event (QEvent::User
+   * + 1) is posted to itself. Upon receiving the event (in the parent
+   * context) the queued entries are processed.
+   *
    * @note The class is reentrant, but it is important that a NewLogEntry()
    * signal does not spawn another call to LogService in the same
    * context. This will make Emit() wait for itself.
@@ -53,6 +59,15 @@ namespace NetDJ
     
     /** The DOM document containing the log entries */
     QDomDocument mDocument;
+    
+    /** The thread owning the class */
+    int mOwnerThread;
+
+    /**
+     * A queue for delayed entries, that is entries not comming from the main
+     * application context
+     */
+    QPtrList<QDomElement> mEntryQueue;
 
     /** Create a new entry */
     void CreateEntry(QDomElement& aEntry, const int aLevel, const QString aName);
@@ -66,6 +81,9 @@ namespace NetDJ
   public:
     /** Constructor */
     LogService(QObject* aParent = 0);
+
+    /** Event handler */
+    bool event(QEvent* aEvent);
 
   public slots:
     /**
