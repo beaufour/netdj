@@ -1,3 +1,14 @@
+Brief description:
+------------------
+You will need to have some program that downloads mp3's for you. I use the
+gnut Gnutella-client (). It has a cache function that downloads random
+files, and with my small patch (gnut.patch) it will only cache .mp3-files.
+
+NetDJ will then scan that directory and play the files in the order that
+they are downloaded, if there's no files or it has played them all it will
+play random files from you private (share) collection.
+
+
 Need to have:
 -------------
 * POSIX threads
