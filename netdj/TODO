@@ -94,5 +94,7 @@ BIG ISSUES
   - Example queries:
     + "30 songs not played the last month"
     + "Top-10 this overall / month / year"
+* Crazy idea: Have LPD/CUPS-interface, so people can print their MP3-files :)
+  - http://patrick.wagstrom.net/weblog/archives/000128.html
 
 CVS: $Id$
