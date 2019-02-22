@@ -12,7 +12,7 @@
 
 #include <map>
 #include <string>
-#include "Regex.h"
+#include "MyRegex.h"
 
 
 //////////////////////////////////////////////////
@@ -22,7 +22,7 @@ class HTTP {
 private:
   std::map<std::string, std::string> headers;
   std::string body;
-  static Regex headerreg;
+  static MyRegex headerreg;
   std::string packet;
 
   int ParseHeaders(const std::string&, int);
@@ -61,8 +61,8 @@ private:
   std::string name;
   std::map<std::string,std::string> params;
 
-  static Regex comreg;
-  static Regex paramreg;
+  static MyRegex comreg;
+  static MyRegex paramreg;
 
   int ParseCommand(const std::string&, int);
   void ClearCommand();
@@ -90,7 +90,7 @@ private:
   int status;
   std::string description;
 
-  static Regex comreg;
+  static MyRegex comreg;
 
   int ParseCommand(const std::string&, int);
   void ClearCommand();

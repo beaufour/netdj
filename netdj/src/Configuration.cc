@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
-#include "Regex.h"
+#include "MyRegex.h"
 #include "config.h"
 #include "util.h"
 
@@ -81,7 +81,7 @@ Configuration::ReadFile() {
   }
 
   // Read file
-  Regex reg("([^ ]+) *= *([^ ]+)");
+  MyRegex reg("([^ ]+) *= *([^ ]+)");
   char line[255];
   vector<string> splitline;
   while (!conf.eof()) {

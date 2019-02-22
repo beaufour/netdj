@@ -20,7 +20,7 @@ using namespace std;
 //////////////////////////////////////////////////
 // HTTP                                         //
 //////////////////////////////////////////////////
-Regex HTTP::headerreg("^([^\r]+) *: *([^\r]+)\r\n");
+MyRegex HTTP::headerreg("^([^\r]+) *: *([^\r]+)\r\n");
 
 HTTP::HTTP() {
   SetHeader("Server", PKGVER);
@@ -127,8 +127,8 @@ HTTP::SetBody(const string &str) {
 //////////////////////////////////////////////////
 // HTTPRequest                                  //
 //////////////////////////////////////////////////
-Regex HTTPRequest::comreg("^([^ ]+) +([^ ]+) +HTTP/([^\r]+)\r\n");
-Regex HTTPRequest::paramreg("([^=&]+)(=([^&]*))?&?");
+MyRegex HTTPRequest::comreg("^([^ ]+) +([^ ]+) +HTTP/([^\r]+)\r\n");
+MyRegex HTTPRequest::paramreg("([^=&]+)(=([^&]*))?&?");
 
 int
 HTTPRequest::ParseCommand(const string& st, int pos) {
@@ -189,7 +189,7 @@ HTTPRequest::GetURIParam(const string& st, string& res) const {
 //////////////////////////////////////////////////
 // HTTPResponse                                 //
 //////////////////////////////////////////////////
-Regex HTTPResponse::comreg("^HTTP/([^ ]+) +([[:digit:]]+) *(.*)\r\n");
+MyRegex HTTPResponse::comreg("^HTTP/([^ ]+) +([[:digit:]]+) *(.*)\r\n");
 
 HTTPResponse::HTTPResponse(int _status, const string &cont_type)
   : HTTP(), version("1.1"), status(_status) {

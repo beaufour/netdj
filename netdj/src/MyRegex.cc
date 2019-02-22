@@ -1,26 +1,26 @@
 /*
  *  Regex.h
- * 
+ *
  *  Allan Beaufour Larsen <allan@beaufour.dk>
  *
  *  $Id$
  */
 
-#include "Regex.h"
+#include "MyRegex.h"
 
 using namespace std;
 
-Regex::Regex(const string &regstr, int cflags) {
+MyRegex::MyRegex(const string &regstr, int cflags) {
   Compile(regstr, cflags);
 }
 
 void
-Regex::Compile(const string &regstr, int cflags) {
+MyRegex::Compile(const string &regstr, int cflags) {
   regcomp(&preg, regstr.c_str(),  cflags ? cflags : REG_EXTENDED);
 }
 
 int
-Regex::Match(const string &str, vector<string> &res, int eflags) {
+MyRegex::Match(const string &str, vector<string> &res, int eflags) {
   const int MAX_MATCH = 20;
   int i;
   regmatch_t pmatch[MAX_MATCH];

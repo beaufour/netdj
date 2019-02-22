@@ -14,12 +14,12 @@
 #include <vector>
 #include <string>
 
-class Regex {
+class MyRegex {
 private:
   regex_t preg;
 
 public:
-  Regex(const std::string&, int = 0);
+  MyRegex(const std::string&, int = 0);
 
   void Compile(const std::string&, int = 0);
   int Match(const std::string&, std::vector<std::string>&, int = 0);

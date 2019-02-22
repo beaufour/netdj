@@ -9,7 +9,7 @@
 #include "AccessConf.h"
 
 #include <iostream>
-#include "Regex.h"
+#include "MyRegex.h"
 #include "config.h"
 
 using namespace std;
@@ -29,7 +29,7 @@ AccessConf::ReadFile() {
   }
 
   cout << "Reading user entries from '" << fullname << "':" << endl;
-  Regex reg("^([^:]+):([[:digit:]]+):(.+)$");
+  MyRegex reg("^([^:]+):([[:digit:]]+):(.+)$");
   vector<string> splitline;
   char line[255];
   User user;
@@ -53,7 +53,7 @@ AccessConf::ReadFile() {
 bool
 AccessConf::IsAccessAllowed(const string& str, int acclevel, string* userstr) const {
   bool res = false;
-  Regex reg("([^:]+):(.+)");
+  MyRegex reg("([^:]+):(.+)");
   vector<string> splitline;
   map<string, User>::const_iterator user;
 
