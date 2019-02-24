@@ -1,0 +1,39 @@
+Notes about how to get this old thing to work :)
+
+
+* install libshout
+* install icecase and run it somewhere
+
+* create empty (and writeable) /var/log/netdj
+* create ~/.netdj/config:
+STREAM_MOUNT = netdj
+STREAM_PASSWD = hackme
+CACHE_DIR = /Users/beaufour/netdj/cache
+SHARE_DIR = /Users/beaufour/netdj/share
+REQUEST_DIR = /Users/beaufour/netdj/request
+HTTP_START = true
+
+* create directory structure for above
+
+* create ~/.netdj/users
+beaufour:1000:mypass
+
+(username:level:password -- used for HTTP access to commands)
+
+* copy in standard icecast.xml file somewhere
+
+* Run: icecast -c icecast.xml
+
+* Run: src/netdj
+
+Access NetDJ:
+http://localhost:7676/
+
+Access Icecast:
+http://localhost:8000/
+
+* copy file to play into share dir
+
+* play NetDJ
+
+mplayer http://localhost:8000/netdj
