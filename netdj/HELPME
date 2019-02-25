@@ -37,3 +37,5 @@ http://localhost:8000/
 * play NetDJ
 
 mplayer http://localhost:8000/netdj
+
+And then there was the good old netdj_picker.pl script too: https://gist.github.com/cboesgaard/af2b62c0040502528d21ed0b7b0b1088
